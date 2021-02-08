@@ -36,26 +36,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Celeste">
-      <HintPath>..\Everest\lib-stripped\Celeste.exe</HintPath>
+    <Reference Include="Celeste, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>lib-stripped\Celeste.exe</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="FNA">
-      <HintPath>..\Everest\lib-stripped\FNA.dll</HintPath>
+    <Reference Include="FNA, Version=19.9.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>lib-stripped\FNA.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="MMHOOK_Celeste">
-      <HintPath>..\deps\MMHOOK_Celeste.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Steamworks.NET">
-      <HintPath>..\Everest\lib-stripped\Steamworks.NET.dll</HintPath>
+    <Reference Include="MMHOOK_Celeste, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>lib-stripped\MMHOOK_Celeste.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
-    <Reference Include="YamlDotNet">
-      <HintPath>..\Everest\lib\YamlDotNet.dll</HintPath>
+    <Reference Include="YamlDotNet, Version=8.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e">
+      <HintPath>..\packages\YamlDotNet.8.1.2\lib\net45\YamlDotNet.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -81,18 +77,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Everest\Celeste.Mod.mm\Celeste.Mod.mm.csproj">
-      <Project>{d5d0239d-ff95-4897-9484-1898ab7e82f5}</Project>
-      <Name>Celeste.Mod.mm</Name>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="..\everest.yaml">
       <Link>everest.yaml</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
