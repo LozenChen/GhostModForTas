@@ -56,7 +56,12 @@ public class GhostModule : EverestModule {
             Run = Guid.NewGuid();
         }
 
-        Step(level);
+        Player player = level.Tracker.GetEntity<Player>();
+        if (player == null) {
+            level.Add(new Entity {new Coroutine(WaitForPlayer(level))});
+        } else {
+            Step(level);
+        }
     }
 
     private IEnumerator WaitForPlayer(Level level) {
