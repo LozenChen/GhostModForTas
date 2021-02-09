@@ -1,4 +1,5 @@
-﻿using YamlDotNet.Serialization;
+﻿using System.IO;
+using YamlDotNet.Serialization;
 
 namespace Celeste.Mod.Ghost {
 public class GhostModuleSettings : EverestModuleSettings {
@@ -33,8 +34,23 @@ public class GhostModuleSettings : EverestModuleSettings {
     [SettingRange(0, 10)] public int BorderSize { get; set; } = 4;
     [YamlIgnore] [SettingIgnore] public float BorderSizeDist => BorderSize * BorderSize * 64f;
 
+    public string ClearAllRecords => "Clear All Records";
+
     public void ShowNameFilterEntry(TextMenu menu, bool inGame) {
         // TODO: Create a slider to choose between all available names.
+    }
+
+    public void CreateClearAllRecordsEntry(TextMenu textMenu, bool inGame) {
+        textMenu.Add(new TextMenu.Button(Dialog.Clean("MODOPTIONS_GHOSTMODULE_CLEAR_ALL_RECORDS")).Pressed(() => {
+            if (!Directory.Exists(GhostModule.PathGhosts)) {
+                return;
+            }
+
+            DirectoryInfo ghostDir = new DirectoryInfo(GhostModule.PathGhosts);
+            foreach (FileInfo file in ghostDir.GetFiles()) {
+                file.Delete();
+            }
+        }));
     }
 }
 
