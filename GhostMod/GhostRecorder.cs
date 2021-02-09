@@ -13,6 +13,8 @@ public class GhostRecorder : Entity {
     public GhostRecorder(Player player)
         : base() {
         Player = player;
+        Depth = 1000000;
+
         Tag = Tags.HUD;
     }
 

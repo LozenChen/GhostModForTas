@@ -121,12 +121,11 @@ public class Ghost : Actor {
                        GhostModule.Settings.NameFilter.Equals(Data.Name, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        if (ForcedFrame == null && Data != null && Player.InControl && AutoForward) {
+        if (ForcedFrame == null && Data != null && AutoForward) {
             do {
                 FrameIndex++;
             } while (
-                (PrevFrame.Data.IsValid && !PrevFrame.Data.InControl) || // Skip any frames we're not in control in.
-                (!PrevFrame.Data.IsValid && FrameIndex < Data.Frames.Count) // Skip any frames not containing the data chunk.
+                !PrevFrame.Data.IsValid && FrameIndex < Data.Frames.Count // Skip any frames not containing the data chunk.
             );
         }
 
