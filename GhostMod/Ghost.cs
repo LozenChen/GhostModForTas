@@ -35,6 +35,7 @@ public class Ghost : Actor {
         Data = data;
 
         Depth = 1;
+        Tag = Tags.PauseUpdate;
 
         Sprite = new PlayerSprite(player.Sprite.Mode);
         Sprite.HairCount = player.Sprite.HairCount;
