@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using YamlDotNet.Serialization;
 
 namespace Celeste.Mod.Ghost {
@@ -54,6 +55,7 @@ public class GhostModuleSettings : EverestModuleSettings {
     }
 }
 
+[Flags]
 public enum GhostModuleMode {
     Off = 0,
     Record = 1 << 0,

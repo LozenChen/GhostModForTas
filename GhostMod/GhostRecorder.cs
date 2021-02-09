@@ -35,6 +35,8 @@ public class GhostRecorder : Entity {
             return;
         }
 
+        Session session = (Engine.Scene as Level).Session;
+
         // A data frame is always a new frame, no matter if the previous one lacks data or not.
         LastFrameData = new GhostFrame {
             Data = new GhostChunkData {
@@ -58,7 +60,9 @@ public class GhostRecorder : Entity {
 
                 DashColor = Player.StateMachine.State == Player.StDash ? Player.GetCurrentTrailColor() : (Color?) null,
                 DashDir = Player.DashDir,
-                DashWasB = Player.GetWasDashB()
+                DashWasB = Player.GetWasDashB(),
+
+                Time = session.Time
             }
         };
 

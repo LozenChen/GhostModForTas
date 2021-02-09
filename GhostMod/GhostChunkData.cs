@@ -39,6 +39,7 @@ public struct GhostChunkData {
 
     // V3
     public int HairCount;
+    public long Time;
 
     public void Read(BinaryReader reader, int version) {
         IsValid = true;
@@ -75,6 +76,7 @@ public struct GhostChunkData {
         }
 
         HairCount = reader.ReadInt32();
+        Time = reader.ReadInt64();
     }
 
     public void Write(BinaryWriter writer) {
@@ -134,6 +136,7 @@ public struct GhostChunkData {
         writer.Write(DashWasB);
 
         writer.Write(HairCount);
+        writer.Write(Time);
     }
 }
 }

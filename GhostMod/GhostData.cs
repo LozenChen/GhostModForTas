@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Xna.Framework;
 using Monocle;
 
 namespace Celeste.Mod.Ghost {
@@ -18,18 +19,18 @@ public class GhostData {
             RegexOptions.Compiled);
 
     public static string GetGhostFilePrefix(Session session)
-        => GetGhostFilePrefix(session.Area.GetSID(), session.Area.Mode, session.Level);
+        => GetGhostFilePrefix(session.Area.GetSID(), session.Area.Mode, session.Level, session.RespawnPoint ?? default);
 
-    public static string GetGhostFilePrefix(string sid, AreaMode mode, string level)
-        => PathVerifyRegex.Replace($"{sid}-{(char) ('A' + (int) mode)}-{level}-", "-");
+    public static string GetGhostFilePrefix(string sid, AreaMode mode, string level, Vector2 respawnPoint)
+        => PathVerifyRegex.Replace($"{sid}-{(char) ('A' + (int) mode)}-{level}-{respawnPoint}-", "-");
 
     public static string GetGhostFilePath(Session session, string name, DateTime date)
-        => GetGhostFilePath(session.Area.GetSID(), session.Area.Mode, session.Level, name, date);
+        => GetGhostFilePath(session.Area.GetSID(), session.Area.Mode, session.Level, session.RespawnPoint ?? default, name, date);
 
-    public static string GetGhostFilePath(string sid, AreaMode mode, string level, string name, DateTime date)
+    public static string GetGhostFilePath(string sid, AreaMode mode, string level, Vector2 respawnPoint, string name, DateTime date)
         => Path.Combine(
             GhostModule.PathGhosts,
-            GetGhostFilePrefix(sid, mode, level) +
+            GetGhostFilePrefix(sid, mode, level, respawnPoint) +
             PathVerifyRegex.Replace($"{name}-{date.ToString("yyyy-MM-dd-HH-mm-ss-fff", CultureInfo.InvariantCulture)}", "-") + ".oshiro"
         );
 
@@ -78,6 +79,7 @@ public class GhostData {
     public AreaMode Mode;
     public string From;
     public string Level;
+    public Vector2 RespawnPoint;
     public string Target;
 
     public string Name;
@@ -97,7 +99,7 @@ public class GhostData {
                 return _FilePath;
             }
 
-            return GetGhostFilePath(SID, Mode, Level, Name, Date);
+            return GetGhostFilePath(SID, Mode, Level, RespawnPoint, Name, Date);
         }
         set { _FilePath = value; }
     }
@@ -125,6 +127,7 @@ public class GhostData {
             SID = session.Area.GetSID();
             Mode = session.Area.Mode;
             Level = session.Level;
+            RespawnPoint = session.RespawnPoint ?? default;
         }
     }
 
@@ -184,6 +187,7 @@ public class GhostData {
         SID = reader.ReadNullTerminatedString();
         Mode = (AreaMode) reader.ReadInt32();
         Level = reader.ReadNullTerminatedString();
+        RespawnPoint = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         Target = reader.ReadNullTerminatedString();
 
         Name = reader.ReadNullTerminatedString();
@@ -248,6 +252,8 @@ public class GhostData {
         writer.WriteNullTerminatedString(SID);
         writer.Write((int) Mode);
         writer.WriteNullTerminatedString(Level);
+        writer.Write((float) RespawnPoint.X);
+        writer.Write((float) RespawnPoint.Y);
         writer.WriteNullTerminatedString(Target);
 
         writer.WriteNullTerminatedString(Name);
