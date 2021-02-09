@@ -6,7 +6,8 @@ namespace Celeste.Mod.Ghost {
 public struct GhostChunkData {
     public const string ChunkV1 = "data";
     public const string ChunkV2 = "data2";
-    public const string Chunk = ChunkV2;
+    public const string ChunkV3 = "data3";
+    public const string Chunk = ChunkV3;
     public bool IsValid;
 
     // V1
@@ -35,6 +36,9 @@ public struct GhostChunkData {
     public Color? DashColor;
     public Vector2 DashDir;
     public bool DashWasB;
+
+    // V3
+    public int HairCount;
 
     public void Read(BinaryReader reader, int version) {
         IsValid = true;
@@ -65,6 +69,12 @@ public struct GhostChunkData {
         DashColor = reader.ReadBoolean() ? (Color?) new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()) : null;
         DashDir = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         DashWasB = reader.ReadBoolean();
+
+        if (version < 3) {
+            return;
+        }
+
+        HairCount = reader.ReadInt32();
     }
 
     public void Write(BinaryWriter writer) {
@@ -122,6 +132,8 @@ public struct GhostChunkData {
         writer.Write(DashDir.Y);
 
         writer.Write(DashWasB);
+
+        writer.Write(HairCount);
     }
 }
 }

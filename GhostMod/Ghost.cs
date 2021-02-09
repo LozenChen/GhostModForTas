@@ -97,6 +97,7 @@ public class Ghost : Actor {
 
         Sprite.Rate = Frame.Data.SpriteRate;
         Sprite.Justify = Frame.Data.SpriteJustify;
+        Sprite.HairCount = Frame.Data.HairCount;
 
         try {
             if (Sprite.CurrentAnimationID != Frame.Data.CurrentAnimationID) {

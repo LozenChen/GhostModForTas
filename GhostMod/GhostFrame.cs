@@ -21,6 +21,9 @@ public struct GhostFrame {
                 case GhostChunkData.ChunkV2:
                     Data.Read(reader, 2);
                     break;
+                case GhostChunkData.ChunkV3:
+                    Data.Read(reader, 3);
+                    break;
                 case GhostChunkInput.Chunk:
                     Input.Read(reader);
                     break;

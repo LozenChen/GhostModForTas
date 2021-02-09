@@ -62,6 +62,14 @@ public class GhostRecorder : Entity {
             }
         };
 
+        if (Player.StateMachine.State == Player.StRedDash) {
+            LastFrameData.Data.HairCount = 1;
+        } else if (Player.StateMachine.State != Player.StStarFly) {
+            LastFrameData.Data.HairCount = Player.Dashes > 1 ? 5 : 4;
+        } else {
+            LastFrameData.Data.HairCount = 7;
+        }
+
         if (Data != null) {
             Data.Frames.Add(LastFrameData);
         }
