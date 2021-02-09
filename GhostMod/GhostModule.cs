@@ -45,6 +45,7 @@ public class GhostModule : EverestModule {
         On.Celeste.Player.Die += OnDie;
         On.Celeste.Level.Render += LevelOnRender;
         On.Celeste.Level.NextLevel += LevelOnNextLevel;
+        On.Celeste.Level.RegisterAreaComplete += LevelOnRegisterAreaComplete;
         On.Celeste.LevelLoader.ctor += LevelLoaderOnCtor;
     }
 
@@ -54,6 +55,7 @@ public class GhostModule : EverestModule {
         On.Celeste.Player.Die -= OnDie;
         On.Celeste.Level.Render -= LevelOnRender;
         On.Celeste.Level.NextLevel -= LevelOnNextLevel;
+        On.Celeste.Level.RegisterAreaComplete -= LevelOnRegisterAreaComplete;
         On.Celeste.LevelLoader.ctor -= LevelLoaderOnCtor;
     }
 
@@ -89,11 +91,6 @@ public class GhostModule : EverestModule {
             mode == LevelExit.Mode.CompletedInterlude) {
             Step(level);
         }
-
-        ghostTime = 0;
-        lastGhostTime = 0;
-        currentTime = 0;
-        lastCurrentTime = 0;
     }
 
     public void Step(Level level) {
@@ -157,8 +154,17 @@ public class GhostModule : EverestModule {
         return corpse;
     }
 
-        private void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
+    private void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
         orig(self, at, dir);
+        lastGhostTime = ghostTime;
+        ghostTime = GhostManager.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time ?? 0;
+        lastCurrentTime = currentTime;
+        currentTime = self.Session.Time;
+    }
+
+    private void LevelOnRegisterAreaComplete(On.Celeste.Level.orig_RegisterAreaComplete orig, Level self) {
+        orig(self);
+
         lastGhostTime = ghostTime;
         ghostTime = GhostManager.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time ?? 0;
         lastCurrentTime = currentTime;
@@ -245,6 +251,5 @@ public class GhostModule : EverestModule {
 
         base.CreateModMenuSection(menu, inGame, snapshot);
     }
-
 }
 }
