@@ -45,85 +45,16 @@ public class GhostModule : EverestModule {
         On.Celeste.Player.Die += OnDie;
         On.Celeste.Level.Render += LevelOnRender;
         On.Celeste.Level.NextLevel += LevelOnNextLevel;
+        On.Celeste.LevelLoader.ctor += LevelLoaderOnCtor;
     }
-
-    private void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
-        orig(self, at, dir);
-        lastGhostTime = ghostTime;
-        ghostTime = GhostManager.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time ?? 0;
-        lastCurrentTime = currentTime;
-        currentTime = self.Session.Time;
-    }
-
 
     public override void Unload() {
         On.Celeste.Level.LoadLevel -= OnLoadLevel;
         Everest.Events.Level.OnExit -= OnExit;
         On.Celeste.Player.Die -= OnDie;
         On.Celeste.Level.Render -= LevelOnRender;
-    }
-
-    private void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
-        orig(self);
-
-        if (Settings.Mode == GhostModuleMode.Play) {
-            int viewWidth = Engine.ViewWidth;
-            int viewHeight = Engine.ViewHeight;
-
-            float pixelScale = viewWidth / 320f;
-            float margin = 2 * pixelScale;
-            float padding = 2 * pixelScale;
-            float fontSize = 0.3f * pixelScale;
-            float alpha = 1f;
-
-
-            if (ghostTime == 0) {
-                return;
-            }
-
-            string diffRoomTime = ((currentTime - ghostTime - lastCurrentTime + lastGhostTime) / 10000000D).ToString("0.000");
-            string diffTime = diffRoomTime + "/" + ((ghostTime - currentTime) / 10000000D).ToString("0.000");
-
-            if (string.IsNullOrEmpty(diffTime)) {
-                return;
-            }
-
-            Vector2 size = Draw.DefaultFont.MeasureString(diffTime) * fontSize;
-
-            float x;
-            float y;
-
-            x = margin;
-            y = margin;
-            y += 16 * pixelScale;
-
-
-            Rectangle bgRect = new Rectangle((int) x, (int) y, (int) (size.X + padding * 2), (int) (size.Y + padding * 2));
-
-            if (self.Entities.FindFirst<Player>() is Player player) {
-                Vector2 playerPosition = self.Camera.CameraToScreen(player.TopLeft) * pixelScale;
-                Rectangle playerRect = new Rectangle((int) playerPosition.X, (int) playerPosition.Y, (int) (8 * pixelScale), (int) (11 * pixelScale));
-                Rectangle mirrorBgRect = bgRect;
-                if (SaveData.Instance?.Assists.MirrorMode == true) {
-                    mirrorBgRect.X = (int) Math.Abs(x - viewWidth + size.X + padding * 2);
-                }
-
-                if (self.Paused || playerRect.Intersects(mirrorBgRect)) {
-                    alpha = 0.5f;
-                }
-            }
-
-            Draw.SpriteBatch.Begin();
-
-            Draw.Rect(bgRect, Color.Black * 0.8f * alpha);
-
-            Vector2 textPosition = new Vector2(x + padding, y + padding);
-            Vector2 scale = new Vector2(fontSize);
-
-            Draw.Text(Draw.DefaultFont, diffTime, textPosition, Color.White * alpha, Vector2.Zero, scale, 0f);
-
-            Draw.SpriteBatch.End();
-        }
+        On.Celeste.Level.NextLevel -= LevelOnNextLevel;
+        On.Celeste.LevelLoader.ctor -= LevelLoaderOnCtor;
     }
 
     public void OnLoadLevel(On.Celeste.Level.orig_LoadLevel orig, Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
@@ -150,12 +81,6 @@ public class GhostModule : EverestModule {
             yield return null;
         }
 
-        Step(level);
-    }
-
-    private void OnTeleportTo(On.Celeste.Level.orig_TeleportTo orig, Level level, Player player, string nextlevel, Player.IntroTypes inrotype,
-        Vector2? nearestspawn) {
-        orig(level, player, nextlevel, inrotype, nearestspawn);
         Step(level);
     }
 
@@ -232,6 +157,86 @@ public class GhostModule : EverestModule {
         return corpse;
     }
 
+        private void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
+        orig(self, at, dir);
+        lastGhostTime = ghostTime;
+        ghostTime = GhostManager.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time ?? 0;
+        lastCurrentTime = currentTime;
+        currentTime = self.Session.Time;
+    }
+
+    private void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
+        orig(self);
+
+        if (Settings.Mode == GhostModuleMode.Play) {
+            int viewWidth = Engine.ViewWidth;
+            int viewHeight = Engine.ViewHeight;
+
+            float pixelScale = viewWidth / 320f;
+            float margin = 2 * pixelScale;
+            float padding = 2 * pixelScale;
+            float fontSize = 0.3f * pixelScale;
+            float alpha = 1f;
+
+
+            if (ghostTime == 0) {
+                return;
+            }
+
+            string diffRoomTime = ((currentTime - ghostTime - lastCurrentTime + lastGhostTime) / 10000000D).ToString("0.000");
+            string diffTime = diffRoomTime + "/" + ((ghostTime - currentTime) / 10000000D).ToString("0.000");
+
+            if (string.IsNullOrEmpty(diffTime)) {
+                return;
+            }
+
+            Vector2 size = Draw.DefaultFont.MeasureString(diffTime) * fontSize;
+
+            float x;
+            float y;
+
+            x = margin;
+            y = margin;
+            y += 16 * pixelScale;
+
+
+            Rectangle bgRect = new Rectangle((int) x, (int) y, (int) (size.X + padding * 2), (int) (size.Y + padding * 2));
+
+            if (self.Entities.FindFirst<Player>() is Player player) {
+                Vector2 playerPosition = self.Camera.CameraToScreen(player.TopLeft) * pixelScale;
+                Rectangle playerRect = new Rectangle((int) playerPosition.X, (int) playerPosition.Y, (int) (8 * pixelScale), (int) (11 * pixelScale));
+                Rectangle mirrorBgRect = bgRect;
+                if (SaveData.Instance?.Assists.MirrorMode == true) {
+                    mirrorBgRect.X = (int) Math.Abs(x - viewWidth + size.X + padding * 2);
+                }
+
+                if (self.Paused || playerRect.Intersects(mirrorBgRect)) {
+                    alpha = 0.5f;
+                }
+            }
+
+            Draw.SpriteBatch.Begin();
+
+            Draw.Rect(bgRect, Color.Black * 0.8f * alpha);
+
+            Vector2 textPosition = new Vector2(x + padding, y + padding);
+            Vector2 scale = new Vector2(fontSize);
+
+            Draw.Text(Draw.DefaultFont, diffTime, textPosition, Color.White * alpha, Vector2.Zero, scale, 0f);
+
+            Draw.SpriteBatch.End();
+        }
+    }
+
+    private void LevelLoaderOnCtor(On.Celeste.LevelLoader.orig_ctor orig, LevelLoader self, Session session, Vector2? startPosition) {
+        orig(self, session, startPosition);
+
+        ghostTime = 0;
+        lastGhostTime = 0;
+        currentTime = 0;
+        lastCurrentTime = 0;
+    }
+
     public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot) {
         if (SettingsOverridden && !Settings.AlwaysShowSettings) {
             menu.Add(new TextMenu.SubHeader(Dialog.Clean("modoptions_ghostmodule_overridden") + " | v." + Metadata.VersionString));
@@ -240,5 +245,6 @@ public class GhostModule : EverestModule {
 
         base.CreateModMenuSection(menu, inGame, snapshot);
     }
+
 }
 }
