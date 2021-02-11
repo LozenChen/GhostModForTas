@@ -181,7 +181,7 @@ public class GhostModule : EverestModule {
             float pixelScale = viewWidth / 320f;
             float margin = 2 * pixelScale;
             float padding = 2 * pixelScale;
-            float fontSize = 0.3f * pixelScale;
+            float fontSize = 0.35f * pixelScale;
             float alpha = 1f;
 
 
@@ -189,14 +189,17 @@ public class GhostModule : EverestModule {
                 return;
             }
 
-            string diffRoomTime = ((currentTime - ghostTime - lastCurrentTime + lastGhostTime) / 10000000D).ToString("0.000");
-            string diffTime = diffRoomTime + "/" + ((ghostTime - currentTime) / 10000000D).ToString("0.000");
+            long diffRoomTime = currentTime - ghostTime - lastCurrentTime + lastGhostTime;
+            long diffTotalTime = currentTime - ghostTime;
+            string diffRoomTimeStr = (diffRoomTime > 0 ? "+" : string.Empty) + (diffRoomTime / 10000000D).ToString("0.000");
+            string diffTotalTimeStr = (diffTotalTime > 0 ? "+" : string.Empty) + (diffTotalTime / 10000000D).ToString("0.000");
+            string timeStr = $"last room: {diffRoomTimeStr}\ntotal    : {diffTotalTimeStr}";
 
-            if (string.IsNullOrEmpty(diffTime)) {
+            if (string.IsNullOrEmpty(timeStr)) {
                 return;
             }
 
-            Vector2 size = Draw.DefaultFont.MeasureString(diffTime) * fontSize;
+            Vector2 size = Draw.DefaultFont.MeasureString(timeStr) * fontSize;
 
             float x;
             float y;
@@ -228,7 +231,7 @@ public class GhostModule : EverestModule {
             Vector2 textPosition = new Vector2(x + padding, y + padding);
             Vector2 scale = new Vector2(fontSize);
 
-            Draw.Text(Draw.DefaultFont, diffTime, textPosition, Color.White * alpha, Vector2.Zero, scale, 0f);
+            Draw.Text(Draw.DefaultFont, timeStr, textPosition, Color.White * alpha, Vector2.Zero, scale, 0f);
 
             Draw.SpriteBatch.End();
         }

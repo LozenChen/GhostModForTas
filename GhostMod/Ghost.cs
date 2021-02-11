@@ -37,7 +37,19 @@ public class Ghost : Actor {
         Depth = 1;
         // Tag = Tags.PauseUpdate;
 
-        Sprite = new PlayerSprite(player.Sprite.Mode);
+        PlayerSpriteMode playerSpriteMode = player.Sprite.Mode;
+        if (GhostModule.Settings.RevertPlayerSpriteMode) {
+            if (playerSpriteMode == PlayerSpriteMode.MadelineAsBadeline) {
+                if (player.Inventory.Backpack) {
+                    playerSpriteMode = PlayerSpriteMode.MadelineNoBackpack;
+                } else {
+                    playerSpriteMode = PlayerSpriteMode.Madeline;
+                }
+            } else {
+                playerSpriteMode = PlayerSpriteMode.MadelineAsBadeline;
+            }
+        }
+        Sprite = new PlayerSprite(playerSpriteMode);
         Sprite.HairCount = player.Sprite.HairCount;
         Add(Hair = new PlayerHair(Sprite));
         Add(Sprite);
@@ -74,6 +86,13 @@ public class Ghost : Actor {
             (Frame.Data.HairColor.B * Color.B) / 255,
             (Frame.Data.HairColor.A * Color.A) / 255
         );
+        if (GhostModule.Settings.RevertPlayerSpriteMode) {
+            if (Hair.Color == Player.NormalHairColor) {
+                Hair.Color = Player.NormalBadelineHairColor;
+            } else if (Hair.Color == Player.NormalBadelineHairColor) {
+                Hair.Color = Player.NormalHairColor;
+            }
+        }
         Hair.Alpha = alphaHair;
         Hair.Facing = Frame.Data.Facing;
         Hair.SimulateMotion = Frame.Data.HairSimulateMotion;

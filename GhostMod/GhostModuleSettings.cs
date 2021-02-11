@@ -17,6 +17,10 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool ShowDeaths { get; set; } = false;
 
+    public bool HighlightFastestGhost { get; set; } = true;
+
+    public bool RevertPlayerSpriteMode { get; set; } = true;
+
     [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 4;
     [YamlIgnore] [SettingIgnore] public float InnerOpacityFactor => InnerOpacity / 10f;
 
@@ -35,6 +39,7 @@ public class GhostModuleSettings : EverestModuleSettings {
     [SettingRange(0, 10)] public int BorderSize { get; set; } = 4;
     [YamlIgnore] [SettingIgnore] public float BorderSizeDist => BorderSize * BorderSize * 64f;
 
+    [YamlIgnore]
     public string ClearAllRecords => "Clear All Records";
 
     public void ShowNameFilterEntry(TextMenu menu, bool inGame) {
@@ -44,8 +49,11 @@ public class GhostModuleSettings : EverestModuleSettings {
     public void CreateClearAllRecordsEntry(TextMenu textMenu, bool inGame) {
         textMenu.Add(new TextMenu.Button(Dialog.Clean("MODOPTIONS_GHOSTMODULE_CLEAR_ALL_RECORDS")).Pressed(() => {
             if (!Directory.Exists(GhostModule.PathGhosts)) {
+                Audio.Play(SFX.ui_main_button_invalid);
                 return;
             }
+
+            Audio.Play(SFX.ui_main_button_select);
 
             DirectoryInfo ghostDir = new DirectoryInfo(GhostModule.PathGhosts);
             foreach (FileInfo file in ghostDir.GetFiles()) {

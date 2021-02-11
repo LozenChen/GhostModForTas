@@ -48,22 +48,24 @@ public class GhostManager : Entity {
          */
 
         // Gold is the easiest: Find fastest active ghost.
-        Ghost fastest = null;
-        foreach (Ghost ghost in Ghosts) {
-            // While we're at it, reset all colors.
-            ghost.Color = ColorNeutral;
+        if (GhostModule.Settings.HighlightFastestGhost) {
+            Ghost fastest = null;
+            foreach (Ghost ghost in Ghosts) {
+                // While we're at it, reset all colors.
+                ghost.Color = ColorNeutral;
 
-            if (!ghost.Frame.Data.IsValid) {
-                continue;
+                if (!ghost.Frame.Data.IsValid) {
+                    continue;
+                }
+
+                if (fastest == null || ghost.Data.Frames.Count < fastest.Data.Frames.Count) {
+                    fastest = ghost;
+                }
             }
 
-            if (fastest == null || ghost.Data.Frames.Count < fastest.Data.Frames.Count) {
-                fastest = ghost;
+            if (fastest != null) {
+                fastest.Color = ColorGold;
             }
-        }
-
-        if (fastest != null) {
-            fastest.Color = ColorGold;
         }
 
         base.Render();
