@@ -156,19 +156,23 @@ public class GhostModule : EverestModule {
 
     private void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
         orig(self, at, dir);
-        lastGhostTime = ghostTime;
-        ghostTime = GhostManager.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time ?? 0;
-        lastCurrentTime = currentTime;
-        currentTime = self.Session.Time;
+        if (GhostManager?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is long time) {
+            lastGhostTime = ghostTime;
+            ghostTime = time;
+            lastCurrentTime = currentTime;
+            currentTime = self.Session.Time;
+        }
     }
 
     private void LevelOnRegisterAreaComplete(On.Celeste.Level.orig_RegisterAreaComplete orig, Level self) {
         orig(self);
 
-        lastGhostTime = ghostTime;
-        ghostTime = GhostManager.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time ?? 0;
-        lastCurrentTime = currentTime;
-        currentTime = self.Session.Time;
+        if (GhostManager?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is long time) {
+            lastGhostTime = ghostTime;
+            ghostTime = time;
+            lastCurrentTime = currentTime;
+            currentTime = self.Session.Time;
+        }
     }
 
     private void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
