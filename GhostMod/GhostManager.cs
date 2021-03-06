@@ -48,7 +48,7 @@ public class GhostManager : Entity {
          */
 
         // Gold is the easiest: Find fastest active ghost.
-        if (GhostModule.Settings.HighlightFastestGhost) {
+        if (GhostModule.ModuleSettings.HighlightFastestGhost) {
             Ghost fastest = null;
             foreach (Ghost ghost in Ghosts) {
                 // While we're at it, reset all colors.

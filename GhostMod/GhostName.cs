@@ -25,7 +25,7 @@ public class GhostName : Entity {
             return;
         }
 
-        if (!GhostModule.Settings.ShowNames ||
+        if (!GhostModule.ModuleSettings.ShowNames ||
             Tracking == null) {
             return;
         }

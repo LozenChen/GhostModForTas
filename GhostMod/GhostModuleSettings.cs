@@ -17,9 +17,11 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool ShowDeaths { get; set; } = false;
 
+    public bool ShowCompareTime { get; set; } = true;
+
     public bool HighlightFastestGhost { get; set; } = true;
 
-    public bool RevertPlayerSpriteMode { get; set; } = true;
+    public bool ReversedPlayerSpriteMode { get; set; } = true;
 
     [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 4;
     [YamlIgnore] [SettingIgnore] public float InnerOpacityFactor => InnerOpacity / 10f;

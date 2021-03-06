@@ -38,7 +38,7 @@ public class Ghost : Actor {
         // Tag = Tags.PauseUpdate;
 
         PlayerSpriteMode playerSpriteMode = player.Sprite.Mode;
-        if (GhostModule.Settings.RevertPlayerSpriteMode) {
+        if (GhostModule.ModuleSettings.ReversedPlayerSpriteMode) {
             if (playerSpriteMode == PlayerSpriteMode.MadelineAsBadeline) {
                 if (player.Inventory.Backpack) {
                     playerSpriteMode = PlayerSpriteMode.MadelineNoBackpack;
@@ -86,7 +86,7 @@ public class Ghost : Actor {
             (Frame.Data.HairColor.B * Color.B) / 255,
             (Frame.Data.HairColor.A * Color.A) / 255
         );
-        if (GhostModule.Settings.RevertPlayerSpriteMode) {
+        if (GhostModule.ModuleSettings.ReversedPlayerSpriteMode) {
             if (Hair.Color == Player.NormalHairColor) {
                 Hair.Color = Player.NormalBadelineHairColor;
             } else if (Hair.Color == Player.NormalBadelineHairColor) {
@@ -131,15 +131,15 @@ public class Ghost : Actor {
     }
 
     public override void Update() {
-        Visible = ForcedFrame != null || ((GhostModule.Settings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play);
+        Visible = ForcedFrame != null || ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play);
         Visible &= Frame.Data.IsValid;
         if (ForcedFrame == null && Data != null && Data.Dead) {
-            Visible &= GhostModule.Settings.ShowDeaths;
+            Visible &= GhostModule.ModuleSettings.ShowDeaths;
         }
 
-        if (ForcedFrame == null && Data != null && !string.IsNullOrEmpty(GhostModule.Settings.NameFilter)) {
+        if (ForcedFrame == null && Data != null && !string.IsNullOrEmpty(GhostModule.ModuleSettings.NameFilter)) {
             Visible &= string.IsNullOrEmpty(Data.Name) ||
-                       GhostModule.Settings.NameFilter.Equals(Data.Name, StringComparison.InvariantCultureIgnoreCase);
+                       GhostModule.ModuleSettings.NameFilter.Equals(Data.Name, StringComparison.InvariantCultureIgnoreCase);
         }
 
         if (ForcedFrame == null && Data != null && AutoForward) {
@@ -155,19 +155,19 @@ public class Ghost : Actor {
             alphaHair = Data.Opacity.Value;
         } else {
             float dist = (Player.Position - Position).LengthSquared();
-            dist -= GhostModule.Settings.InnerRadiusDist;
+            dist -= GhostModule.ModuleSettings.InnerRadiusDist;
             if (dist < 0f) {
                 dist = 0f;
             }
 
-            if (GhostModule.Settings.BorderSize == 0) {
-                dist = dist < GhostModule.Settings.InnerRadiusDist ? 0f : 1f;
+            if (GhostModule.ModuleSettings.BorderSize == 0) {
+                dist = dist < GhostModule.ModuleSettings.InnerRadiusDist ? 0f : 1f;
             } else {
-                dist /= GhostModule.Settings.BorderSizeDist;
+                dist /= GhostModule.ModuleSettings.BorderSizeDist;
             }
 
-            alpha = Calc.LerpClamp(GhostModule.Settings.InnerOpacityFactor, GhostModule.Settings.OuterOpacityFactor, dist);
-            alphaHair = Calc.LerpClamp(GhostModule.Settings.InnerHairOpacityFactor, GhostModule.Settings.OuterHairOpacityFactor, dist);
+            alpha = Calc.LerpClamp(GhostModule.ModuleSettings.InnerOpacityFactor, GhostModule.ModuleSettings.OuterOpacityFactor, dist);
+            alphaHair = Calc.LerpClamp(GhostModule.ModuleSettings.InnerHairOpacityFactor, GhostModule.ModuleSettings.OuterHairOpacityFactor, dist);
         }
 
         UpdateSprite();

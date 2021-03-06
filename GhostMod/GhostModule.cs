@@ -13,7 +13,7 @@ public class GhostModule : EverestModule {
     public static GhostModule Instance;
 
     public override Type SettingsType => typeof(GhostModuleSettings);
-    public static GhostModuleSettings Settings => (GhostModuleSettings) Instance._Settings;
+    public static GhostModuleSettings ModuleSettings => (GhostModuleSettings) Instance._Settings;
 
     public static bool SettingsOverridden = false;
 
@@ -94,7 +94,7 @@ public class GhostModule : EverestModule {
     }
 
     public void Step(Level level) {
-        if (Settings.Mode == GhostModuleMode.Off) {
+        if (ModuleSettings.Mode == GhostModuleMode.Off) {
             return;
         }
 
@@ -104,7 +104,7 @@ public class GhostModule : EverestModule {
         // Write the ghost, even if we haven't gotten an IL PB.
         // Maybe we left the level prematurely earlier?
         if (GhostRecorder?.Data != null &&
-            (Settings.Mode & GhostModuleMode.Record) == GhostModuleMode.Record) {
+            (ModuleSettings.Mode & GhostModuleMode.Record) == GhostModuleMode.Record) {
             GhostRecorder.Data.Target = target;
             GhostRecorder.Data.Run = Run;
             GhostRecorder.Data.Write();
@@ -121,7 +121,7 @@ public class GhostModule : EverestModule {
 
         level.Add(GhostRecorder = new GhostRecorder(player));
         GhostRecorder.Data = new GhostData(level.Session);
-        GhostRecorder.Data.Name = Settings.Name;
+        GhostRecorder.Data.Name = ModuleSettings.Name;
     }
 
     public PlayerDeadBody OnDie(On.Celeste.Player.orig_Die orig, Player player, Vector2 direction, bool evenIfInvincible, bool registerDeathInStats) {
@@ -178,16 +178,15 @@ public class GhostModule : EverestModule {
     private void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
         orig(self);
 
-        if (Settings.Mode == GhostModuleMode.Play) {
+        if (ModuleSettings.Mode == GhostModuleMode.Play && ModuleSettings.ShowCompareTime) {
             int viewWidth = Engine.ViewWidth;
             int viewHeight = Engine.ViewHeight;
 
             float pixelScale = viewWidth / 320f;
             float margin = 2 * pixelScale;
             float padding = 2 * pixelScale;
-            float fontSize = 0.35f * pixelScale;
+            float fontSize = 0.3f * pixelScale;
             float alpha = 1f;
-
 
             if (ghostTime == 0) {
                 return;
@@ -210,8 +209,12 @@ public class GhostModule : EverestModule {
 
             x = margin;
             y = margin;
-            y += 16 * pixelScale;
 
+            if (Settings.Instance.SpeedrunClock == SpeedrunType.Chapter) {
+                y += 16 * pixelScale;
+            } else if (Settings.Instance.SpeedrunClock == SpeedrunType.File) {
+                y += 20 * pixelScale;
+            }
 
             Rectangle bgRect = new Rectangle((int) x, (int) y, (int) (size.X + padding * 2), (int) (size.Y + padding * 2));
 
@@ -251,7 +254,7 @@ public class GhostModule : EverestModule {
     }
 
     public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot) {
-        if (SettingsOverridden && !Settings.AlwaysShowSettings) {
+        if (SettingsOverridden && !ModuleSettings.AlwaysShowSettings) {
             menu.Add(new TextMenu.SubHeader(Dialog.Clean("modoptions_ghostmodule_overridden") + " | v." + Metadata.VersionString));
             return;
         }
