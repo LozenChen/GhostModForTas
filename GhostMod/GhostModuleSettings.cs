@@ -8,14 +8,14 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public GhostModuleMode Mode { get; set; } = GhostModuleMode.On;
 
-    [SettingInGame(false)] public string Name { get; set; } = "";
+    [SettingInGame(false)] public string Name { get; set; } = "Ghost";
 
     [SettingIgnore] // Ignore on older builds of Everest which don't support custom entry creators.
     public string NameFilter { get; set; } = "";
 
     public bool ShowNames { get; set; } = true;
 
-    public bool ShowDeaths { get; set; } = false;
+    public bool ShowDeaths { get; set; } = true;
 
     public bool ShowCompareTime { get; set; } = true;
 
@@ -23,22 +23,22 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool ReversedPlayerSpriteMode { get; set; } = true;
 
-    [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 4;
+    [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 10;
     [YamlIgnore] [SettingIgnore] public float InnerOpacityFactor => InnerOpacity / 10f;
 
-    [SettingRange(0, 10)] public int InnerHairOpacity { get; set; } = 4;
+    [SettingRange(0, 10)] public int InnerHairOpacity { get; set; } = 10;
     [YamlIgnore] [SettingIgnore] public float InnerHairOpacityFactor => InnerHairOpacity / 10f;
 
-    [SettingRange(0, 10)] public int OuterOpacity { get; set; } = 1;
+    [SettingRange(0, 10)] public int OuterOpacity { get; set; } = 10;
     [YamlIgnore] [SettingIgnore] public float OuterOpacityFactor => OuterOpacity / 10f;
 
-    [SettingRange(0, 10)] public int OuterHairOpacity { get; set; } = 1;
+    [SettingRange(0, 10)] public int OuterHairOpacity { get; set; } = 10;
     [YamlIgnore] [SettingIgnore] public float OuterHairOpacityFactor => OuterHairOpacity / 10f;
 
-    [SettingRange(0, 10)] public int InnerRadius { get; set; } = 4;
+    [SettingRange(0, 10)] public int InnerRadius { get; set; } = 10;
     [YamlIgnore] [SettingIgnore] public float InnerRadiusDist => InnerRadius * InnerRadius * 64f;
 
-    [SettingRange(0, 10)] public int BorderSize { get; set; } = 4;
+    [SettingRange(0, 10)] public int BorderSize { get; set; } = 10;
     [YamlIgnore] [SettingIgnore] public float BorderSizeDist => BorderSize * BorderSize * 64f;
 
     [YamlIgnore]
