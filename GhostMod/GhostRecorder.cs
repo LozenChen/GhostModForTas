@@ -61,7 +61,7 @@ public class GhostRecorder : Entity {
 
                 DashColor = Player.StateMachine.State == Player.StDash ? Player.GetCurrentTrailColor() : (Color?) null,
                 DashDir = Player.DashDir,
-                DashWasB = Player.GetWasDashB(),
+                DashWasB = Player.wasDashB,
 
                 Time = session.Time
             }
