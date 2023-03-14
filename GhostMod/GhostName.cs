@@ -1,7 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public class GhostName : Entity {
     public Entity Tracking;
     public string Name;
@@ -65,5 +66,4 @@ public class GhostName : Entity {
             Color.Black * (Alpha * Alpha * Alpha)
         );
     }
-}
 }

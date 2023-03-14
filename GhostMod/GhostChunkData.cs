@@ -2,7 +2,8 @@
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public struct GhostChunkData {
     public const string ChunkV1 = "data";
     public const string ChunkV2 = "data2";
@@ -138,5 +139,4 @@ public struct GhostChunkData {
         writer.Write(HairCount);
         writer.Write(Time);
     }
-}
 }

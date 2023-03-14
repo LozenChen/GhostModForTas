@@ -2,7 +2,8 @@
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public class GhostManager : Entity {
     public List<Ghost> Ghosts = new List<Ghost>();
 
@@ -70,5 +71,4 @@ public class GhostManager : Entity {
 
         base.Render();
     }
-}
 }

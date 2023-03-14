@@ -1,7 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public class GhostRecorder : Entity {
     public Player Player;
 
@@ -130,5 +131,4 @@ public class GhostRecorder : Entity {
 
         MInput.Disabled = inputDisabled;
     }
-}
 }

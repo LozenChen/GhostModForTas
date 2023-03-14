@@ -2,7 +2,8 @@
 using System.IO;
 using Microsoft.Xna.Framework;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public struct GhostChunkInput {
     public const string Chunk = "input";
     public bool IsValid;
@@ -197,5 +198,4 @@ public struct GhostChunkInput {
         Grab = 1 << 12,
         Talk = 1 << 13
     }
-}
 }

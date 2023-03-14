@@ -7,7 +7,8 @@ using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public class GhostData {
     public readonly static string Magic = "everest-ghost\r\n";
     public readonly static char[] MagicChars = Magic.ToCharArray();
@@ -278,5 +279,4 @@ public class GhostData {
             frame.Write(writer);
         }
     }
-}
 }

@@ -2,7 +2,8 @@
 using System.IO;
 using YamlDotNet.Serialization;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public class GhostModuleSettings : EverestModuleSettings {
     [SettingIgnore] public bool AlwaysShowSettings { get; set; } = false;
 
@@ -71,5 +72,4 @@ public enum GhostModuleMode {
     Record = 1 << 0,
     Play = 1 << 1,
     On = Record | Play
-}
 }

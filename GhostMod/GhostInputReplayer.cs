@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 // We need this to work across scenes.
 public class GhostInputReplayer : GameComponent {
     public GhostData Data;
@@ -63,5 +64,4 @@ public class GhostInputReplayer : GameComponent {
         Logger.Log("ghost", "GhostReplayer returned input.");
         Game.Components.Remove(this);
     }
-}
 }

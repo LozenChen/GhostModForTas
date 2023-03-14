@@ -2,7 +2,8 @@
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public class Ghost : Actor {
     public GhostManager Manager;
 
@@ -179,5 +180,4 @@ public class Ghost : Actor {
 
         base.Update();
     }
-}
 }

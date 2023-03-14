@@ -8,7 +8,8 @@ using Microsoft.Xna.Framework;
 using Monocle;
 using EventInstance = FMOD.Studio.EventInstance;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.Ghost;
+
 public class GhostModule : EverestModule {
     public static GhostModule Instance;
 
@@ -261,5 +262,4 @@ public class GhostModule : EverestModule {
 
         base.CreateModMenuSection(menu, inGame, snapshot);
     }
-}
 }
