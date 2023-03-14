@@ -38,7 +38,7 @@ internal static class GhostCompareTime {
     private static void LevelOnRegisterAreaComplete(On.Celeste.Level.orig_RegisterAreaComplete orig, Level self) {
         orig(self);
 
-        if (GhostModule.Instance.GhostManager?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is long time) {
+        if (GhostModule.Instance.GhostManager?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
             LastGhostTime = GhostTime;
             GhostTime = time;
             LastCurrentTime = CurrentTime;
@@ -51,7 +51,6 @@ internal static class GhostCompareTime {
 
         if (GhostModule.ModuleSettings.Mode == GhostModuleMode.Play && GhostModule.ModuleSettings.ShowCompareTime) {
             int viewWidth = Engine.ViewWidth;
-            int viewHeight = Engine.ViewHeight;
 
             float pixelScale = viewWidth / 320f;
             float margin = 2 * pixelScale;
@@ -65,9 +64,7 @@ internal static class GhostCompareTime {
 
             long diffRoomTime = CurrentTime - GhostTime - LastCurrentTime + LastGhostTime;
             long diffTotalTime = CurrentTime - GhostTime;
-            string diffRoomTimeStr = (diffRoomTime > 0 ? "+" : string.Empty) + (diffRoomTime / 10000000D).ToString("0.000");
-            string diffTotalTimeStr = (diffTotalTime > 0 ? "+" : string.Empty) + (diffTotalTime / 10000000D).ToString("0.000");
-            string timeStr = $"last room: {diffRoomTimeStr}\ntotal    : {diffTotalTimeStr}";
+            string timeStr = $"last room: {FormatTime(diffRoomTime)}\ntotal    : {FormatTime(diffTotalTime)}";
 
             if (string.IsNullOrEmpty(timeStr)) {
                 return;
@@ -89,7 +86,7 @@ internal static class GhostCompareTime {
 
             Rectangle bgRect = new Rectangle((int)x, (int)y, (int)(size.X + padding * 2), (int)(size.Y + padding * 2));
 
-            if (self.Entities.FindFirst<Player>() is Player player) {
+            if (self.Entities.FindFirst<Player>() is { } player) {
                 Vector2 playerPosition = self.Camera.CameraToScreen(player.TopLeft) * pixelScale;
                 Rectangle playerRect = new Rectangle((int)playerPosition.X, (int)playerPosition.Y, (int)(8 * pixelScale), (int)(11 * pixelScale));
                 Rectangle mirrorBgRect = bgRect;
@@ -122,5 +119,11 @@ internal static class GhostCompareTime {
         LastGhostTime = 0;
         CurrentTime = 0;
         LastCurrentTime = 0;
+    }
+
+    private static string FormatTime(long time) {
+        string sign = time > 0 ? "+" : time < 0 ? "-" : "";
+        TimeSpan timeSpan = TimeSpan.FromTicks(time);
+        return $"{sign}{timeSpan.ShortGameplayFormat()}({time / TimeSpan.FromSeconds(Engine.RawDeltaTime).Ticks})";
     }
 }
