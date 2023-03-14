@@ -25,14 +25,12 @@ public class GhostModule : EverestModule {
 
     public Guid Run;
 
-
-    private long ghostTime;
-    private long lastGhostTime;
-    private long currentTime;
-    private long lastCurrentTime;
-
     public GhostModule() {
         Instance = this;
+    }
+
+    public override void Initialize() {
+        SaveStateUtils.Initialize();
     }
 
     public override void Load() {
@@ -44,20 +42,15 @@ public class GhostModule : EverestModule {
         On.Celeste.Level.LoadLevel += OnLoadLevel;
         Everest.Events.Level.OnExit += OnExit;
         On.Celeste.Player.Die += OnDie;
-        On.Celeste.Level.Render += LevelOnRender;
-        On.Celeste.Level.NextLevel += LevelOnNextLevel;
-        On.Celeste.Level.RegisterAreaComplete += LevelOnRegisterAreaComplete;
-        On.Celeste.LevelLoader.ctor += LevelLoaderOnCtor;
+        GhostCompareTime.Load();
     }
 
     public override void Unload() {
         On.Celeste.Level.LoadLevel -= OnLoadLevel;
         Everest.Events.Level.OnExit -= OnExit;
         On.Celeste.Player.Die -= OnDie;
-        On.Celeste.Level.Render -= LevelOnRender;
-        On.Celeste.Level.NextLevel -= LevelOnNextLevel;
-        On.Celeste.Level.RegisterAreaComplete -= LevelOnRegisterAreaComplete;
-        On.Celeste.LevelLoader.ctor -= LevelLoaderOnCtor;
+        GhostCompareTime.Unload();
+        SaveStateUtils.Unload();
     }
 
     public void OnLoadLevel(On.Celeste.Level.orig_LoadLevel orig, Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
@@ -153,105 +146,6 @@ public class GhostModule : EverestModule {
         GhostRecorder.Data.Dead = true;
 
         return corpse;
-    }
-
-    private void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
-        orig(self, at, dir);
-        if (GhostManager?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is long time) {
-            lastGhostTime = ghostTime;
-            ghostTime = time;
-            lastCurrentTime = currentTime;
-            currentTime = self.Session.Time;
-        }
-    }
-
-    private void LevelOnRegisterAreaComplete(On.Celeste.Level.orig_RegisterAreaComplete orig, Level self) {
-        orig(self);
-
-        if (GhostManager?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is long time) {
-            lastGhostTime = ghostTime;
-            ghostTime = time;
-            lastCurrentTime = currentTime;
-            currentTime = self.Session.Time;
-        }
-    }
-
-    private void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
-        orig(self);
-
-        if (ModuleSettings.Mode == GhostModuleMode.Play && ModuleSettings.ShowCompareTime) {
-            int viewWidth = Engine.ViewWidth;
-            int viewHeight = Engine.ViewHeight;
-
-            float pixelScale = viewWidth / 320f;
-            float margin = 2 * pixelScale;
-            float padding = 2 * pixelScale;
-            float fontSize = 0.3f * pixelScale;
-            float alpha = 1f;
-
-            if (ghostTime == 0) {
-                return;
-            }
-
-            long diffRoomTime = currentTime - ghostTime - lastCurrentTime + lastGhostTime;
-            long diffTotalTime = currentTime - ghostTime;
-            string diffRoomTimeStr = (diffRoomTime > 0 ? "+" : string.Empty) + (diffRoomTime / 10000000D).ToString("0.000");
-            string diffTotalTimeStr = (diffTotalTime > 0 ? "+" : string.Empty) + (diffTotalTime / 10000000D).ToString("0.000");
-            string timeStr = $"last room: {diffRoomTimeStr}\ntotal    : {diffTotalTimeStr}";
-
-            if (string.IsNullOrEmpty(timeStr)) {
-                return;
-            }
-
-            Vector2 size = Draw.DefaultFont.MeasureString(timeStr) * fontSize;
-
-            float x;
-            float y;
-
-            x = margin;
-            y = margin;
-
-            if (Settings.Instance.SpeedrunClock == SpeedrunType.Chapter) {
-                y += 16 * pixelScale;
-            } else if (Settings.Instance.SpeedrunClock == SpeedrunType.File) {
-                y += 20 * pixelScale;
-            }
-
-            Rectangle bgRect = new Rectangle((int) x, (int) y, (int) (size.X + padding * 2), (int) (size.Y + padding * 2));
-
-            if (self.Entities.FindFirst<Player>() is Player player) {
-                Vector2 playerPosition = self.Camera.CameraToScreen(player.TopLeft) * pixelScale;
-                Rectangle playerRect = new Rectangle((int) playerPosition.X, (int) playerPosition.Y, (int) (8 * pixelScale), (int) (11 * pixelScale));
-                Rectangle mirrorBgRect = bgRect;
-                if (SaveData.Instance?.Assists.MirrorMode == true) {
-                    mirrorBgRect.X = (int) Math.Abs(x - viewWidth + size.X + padding * 2);
-                }
-
-                if (self.Paused || playerRect.Intersects(mirrorBgRect)) {
-                    alpha = 0.5f;
-                }
-            }
-
-            Draw.SpriteBatch.Begin();
-
-            Draw.Rect(bgRect, Color.Black * 0.8f * alpha);
-
-            Vector2 textPosition = new Vector2(x + padding, y + padding);
-            Vector2 scale = new Vector2(fontSize);
-
-            Draw.Text(Draw.DefaultFont, timeStr, textPosition, Color.White * alpha, Vector2.Zero, scale, 0f);
-
-            Draw.SpriteBatch.End();
-        }
-    }
-
-    private void LevelLoaderOnCtor(On.Celeste.LevelLoader.orig_ctor orig, LevelLoader self, Session session, Vector2? startPosition) {
-        orig(self, session, startPosition);
-
-        ghostTime = 0;
-        lastGhostTime = 0;
-        currentTime = 0;
-        lastCurrentTime = 0;
     }
 
     public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot) {

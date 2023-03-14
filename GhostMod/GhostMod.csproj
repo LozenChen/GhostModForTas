@@ -44,6 +44,9 @@
     <Reference Include="MMHOOK_Celeste">
       <HintPath>lib-stripped\MMHOOK_Celeste.dll</HintPath>
     </Reference>
+    <Reference Include="SpeedrunTool">
+      <HintPath>lib-stripped\SpeedrunTool.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="lib-stripped\**" />
