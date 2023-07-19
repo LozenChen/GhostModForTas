@@ -6,7 +6,7 @@ using Monocle;
 namespace Celeste.Mod.Ghost;
 
 internal static class GhostCompareTime {
-    public static long GhostTime = -1;
+    public static long GhostTime;
     public static long LastGhostTime;
     public static long CurrentTime;
     public static long LastCurrentTime;
@@ -66,18 +66,6 @@ internal static class GhostCompareTime {
 
             long diffRoomTime = CurrentTime - GhostTime - LastCurrentTime + LastGhostTime;
             long diffTotalTime = CurrentTime - GhostTime;
-            /*
-            string timeStr;
-            if (GhostModule.ModuleSettings.ShowCompareRoomTime) {
-                timeStr = $"last room: {FormatTime(diffRoomTime)}";
-                if (GhostModule.ModuleSettings.ShowCompareTotalTime) {
-                    timeStr += $"\ntotal    : {FormatTime(diffTotalTime)}";
-                }
-            } else {
-                timeStr = $"total    : {FormatTime(diffTotalTime)}";
-            }
-            */
-
             string timeStr;
             string timeStr1;
             string timeStr2;
