@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETFramework,Version=v4.5.2": {
+      "MonoMod.RuntimeDetour": {
+        "type": "Direct",
+        "requested": "[21.4.29.1, )",
+        "resolved": "21.4.29.1",
+        "contentHash": "sqn/g1WKJRRuokOyjw6JFxWfK9p+lDoEDCVoPpJohGtFGtVeL3GK5nUdA1SWAbdrKR6LYI09KIOnv28D9UuGnw==",
+        "dependencies": {
+          "Mono.Cecil": "0.11.3",
+          "MonoMod.Utils": "21.4.29.1"
+        }
+      },
+      "YamlDotNet": {
+        "type": "Direct",
+        "requested": "[8.1.2, )",
+        "resolved": "8.1.2",
+        "contentHash": "GlPKbb4l+91dyYVKV7UnJlr2CWooNNM1ayZWC90QAmlFPgbwSkfhgId7dGjTAHqkB84BZqjMSy5PlAYf1iejVA=="
+      },
+      "Mono.Cecil": {
+        "type": "Transitive",
+        "resolved": "0.11.3",
+        "contentHash": "DNYE+io5XfEE8+E+5padThTPHJARJHbz1mhbhMPNrrWGKVKKqj/KEeLvbawAmbIcT73NuxLV7itHZaYCZcVWGg=="
+      },
+      "MonoMod.Utils": {
+        "type": "Transitive",
+        "resolved": "21.4.29.1",
+        "contentHash": "4ZSnPtXZ5q4Fdd7dRVBgeg26OXlB+bTLdDqI7R6Tu5Iw28+ipAwujXbd2dVU13PbSj+qhkrq2MKZoJM2Er07WQ==",
+        "dependencies": {
+          "Mono.Cecil": "0.11.3"
+        }
+      }
+    }
+  }
+}
