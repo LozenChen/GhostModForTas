@@ -1,4 +1,4 @@
-﻿- Name: GhostMod
+﻿- Name: GhostModForTas
   Version: 1.4.1
   DLL: GhostMod\bin\Release\net452\GhostMod.dll
   Dependencies:

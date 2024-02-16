@@ -20,10 +20,10 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     [SettingIgnore]
 
-    public bool ShowCompareTime => ShowCompareRoomTime || ShowCompareTotalTime;
-    public bool ShowCompareRoomTime { get; set; } = true;
+    public bool ShowCompareTime => CompareRoomTime || CompareTotalTime;
+    public bool CompareRoomTime { get; set; } = true;
 
-    public bool ShowCompareTotalTime { get; set; } = true; 
+    public bool CompareTotalTime { get; set; } = true; 
 
     public bool HighlightFastestGhost { get; set; } = true;
 

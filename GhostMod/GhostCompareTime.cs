@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using Microsoft.Xna.Framework;
 using Monocle;
 
@@ -13,6 +14,9 @@ internal static class GhostCompareTime {
 
     public static readonly Color AheadColor = Calc.HexToColor("6ded87");
     public static readonly Color BehindColor = Calc.HexToColor("ff8c8c");
+
+    public static readonly string StringLastRoom = "last room: ";
+    public static readonly string StringTotal = "total    : ";
     public static void Load() {
         On.Celeste.Level.Render += LevelOnRender;
         On.Celeste.Level.NextLevel += LevelOnNextLevel;
@@ -69,31 +73,32 @@ internal static class GhostCompareTime {
             string timeStr;
             string timeStr1;
             string timeStr2;
-            string timeStr3 = "";
-            string timeStr4 = "";
+            string timeStr3;
+            string timeStr4;
             Color color2;
             Color color4 = Color.White;
-            if (GhostModule.ModuleSettings.ShowCompareRoomTime) {
-                timeStr1 = "last room: ";
+            if (GhostModule.ModuleSettings.CompareRoomTime) {
+                timeStr1 = StringLastRoom;
                 timeStr2 = $"{FormatTime(diffRoomTime)}";
                 color2 = AheadBehindColor(diffRoomTime);
-                if (GhostModule.ModuleSettings.ShowCompareTotalTime) {
-                    timeStr3 = "total    : ";
+                if (GhostModule.ModuleSettings.CompareTotalTime) {
+                    timeStr3 = StringTotal;
                     timeStr4 = $"{FormatTime(diffTotalTime)}";
                     color4 = AheadBehindColor(diffTotalTime);
                     timeStr = timeStr1 + timeStr2 + "\n" + timeStr3 + timeStr4;
                 }
                 else {
+                    timeStr3 = timeStr4 = "";
                     timeStr = timeStr1 + timeStr2;
                 }
             } else {
-                timeStr1 = "total    : ";
+                timeStr1 = StringTotal;
                 timeStr2 = $"{FormatTime(diffTotalTime)}";
+                timeStr3 = timeStr4 = "";
                 color2 = AheadBehindColor(diffTotalTime);
                 timeStr = timeStr1 + timeStr2;
             }
             
-
             Vector2 size = Draw.DefaultFont.MeasureString(timeStr) * fontSize;
 
             float x;
@@ -150,7 +155,7 @@ internal static class GhostCompareTime {
     }
 
     private static string FormatTime(long time) {
-        string sign = time > 0 ? "+" : time < 0 ? "-" : "";
+        string sign = time > 0 ? "+" : time < 0 ? "-" : " ";
         TimeSpan timeSpan = TimeSpan.FromTicks(time);
         return $"{sign}{timeSpan.VeryShortGameplayFormat()}({time / TimeSpan.FromSeconds(Engine.RawDeltaTime).Ticks}f)";
     }
