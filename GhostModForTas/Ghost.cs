@@ -2,7 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost;
+namespace Celeste.Mod.GhostModForTas;
 
 public class Ghost : Actor {
     public GhostManager Manager;

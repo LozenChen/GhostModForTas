@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost;
+namespace Celeste.Mod.GhostModForTas;
 
 public class GhostData {
     public readonly static string Magic = "everest-ghost\r\n";

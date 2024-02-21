@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Celeste.Mod.SpeedrunTool.SaveLoad;
 
-namespace Celeste.Mod.Ghost;
+namespace Celeste.Mod.GhostModForTas;
 
 internal static class SaveStateUtils {
     private static bool Installed => Everest.Modules.Any(module => module.Metadata?.Name == "SpeedrunTool");

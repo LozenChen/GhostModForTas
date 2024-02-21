@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using YamlDotNet.Serialization;
 
-namespace Celeste.Mod.Ghost;
+namespace Celeste.Mod.GhostModForTas;
 
 public class GhostModuleSettings : EverestModuleSettings {
     [SettingIgnore] public bool AlwaysShowSettings { get; set; } = false;

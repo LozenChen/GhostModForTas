@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost;
+namespace Celeste.Mod.GhostModForTas;
 
 public class GhostManager : Entity {
     public List<Ghost> Ghosts = new List<Ghost>();

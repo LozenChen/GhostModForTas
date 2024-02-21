@@ -8,15 +8,13 @@ using Microsoft.Xna.Framework;
 using Monocle;
 using EventInstance = FMOD.Studio.EventInstance;
 
-namespace Celeste.Mod.Ghost;
+namespace Celeste.Mod.GhostModForTas;
 
 public class GhostModule : EverestModule {
     public static GhostModule Instance;
 
     public override Type SettingsType => typeof(GhostModuleSettings);
     public static GhostModuleSettings ModuleSettings => (GhostModuleSettings) Instance._Settings;
-
-    public static bool SettingsOverridden = false;
 
     public static string PathGhosts { get; internal set; }
 
@@ -34,7 +32,7 @@ public class GhostModule : EverestModule {
     }
 
     public override void Load() {
-        PathGhosts = Path.Combine(Everest.PathSettings, "Ghosts");
+        PathGhosts = Path.Combine(Everest.PathSettings, "GhostsForTas");
         if (!Directory.Exists(PathGhosts)) {
             Directory.CreateDirectory(PathGhosts);
         }
@@ -149,11 +147,6 @@ public class GhostModule : EverestModule {
     }
 
     public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot) {
-        if (SettingsOverridden && !ModuleSettings.AlwaysShowSettings) {
-            menu.Add(new TextMenu.SubHeader(Dialog.Clean("modoptions_ghostmodule_overridden") + " | v." + Metadata.VersionString));
-            return;
-        }
-
         base.CreateModMenuSection(menu, inGame, snapshot);
     }
 }

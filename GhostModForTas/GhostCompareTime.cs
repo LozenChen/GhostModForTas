@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost;
+namespace Celeste.Mod.GhostModForTas;
 
 internal static class GhostCompareTime {
     public static long GhostTime;

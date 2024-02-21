@@ -1,8 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.Ghost;
+namespace Celeste.Mod.GhostModForTas;
 
 public struct GhostChunkData {
     public const string ChunkV1 = "data";

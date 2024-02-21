@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>Celeste.Mod.Ghost</RootNamespace>
+    <RootNamespace>Celeste.Mod.GhostModForTas</RootNamespace>
     <TargetFramework>net452</TargetFramework>
     <LangVersion>11</LangVersion>
-    <AssemblyTitle>GhostMode</AssemblyTitle>
+    <AssemblyTitle>GhostModForTas</AssemblyTitle>
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3270</MSBuildWarningsAsMessages>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -15,7 +15,7 @@
     </Reference>
   </ItemDefinitionGroup>
   <PropertyGroup>
-    <PathMap>$(MSBuildProjectDirectory)=GhostMod/</PathMap>
+    <PathMap>$(MSBuildProjectDirectory)=GhostModForTas/</PathMap>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>portable</DebugType>

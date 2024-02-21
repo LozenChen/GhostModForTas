@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Monocle;
 
-namespace Celeste.Mod.Ghost {
+namespace Celeste.Mod.GhostModForTas {
 public struct GhostFrame {
     public const string End = "\r\n";
 
