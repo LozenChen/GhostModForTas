@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Monocle;
 
@@ -7,7 +7,6 @@ public struct GhostFrame {
     public const string End = "\r\n";
 
     public GhostChunkData Data;
-    public GhostChunkInput Input;
 
     public void Read(BinaryReader reader) {
         string chunk;
@@ -24,9 +23,6 @@ public struct GhostFrame {
                 case GhostChunkData.ChunkV3:
                     Data.Read(reader, 3);
                     break;
-                case GhostChunkInput.Chunk:
-                    Input.Read(reader);
-                    break;
 
                 default:
                     // Skip any unknown chunks.
@@ -39,10 +35,6 @@ public struct GhostFrame {
     public void Write(BinaryWriter writer) {
         if (Data.IsValid) {
             WriteChunk(writer, Data.Write, GhostChunkData.Chunk);
-        }
-
-        if (Input.IsValid) {
-            WriteChunk(writer, Input.Write, GhostChunkInput.Chunk);
         }
 
         writer.WriteNullTerminatedString(End);

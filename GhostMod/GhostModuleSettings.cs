@@ -10,9 +10,6 @@ public class GhostModuleSettings : EverestModuleSettings {
     public GhostModuleMode Mode { get; set; } = GhostModuleMode.Both;
 
     [SettingInGame(false)] public string Name { get; set; } = "Ghost";
-
-    [SettingIgnore] // Ignore on older builds of Everest which don't support custom entry creators.
-    public string NameFilter { get; set; } = "";
     
     public bool ShowNames { get; set; } = true;
 
@@ -49,9 +46,6 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     [YamlIgnore] public string ClearAllRecords => "Clear All Records";
     // EverestModule.CreateModMenuSection(...) will automatically allocate "Create XXX Entry" to that "XXX" property. So do not delete this.
-    public void ShowNameFilterEntry(TextMenu menu, bool inGame) {
-        // TODO: Create a slider to choose between all available names.
-    }
 
     public void CreateClearAllRecordsEntry(TextMenu textMenu, bool inGame) {
         textMenu.Add(new TextMenu.Button("Clear All Records").Pressed(() => {

@@ -24,6 +24,7 @@ internal static class GhostCompareTime {
         On.Celeste.LevelLoader.ctor += LevelLoaderOnCtor;
     }
 
+
     public static void Unload() {
         On.Celeste.Level.Render -= LevelOnRender;
         On.Celeste.Level.NextLevel -= LevelOnNextLevel;

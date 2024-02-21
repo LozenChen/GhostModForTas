@@ -20,8 +20,6 @@ public class Ghost : Actor {
     public GhostFrame Frame => ForcedFrame ?? (Data == null ? default(GhostFrame) : Data[FrameIndex]);
     public bool AutoForward = true;
 
-    public GhostName Name;
-
     public Color Color = Color.White;
 
     protected float alpha;
@@ -56,8 +54,6 @@ public class Ghost : Actor {
         Add(Sprite);
 
         Hair.Color = Player.NormalHairColor;
-
-        Name = new GhostName(this, Data?.Name ?? "");
     }
 
     public override void Added(Scene scene) {
@@ -66,14 +62,10 @@ public class Ghost : Actor {
         Hair.Facing = Frame.Data.Facing;
         Hair.Start();
         UpdateHair();
-
-        Scene.Add(Name);
     }
 
     public override void Removed(Scene scene) {
         base.Removed(scene);
-
-        Name.RemoveSelf();
     }
 
     public void UpdateHair() {
@@ -138,11 +130,6 @@ public class Ghost : Actor {
             Visible &= GhostModule.ModuleSettings.ShowDeaths;
         }
 
-        if (ForcedFrame == null && Data != null && !string.IsNullOrEmpty(GhostModule.ModuleSettings.NameFilter)) {
-            Visible &= string.IsNullOrEmpty(Data.Name) ||
-                       GhostModule.ModuleSettings.NameFilter.Equals(Data.Name, StringComparison.InvariantCultureIgnoreCase);
-        }
-
         if (ForcedFrame == null && Data != null && AutoForward) {
             do {
                 FrameIndex++;
@@ -175,8 +162,6 @@ public class Ghost : Actor {
         UpdateHair();
 
         Visible &= alpha > 0f;
-
-        Name.Alpha = Visible ? alpha : 0f;
 
         base.Update();
     }

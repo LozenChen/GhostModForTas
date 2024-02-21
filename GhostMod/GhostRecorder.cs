@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Monocle;
 
 namespace Celeste.Mod.Ghost;
@@ -9,7 +9,6 @@ public class GhostRecorder : Entity {
     public GhostData Data;
 
     public GhostFrame LastFrameData;
-    public GhostFrame LastFrameInput;
 
     public GhostRecorder(Player player)
         : base() {
@@ -23,12 +22,6 @@ public class GhostRecorder : Entity {
         base.Update();
 
         RecordData();
-    }
-
-    public override void Render() {
-        base.Render();
-
-        RecordInput();
     }
 
     public void RecordData() {
@@ -78,57 +71,5 @@ public class GhostRecorder : Entity {
         if (Data != null) {
             Data.Frames.Add(LastFrameData);
         }
-    }
-
-    public void RecordInput() {
-        // Check if we've got a data-less input frame. If so, add input to it.
-        // If the frame already has got input, add a new input frame.
-
-        bool inputDisabled = MInput.Disabled;
-        MInput.Disabled = false;
-
-        GhostFrame frame;
-        bool isNew = false;
-        if (Data == null || Data.Frames.Count == 0 || Data[Data.Frames.Count - 1].Input.IsValid) {
-            frame = new GhostFrame();
-            isNew = true;
-        } else {
-            frame = Data[Data.Frames.Count - 1];
-        }
-
-        frame.Input.IsValid = true;
-
-        frame.Input.MoveX = Input.MoveX.Value;
-        frame.Input.MoveY = Input.MoveY.Value;
-
-        frame.Input.Aim = Input.Aim.Value;
-        frame.Input.MountainAim = Input.MountainAim.Value;
-
-        frame.Input.ESC = Input.ESC.Check;
-        frame.Input.Pause = Input.Pause.Check;
-        frame.Input.MenuLeft = Input.MenuLeft.Check;
-        frame.Input.MenuRight = Input.MenuRight.Check;
-        frame.Input.MenuUp = Input.MenuUp.Check;
-        frame.Input.MenuDown = Input.MenuDown.Check;
-        frame.Input.MenuConfirm = Input.MenuConfirm.Check;
-        frame.Input.MenuCancel = Input.MenuCancel.Check;
-        frame.Input.MenuJournal = Input.MenuJournal.Check;
-        frame.Input.QuickRestart = Input.QuickRestart.Check;
-        frame.Input.Jump = Input.Jump.Check;
-        frame.Input.Dash = Input.Dash.Check;
-        frame.Input.Grab = Input.Grab.Check;
-        frame.Input.Talk = Input.Talk.Check;
-
-        if (Data != null) {
-            if (isNew) {
-                Data.Frames.Add(frame);
-            } else {
-                Data.Frames[Data.Frames.Count - 1] = frame;
-            }
-        }
-
-        LastFrameInput = frame;
-
-        MInput.Disabled = inputDisabled;
     }
 }
