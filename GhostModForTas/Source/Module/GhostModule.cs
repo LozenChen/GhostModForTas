@@ -1,11 +1,13 @@
+using Celeste.Mod.GhostModForTas.Entities;
+using Celeste.Mod.GhostModForTas.Recorder;
+using Celeste.Mod.GhostModForTas.Utils;
+using Microsoft.Xna.Framework;
+using Monocle;
 using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using Microsoft.Xna.Framework;
-using Monocle;
 using EventInstance = FMOD.Studio.EventInstance;
 
 namespace Celeste.Mod.GhostModForTas;
@@ -14,7 +16,7 @@ public class GhostModule : EverestModule {
     public static GhostModule Instance;
 
     public override Type SettingsType => typeof(GhostModuleSettings);
-    public static GhostModuleSettings ModuleSettings => (GhostModuleSettings) Instance._Settings;
+    public static GhostModuleSettings ModuleSettings => (GhostModuleSettings)Instance._Settings;
 
     public static string PathGhosts { get; internal set; }
 
@@ -64,7 +66,7 @@ public class GhostModule : EverestModule {
 
         Player player = level.Tracker.GetEntity<Player>();
         if (player == null) {
-            level.Add(new Entity {new Coroutine(WaitForPlayer(level))});
+            level.Add(new Entity { new Coroutine(WaitForPlayer(level)) });
         } else {
             Step(level);
         }

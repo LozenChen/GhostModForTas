@@ -10,7 +10,7 @@ public class GhostModuleSettings : EverestModuleSettings {
     public GhostModuleMode Mode { get; set; } = GhostModuleMode.Both;
 
     [SettingInGame(false)] public string Name { get; set; } = "Ghost";
-    
+
     public bool ShowNames { get; set; } = true;
 
     public bool ShowDeaths { get; set; } = true;
@@ -20,29 +20,29 @@ public class GhostModuleSettings : EverestModuleSettings {
     public bool ShowCompareTime => CompareRoomTime || CompareTotalTime;
     public bool CompareRoomTime { get; set; } = true;
 
-    public bool CompareTotalTime { get; set; } = true; 
+    public bool CompareTotalTime { get; set; } = true;
 
     public bool HighlightFastestGhost { get; set; } = true;
 
     public bool ReversedPlayerSpriteMode { get; set; } = true;
 
     [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 10;
-    [YamlIgnore] [SettingIgnore] public float InnerOpacityFactor => InnerOpacity / 10f;
+    [YamlIgnore][SettingIgnore] public float InnerOpacityFactor => InnerOpacity / 10f;
 
     [SettingRange(0, 10)] public int InnerHairOpacity { get; set; } = 10;
-    [YamlIgnore] [SettingIgnore] public float InnerHairOpacityFactor => InnerHairOpacity / 10f;
+    [YamlIgnore][SettingIgnore] public float InnerHairOpacityFactor => InnerHairOpacity / 10f;
 
     [SettingRange(0, 10)] public int OuterOpacity { get; set; } = 10;
-    [YamlIgnore] [SettingIgnore] public float OuterOpacityFactor => OuterOpacity / 10f;
+    [YamlIgnore][SettingIgnore] public float OuterOpacityFactor => OuterOpacity / 10f;
 
     [SettingRange(0, 10)] public int OuterHairOpacity { get; set; } = 10;
-    [YamlIgnore] [SettingIgnore] public float OuterHairOpacityFactor => OuterHairOpacity / 10f;
+    [YamlIgnore][SettingIgnore] public float OuterHairOpacityFactor => OuterHairOpacity / 10f;
 
     [SettingRange(0, 10)] public int InnerRadius { get; set; } = 10;
-    [YamlIgnore] [SettingIgnore] public float InnerRadiusDist => InnerRadius * InnerRadius * 64f;
+    [YamlIgnore][SettingIgnore] public float InnerRadiusDist => InnerRadius * InnerRadius * 64f;
 
     [SettingRange(0, 10)] public int BorderSize { get; set; } = 10;
-    [YamlIgnore] [SettingIgnore] public float BorderSizeDist => BorderSize * BorderSize * 64f;
+    [YamlIgnore][SettingIgnore] public float BorderSizeDist => BorderSize * BorderSize * 64f;
 
     [YamlIgnore] public string ClearAllRecords => "Clear All Records";
     // EverestModule.CreateModMenuSection(...) will automatically allocate "Create XXX Entry" to that "XXX" property. So do not delete this.

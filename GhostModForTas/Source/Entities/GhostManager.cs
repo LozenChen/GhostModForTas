@@ -1,8 +1,9 @@
-using System.Collections.Generic;
+using Celeste.Mod.GhostModForTas.Recorder;
 using Microsoft.Xna.Framework;
 using Monocle;
+using System.Collections.Generic;
 
-namespace Celeste.Mod.GhostModForTas;
+namespace Celeste.Mod.GhostModForTas.Entities;
 
 public class GhostManager : Entity {
     public List<Ghost> Ghosts = new List<Ghost>();

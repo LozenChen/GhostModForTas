@@ -1,8 +1,8 @@
+using Monocle;
 using System;
 using System.IO;
-using Monocle;
 
-namespace Celeste.Mod.GhostModForTas {
+namespace Celeste.Mod.GhostModForTas.Recorder;
 public struct GhostFrame {
     public const string End = "\r\n";
 
@@ -60,10 +60,9 @@ public struct GhostFrame {
         // Update the chunk length, which consists of the 4 bytes before the chunk data.
         writer.Flush();
         writer.BaseStream.Seek(start - 4, SeekOrigin.Begin);
-        writer.Write((int) length);
+        writer.Write((int)length);
 
         writer.Flush();
         writer.BaseStream.Seek(pos, SeekOrigin.Begin);
     }
-}
 }

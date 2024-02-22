@@ -1,13 +1,13 @@
+using Microsoft.Xna.Framework;
+using Monocle;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Xna.Framework;
-using Monocle;
 
-namespace Celeste.Mod.GhostModForTas;
+namespace Celeste.Mod.GhostModForTas.Recorder;
 
 public class GhostData {
     public readonly static string Magic = "everest-ghost\r\n";
@@ -23,7 +23,7 @@ public class GhostData {
         => GetGhostFilePrefix(session.Area.GetSID(), session.Area.Mode, session.Level, session.RespawnPoint ?? default);
 
     public static string GetGhostFilePrefix(string sid, AreaMode mode, string level, Vector2 respawnPoint)
-        => PathVerifyRegex.Replace($"{sid}-{(char) ('A' + (int) mode)}-{level}-{respawnPoint}-", "-");
+        => PathVerifyRegex.Replace($"{sid}-{(char)('A' + (int)mode)}-{level}-{respawnPoint}-", "-");
 
     public static string GetGhostFilePath(Session session, string name, DateTime date)
         => GetGhostFilePath(session.Area.GetSID(), session.Area.Mode, session.Level, session.RespawnPoint ?? default, name, date);
@@ -139,7 +139,7 @@ public class GhostData {
 
     public GhostData Read() {
         if (FilePath == null)
-            // Keep existing frames in-tact.
+        // Keep existing frames in-tact.
         {
             return null;
         }
@@ -186,7 +186,7 @@ public class GhostData {
         }
 
         SID = reader.ReadNullTerminatedString();
-        Mode = (AreaMode) reader.ReadInt32();
+        Mode = (AreaMode)reader.ReadInt32();
         Level = reader.ReadNullTerminatedString();
         RespawnPoint = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         Target = reader.ReadNullTerminatedString();
@@ -202,7 +202,7 @@ public class GhostData {
 
         Dead = reader.ReadBoolean();
 
-        Opacity = reader.ReadBoolean() ? (float?) reader.ReadSingle() : null;
+        Opacity = reader.ReadBoolean() ? (float?)reader.ReadSingle() : null;
 
         if (version >= 1) {
             Run = new Guid(reader.ReadBytes(16));
@@ -244,17 +244,17 @@ public class GhostData {
     }
 
     public void Write(BinaryWriter writer) {
-        writer.Write((short) 0x0ade);
+        writer.Write((short)0x0ade);
         writer.Write(MagicChars);
         writer.Write(Version);
 
         writer.Write(0); // Uncompressed
 
         writer.WriteNullTerminatedString(SID);
-        writer.Write((int) Mode);
+        writer.Write((int)Mode);
         writer.WriteNullTerminatedString(Level);
-        writer.Write((float) RespawnPoint.X);
-        writer.Write((float) RespawnPoint.Y);
+        writer.Write((float)RespawnPoint.X);
+        writer.Write((float)RespawnPoint.Y);
         writer.WriteNullTerminatedString(Target);
 
         writer.WriteNullTerminatedString(Name);

@@ -1,10 +1,9 @@
-using System;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Monocle;
+using System;
+using System.Linq;
 
-namespace Celeste.Mod.GhostModForTas;
+namespace Celeste.Mod.GhostModForTas.Entities;
 
 internal static class GhostCompareTime {
     public static long GhostTime;
@@ -87,8 +86,7 @@ internal static class GhostCompareTime {
                     timeStr4 = $"{FormatTime(diffTotalTime)}";
                     color4 = AheadBehindColor(diffTotalTime);
                     timeStr = timeStr1 + timeStr2 + "\n" + timeStr3 + timeStr4;
-                }
-                else {
+                } else {
                     timeStr3 = timeStr4 = "";
                     timeStr = timeStr1 + timeStr2;
                 }
@@ -99,7 +97,7 @@ internal static class GhostCompareTime {
                 color2 = AheadBehindColor(diffTotalTime);
                 timeStr = timeStr1 + timeStr2;
             }
-            
+
             Vector2 size = Draw.DefaultFont.MeasureString(timeStr) * fontSize;
 
             float x;
@@ -128,7 +126,7 @@ internal static class GhostCompareTime {
                     alpha = 0.5f;
                 }
             }
-            
+
             Draw.SpriteBatch.Begin();
 
             Draw.Rect(bgRect, Color.Black * 0.8f * alpha);
@@ -174,8 +172,7 @@ internal static class GhostCompareTime {
     public static Color AheadBehindColor(float diffTime) {
         if (diffTime < 0) {
             return AheadColor;
-        }
-        else if (diffTime > 0) {
+        } else if (diffTime > 0) {
             return BehindColor;
         } else {
             return Color.White;

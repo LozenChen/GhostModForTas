@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.GhostModForTas;
+namespace Celeste.Mod.GhostModForTas.Recorder;
 
 public class GhostRecorder : Entity {
     public Player Player;
@@ -52,7 +52,7 @@ public class GhostRecorder : Entity {
                 HairColor = Player.Hair.Color,
                 HairSimulateMotion = Player.Hair.SimulateMotion,
 
-                DashColor = Player.StateMachine.State == Player.StDash ? Player.GetCurrentTrailColor() : (Color?) null,
+                DashColor = Player.StateMachine.State == Player.StDash ? Player.GetCurrentTrailColor() : (Color?)null,
                 DashDir = Player.DashDir,
                 DashWasB = Player.wasDashB,
 

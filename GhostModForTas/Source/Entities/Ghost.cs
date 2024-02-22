@@ -1,8 +1,8 @@
-using System;
+using Celeste.Mod.GhostModForTas.Recorder;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.GhostModForTas;
+namespace Celeste.Mod.GhostModForTas.Entities;
 
 public class Ghost : Actor {
     public GhostManager Manager;
@@ -99,7 +99,7 @@ public class Ghost : Actor {
         Position = Frame.Data.Position;
         Sprite.Rotation = Frame.Data.Rotation;
         Sprite.Scale = Frame.Data.Scale;
-        Sprite.Scale.X = Sprite.Scale.X * (float) Frame.Data.Facing;
+        Sprite.Scale.X = Sprite.Scale.X * (float)Frame.Data.Facing;
         Sprite.Color = new Color(
             (Frame.Data.Color.R * Color.R) / 255,
             (Frame.Data.Color.G * Color.G) / 255,

@@ -1,8 +1,8 @@
-using System.IO;
 using Microsoft.Xna.Framework;
 using Monocle;
+using System.IO;
 
-namespace Celeste.Mod.GhostModForTas;
+namespace Celeste.Mod.GhostModForTas.Recorder;
 
 public struct GhostChunkData {
     public const string ChunkV1 = "data";
@@ -54,9 +54,9 @@ public struct GhostChunkData {
         Color = new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
 
         SpriteRate = reader.ReadSingle();
-        SpriteJustify = reader.ReadBoolean() ? (Vector2?) new Vector2(reader.ReadSingle(), reader.ReadSingle()) : null;
+        SpriteJustify = reader.ReadBoolean() ? (Vector2?)new Vector2(reader.ReadSingle(), reader.ReadSingle()) : null;
 
-        Facing = (Facings) reader.ReadInt32();
+        Facing = (Facings)reader.ReadInt32();
 
         CurrentAnimationID = reader.ReadNullTerminatedString();
         CurrentAnimationFrame = reader.ReadInt32();
@@ -68,7 +68,7 @@ public struct GhostChunkData {
             return;
         }
 
-        DashColor = reader.ReadBoolean() ? (Color?) new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()) : null;
+        DashColor = reader.ReadBoolean() ? (Color?)new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()) : null;
         DashDir = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         DashWasB = reader.ReadBoolean();
 
@@ -109,7 +109,7 @@ public struct GhostChunkData {
             writer.Write(false);
         }
 
-        writer.Write((int) Facing);
+        writer.Write((int)Facing);
 
         writer.WriteNullTerminatedString(CurrentAnimationID);
         writer.Write(CurrentAnimationFrame);
