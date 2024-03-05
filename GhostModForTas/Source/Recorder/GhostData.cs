@@ -30,14 +30,14 @@ public class GhostData {
 
     public static string GetGhostFilePath(string sid, AreaMode mode, string level, Vector2 respawnPoint, string name, DateTime date)
         => Path.Combine(
-            GhostModule.PathGhosts,
+            PathGhosts,
             GetGhostFilePrefix(sid, mode, level, respawnPoint) +
             PathVerifyRegex.Replace($"{name}-{date.ToString("yyyy-MM-dd-HH-mm-ss-fff", CultureInfo.InvariantCulture)}", "-") + ".oshiro"
         );
 
     public static string[] GetAllGhostFilePaths(Session session)
         => Directory.GetFiles(
-            GhostModule.PathGhosts,
+            PathGhosts,
             GetGhostFilePrefix(session) + "*.oshiro"
         );
 

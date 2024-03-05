@@ -1,4 +1,5 @@
 using Celeste.Mod.GhostModForTas.Entities;
+using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.SpeedrunTool.SaveLoad;
 using System;
 using System.Linq;
@@ -15,12 +16,14 @@ internal static class SaveStateUtils {
     private static long currentTime;
     private static long lastCurrentTime;
 
+    [Initialize]
     public static void Initialize() {
         if (Installed) {
             AddSaveLoadAction();
         }
     }
 
+    [Unload]
     public static void Unload() {
         if (Installed) {
             RemoveSaveLoadAction();
@@ -29,13 +32,13 @@ internal static class SaveStateUtils {
 
     private static void AddSaveLoadAction() {
         action = SaveLoadAction.SafeAdd((_, _) => {
-            run = GhostModule.Instance.Run;
+            run = GhostCore.Run;
             ghostTime = GhostCompareTime.GhostTime;
             lastGhostTime = GhostCompareTime.LastGhostTime;
             currentTime = GhostCompareTime.CurrentTime;
             lastCurrentTime = GhostCompareTime.LastCurrentTime;
         }, (_, _) => {
-            GhostModule.Instance.Run = run;
+            GhostCore.Run = run;
             GhostCompareTime.GhostTime = ghostTime;
             GhostCompareTime.LastGhostTime = lastGhostTime;
             GhostCompareTime.CurrentTime = currentTime;

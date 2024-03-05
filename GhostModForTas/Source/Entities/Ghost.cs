@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder;
 using Microsoft.Xna.Framework;
 using Monocle;
@@ -5,7 +6,7 @@ using Monocle;
 namespace Celeste.Mod.GhostModForTas.Entities;
 
 public class Ghost : Actor {
-    public GhostManager Manager;
+    public GhostReplayer Manager;
 
     public Player Player;
 

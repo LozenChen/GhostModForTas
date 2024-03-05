@@ -3,6 +3,7 @@
     <RootNamespace>Celeste.Mod.GhostModForTas</RootNamespace>
     <TargetFramework>net452</TargetFramework>
     <LangVersion>11</LangVersion>
+    <Nullable>enable</Nullable>
     <AssemblyTitle>GhostModForTas</AssemblyTitle>
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3270</MSBuildWarningsAsMessages>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
@@ -31,12 +32,19 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MonoMod.RuntimeDetour" Version="21.4.29.1" />
+    <PackageReference Include="Krafs.Publicizer" Version="2.2.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MonoMod.Utils" Version="22.7.31.1" />
     <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Celeste">
-      <HintPath>lib-stripped\Celeste-nstrip.exe</HintPath>
+        <HintPath>..\..\..\legacyRef\Celeste.exe</HintPath>
+    </Reference>
+    <Reference Include="CelesteTAS-EverestInterop">
+      <HintPath>lib-stripped\CelesteTAS-EverestInterop.dll</HintPath>
     </Reference>
     <Reference Include="FNA">
       <HintPath>lib-stripped\FNA.dll</HintPath>
@@ -44,10 +52,28 @@
     <Reference Include="MMHOOK_Celeste">
       <HintPath>lib-stripped\MMHOOK_Celeste.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>lib-stripped\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>lib-stripped\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
     <Reference Include="SpeedrunTool">
       <HintPath>lib-stripped\SpeedrunTool.dll</HintPath>
     </Reference>
   </ItemGroup>
+    <PropertyGroup>
+        <PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>
+    </PropertyGroup>
+    <ItemGroup>
+        <Publicize Include="Celeste" />
+        <DoNotPublicize Include="Celeste:Monocle.Scene.OnEndOfFrame" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <PublicizerClearCacheOnClean>true</PublicizerClearCacheOnClean>
+    </PropertyGroup>
+    
   <ItemGroup>
     <Compile Remove="lib-stripped\**" />
     <EmbeddedResource Remove="lib-stripped\**" />

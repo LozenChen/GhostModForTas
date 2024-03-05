@@ -1,8 +1,10 @@
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.IO;
+using TAS.EverestInterop;
 using YamlDotNet.Serialization;
 
-namespace Celeste.Mod.GhostModForTas;
+namespace Celeste.Mod.GhostModForTas.Module;
 
 public class GhostModuleSettings : EverestModuleSettings {
     [SettingIgnore] public bool AlwaysShowSettings { get; set; } = false;
@@ -45,23 +47,37 @@ public class GhostModuleSettings : EverestModuleSettings {
     [YamlIgnore][SettingIgnore] public float BorderSizeDist => BorderSize * BorderSize * 64f;
 
     [YamlIgnore] public string ClearAllRecords => "Clear All Records";
-    // EverestModule.CreateModMenuSection(...) will automatically allocate "Create XXX Entry" to that "XXX" property. So do not delete this.
 
     public void CreateClearAllRecordsEntry(TextMenu textMenu, bool inGame) {
         textMenu.Add(new TextMenu.Button("Clear All Records").Pressed(() => {
-            if (!Directory.Exists(GhostModule.PathGhosts)) {
+            if (!Directory.Exists(PathGhosts)) {
                 Audio.Play(SFX.ui_main_button_invalid);
                 return;
             }
 
             Audio.Play(SFX.ui_main_button_select);
 
-            DirectoryInfo ghostDir = new DirectoryInfo(GhostModule.PathGhosts);
+            DirectoryInfo ghostDir = new DirectoryInfo(PathGhosts);
             foreach (FileInfo file in ghostDir.GetFiles()) {
                 file.Delete();
             }
         }));
     }
+
+
+    [SettingName("GHOST_MAIN_SWITCH_HOTKEY")]
+    [SettingSubHeader("GHOST_HOTKEY_DESCRIPTION")]
+    [DefaultButtonBinding2(0, Keys.LeftControl, Keys.E)]
+    public ButtonBinding keyMainSwitch { get; set; } = new((Buttons)0, Keys.LeftControl, Keys.E);
+
+    public bool MainEnabled = true;
+
+    public bool ShowInPauseMenu = true;
+
+    public static bool SettingsHotkeysPressed() {
+        return false;
+    }
+
 }
 
 [Flags]

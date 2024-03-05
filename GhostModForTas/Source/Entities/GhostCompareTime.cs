@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.Module;
 using Microsoft.Xna.Framework;
 using Monocle;
 using System;
@@ -16,6 +17,8 @@ internal static class GhostCompareTime {
 
     public static readonly string StringLastRoom = "last room: ";
     public static readonly string StringTotal = "total    : ";
+
+    [Load]
     public static void Load() {
         On.Celeste.Level.Render += LevelOnRender;
         On.Celeste.Level.NextLevel += LevelOnNextLevel;
@@ -23,7 +26,7 @@ internal static class GhostCompareTime {
         On.Celeste.LevelLoader.ctor += LevelLoaderOnCtor;
     }
 
-
+    [Unload]
     public static void Unload() {
         On.Celeste.Level.Render -= LevelOnRender;
         On.Celeste.Level.NextLevel -= LevelOnNextLevel;
@@ -33,7 +36,7 @@ internal static class GhostCompareTime {
 
     private static void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
         orig(self, at, dir);
-        if (GhostModule.Instance.GhostManager?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
+        if (GhostCore.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
             LastGhostTime = GhostTime;
             GhostTime = time;
             LastCurrentTime = CurrentTime;
@@ -44,7 +47,7 @@ internal static class GhostCompareTime {
     private static void LevelOnRegisterAreaComplete(On.Celeste.Level.orig_RegisterAreaComplete orig, Level self) {
         orig(self);
 
-        if (GhostModule.Instance.GhostManager?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
+        if (GhostCore.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
             LastGhostTime = GhostTime;
             GhostTime = time;
             LastCurrentTime = CurrentTime;

@@ -2,14 +2,19 @@
   "version": 1,
   "dependencies": {
     ".NETFramework,Version=v4.5.2": {
-      "MonoMod.RuntimeDetour": {
+      "Krafs.Publicizer": {
         "type": "Direct",
-        "requested": "[21.4.29.1, )",
-        "resolved": "21.4.29.1",
-        "contentHash": "sqn/g1WKJRRuokOyjw6JFxWfK9p+lDoEDCVoPpJohGtFGtVeL3GK5nUdA1SWAbdrKR6LYI09KIOnv28D9UuGnw==",
+        "requested": "[2.2.1, )",
+        "resolved": "2.2.1",
+        "contentHash": "QGI4nMGQbKsuFUUboixVHu4mv3lHB5RejIa7toIlzTmwLkuCYYEpUBJjmy3OpXYyj5dVSZAXVbr4oeMSloE67Q=="
+      },
+      "MonoMod.Utils": {
+        "type": "Direct",
+        "requested": "[22.7.31.1, )",
+        "resolved": "22.7.31.1",
+        "contentHash": "nI0E1oadXS1iMbfwfCzYF08C1jRQR9cnnHv66a4BSPd4sGu2p6g4BmctCWsdAB6oGKkSJUhcfHfxcfTsDyB94Q==",
         "dependencies": {
-          "Mono.Cecil": "0.11.3",
-          "MonoMod.Utils": "21.4.29.1"
+          "Mono.Cecil": "0.11.4"
         }
       },
       "YamlDotNet": {
@@ -20,16 +25,8 @@
       },
       "Mono.Cecil": {
         "type": "Transitive",
-        "resolved": "0.11.3",
-        "contentHash": "DNYE+io5XfEE8+E+5padThTPHJARJHbz1mhbhMPNrrWGKVKKqj/KEeLvbawAmbIcT73NuxLV7itHZaYCZcVWGg=="
-      },
-      "MonoMod.Utils": {
-        "type": "Transitive",
-        "resolved": "21.4.29.1",
-        "contentHash": "4ZSnPtXZ5q4Fdd7dRVBgeg26OXlB+bTLdDqI7R6Tu5Iw28+ipAwujXbd2dVU13PbSj+qhkrq2MKZoJM2Er07WQ==",
-        "dependencies": {
-          "Mono.Cecil": "0.11.3"
-        }
+        "resolved": "0.11.4",
+        "contentHash": "IC1h5g0NeJGHIUgzM1P82ld57knhP0IcQfrYITDPXlNpMYGUrsG5TxuaWTjaeqDNQMBDNZkB8L0rBnwsY6JHuQ=="
       }
     }
   }
