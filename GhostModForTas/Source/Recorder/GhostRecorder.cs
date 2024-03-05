@@ -25,11 +25,9 @@ public class GhostRecorder : Entity {
     }
 
     public void RecordData() {
-        if (Player == null) {
+        if (Player == null || (Engine.Scene as Level)?.Session is not { } session) {
             return;
         }
-
-        Session session = (Engine.Scene as Level).Session;
 
         // A data frame is always a new frame, no matter if the previous one lacks data or not.
         LastFrameData = new GhostFrame {

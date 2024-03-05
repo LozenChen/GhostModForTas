@@ -10,7 +10,7 @@ using Hotkey = TAS.EverestInterop.Hotkeys.Hotkey;
 
 namespace Celeste.Mod.GhostModForTas.Module;
 
-public static class TH_Hotkeys {
+public static class GhostHotkey {
 
     public static Hotkey MainSwitchHotkey { get; set; }
 
@@ -38,7 +38,7 @@ public static class TH_Hotkeys {
 
     private static void HotkeysPressed(On.Celeste.Level.orig_Render orig, Level self) {
         orig(self);
-        if (GhostModuleSettings.SettingsHotkeysPressed()) {
+        if (ghostSettings.SettingsHotkeysPressed()) {
             GhostModule.Instance.SaveSettings();
         }
     }

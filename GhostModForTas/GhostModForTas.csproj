@@ -61,6 +61,9 @@
     <Reference Include="SpeedrunTool">
       <HintPath>lib-stripped\SpeedrunTool.dll</HintPath>
     </Reference>
+    <Reference Include="TASHelper">
+      <HintPath>lib-stripped\TASHelper.dll</HintPath>
+    </Reference>
   </ItemGroup>
     <PropertyGroup>
         <PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>

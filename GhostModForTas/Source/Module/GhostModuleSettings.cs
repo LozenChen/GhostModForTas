@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.IO;
 using TAS.EverestInterop;
+using Monocle;
 using YamlDotNet.Serialization;
 
 namespace Celeste.Mod.GhostModForTas.Module;
@@ -67,15 +68,43 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     [SettingName("GHOST_MAIN_SWITCH_HOTKEY")]
     [SettingSubHeader("GHOST_HOTKEY_DESCRIPTION")]
-    [DefaultButtonBinding2(0, Keys.LeftControl, Keys.E)]
-    public ButtonBinding keyMainSwitch { get; set; } = new((Buttons)0, Keys.LeftControl, Keys.E);
+    [DefaultButtonBinding2(0, Keys.LeftControl, Keys.H)]
+    public ButtonBinding keyMainSwitch { get; set; } = new((Buttons)0, Keys.LeftControl, Keys.H);
 
     public bool MainEnabled = true;
 
     public bool ShowInPauseMenu = true;
 
-    public static bool SettingsHotkeysPressed() {
-        return false;
+    public bool SettingsHotkeysPressed() {
+        if (Engine.Scene is not Level) {
+            return false;
+        }
+
+        GhostHotkey.Update(true, true);
+#pragma warning disable CS8524
+        bool changed = false; // if settings need to be saved
+
+        if (GhostHotkey.MainSwitchHotkey.Pressed) {
+            changed = true;
+            Mode = Mode switch {
+                GhostModuleMode.Off => GhostModuleMode.Record,
+                GhostModuleMode.Record => GhostModuleMode.Play,
+                GhostModuleMode.Play => GhostModuleMode.Both,
+                GhostModuleMode.Both => GhostModuleMode.Off
+            };
+            Refresh("GhostMod Mode = " + Mode switch {
+                GhostModuleMode.Off => "Off",
+                GhostModuleMode.Record => "Record",
+                GhostModuleMode.Play => "Play",
+                GhostModuleMode.Both => "Both"
+            });
+        }
+#pragma warning restore CS8524
+        return changed;
+
+        static void Refresh(string text) {
+            TASHelper.Entities.HotkeyWatcher.Refresh(text);
+        }
     }
 
 }

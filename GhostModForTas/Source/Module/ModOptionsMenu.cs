@@ -45,12 +45,12 @@ internal static class ModOptionsMenu {
             Add(new EaseInSubHeader("Sub Header".ToDialogText()) { HeightExtra = 30f });
 
 
-
+            /*
 
             Add(new TextMenu.Button(Dialog.Clean("options_keyconfig")).Pressed(() => {
                 menu.Focused = false;
                 KeyboardConfigUI keyboardConfig = new ModuleSettingsKeyboardConfigUIExt(everestModule) {
-                    OnClose = () => { menu.Focused = true; TH_Hotkeys.HotkeyInitialize(); }
+                    OnClose = () => { menu.Focused = true; GhostHotkey.HotkeyInitialize(); }
                 };
 
                 Engine.Scene.Add(keyboardConfig);
@@ -59,14 +59,14 @@ internal static class ModOptionsMenu {
             Add(new TextMenu.Button(Dialog.Clean("options_btnconfig")).Pressed(() => {
                 menu.Focused = false;
                 ButtonConfigUI buttonConfig = new ModuleSettingsButtonConfigUI(everestModule) {
-                    OnClose = () => { menu.Focused = true; TH_Hotkeys.HotkeyInitialize(); }
+                    OnClose = () => { menu.Focused = true; GhostHotkey.HotkeyInitialize(); }
                 };
 
                 Engine.Scene.Add(buttonConfig);
                 Engine.Scene.OnEndOfFrame += () => Engine.Scene.Entities.UpdateLists();
             }));
 
-
+            */
 
 
             int index = menu.IndexOf(indexer);
