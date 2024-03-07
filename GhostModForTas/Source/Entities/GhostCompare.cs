@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Celeste.Mod.GhostModForTas.Entities;
 
-internal static class GhostCompareTime {
+internal static class GhostCompare {
     public static long GhostTime;
     public static long LastGhostTime;
     public static long CurrentTime;
@@ -36,7 +36,7 @@ internal static class GhostCompareTime {
 
     private static void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
         orig(self, at, dir);
-        if (GhostCore.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
+        if (GhostReplayerLogic.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
             LastGhostTime = GhostTime;
             GhostTime = time;
             LastCurrentTime = CurrentTime;
@@ -47,7 +47,7 @@ internal static class GhostCompareTime {
     private static void LevelOnRegisterAreaComplete(On.Celeste.Level.orig_RegisterAreaComplete orig, Level self) {
         orig(self);
 
-        if (GhostCore.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
+        if (GhostReplayerLogic.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
             LastGhostTime = GhostTime;
             GhostTime = time;
             LastCurrentTime = CurrentTime;
@@ -58,6 +58,9 @@ internal static class GhostCompareTime {
     private static void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
         orig(self);
 
+        if (GhostTime == 0) {
+            return;
+        }
         if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play && GhostModule.ModuleSettings.ShowCompareTime) {
             int viewWidth = Engine.ViewWidth;
 
@@ -66,10 +69,6 @@ internal static class GhostCompareTime {
             float padding = 2 * pixelScale;
             float fontSize = 0.3f * pixelScale;
             float alpha = 1f;
-
-            if (GhostTime == 0) {
-                return;
-            }
 
             long diffRoomTime = CurrentTime - GhostTime - LastCurrentTime + LastGhostTime;
             long diffTotalTime = CurrentTime - GhostTime;

@@ -2,7 +2,7 @@ using Monocle;
 using System;
 using System.IO;
 
-namespace Celeste.Mod.GhostModForTas.Recorder;
+namespace Celeste.Mod.GhostModForTas.Recorder.Data;
 public struct GhostFrame {
     public const string End = "\r\n";
 
@@ -11,6 +11,14 @@ public struct GhostFrame {
     public void Read(BinaryReader reader) {
         string chunk;
         // The last "chunk" type, \r\n (Windows linebreak), doesn't contain a length.
+        Data.HasPlayer = reader.ReadBoolean();
+        if (!Data.HasPlayer) {
+            while (reader.ReadNullTerminatedString() != End) {
+                // do nothing
+            }
+            return;
+        }
+
         while ((chunk = reader.ReadNullTerminatedString()) != End) {
             uint length = reader.ReadUInt32();
             switch (chunk) {
@@ -33,7 +41,9 @@ public struct GhostFrame {
     }
 
     public void Write(BinaryWriter writer) {
-        if (Data.IsValid) {
+        writer.Write(Data.HasPlayer);
+
+        if (Data.HasPlayer) {
             WriteChunk(writer, Data.Write, GhostChunkData.Chunk);
         }
 

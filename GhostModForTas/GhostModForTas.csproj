@@ -70,6 +70,8 @@
     </PropertyGroup>
     <ItemGroup>
         <Publicize Include="Celeste" />
+        <Publicize Include="CelesteTAS-EverestInterop:TAS.Utils.AttributeUtils.MethodInfos" />
+        <Publicize Include="CelesteTAS-EverestInterop:TAS.Input.Commands.TasCommandAttribute.MethodInfos" />
         <DoNotPublicize Include="Celeste:Monocle.Scene.OnEndOfFrame" />
     </ItemGroup>
 

@@ -8,7 +8,7 @@ namespace Celeste.Mod.GhostModForTas;
 
 internal static class GlobalVariables {
 
-    public static string PathGhosts => Module.GhostCore.PathGhosts;
+    public static string PathGhosts => Recorder.GhostRecorder.PathGhosts;
 
     public static GhostModuleSettings ghostSettings => GhostModule.ModuleSettings;
     public static Player? playerInstance => Engine.Scene.Tracker.GetEntity<Player>();

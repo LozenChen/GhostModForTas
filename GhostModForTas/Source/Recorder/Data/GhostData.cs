@@ -7,56 +7,40 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Celeste.Mod.GhostModForTas.Recorder;
+namespace Celeste.Mod.GhostModForTas.Recorder.Data;
 
 public class GhostData {
     public readonly static string Magic = "everest-ghost\r\n";
     public readonly static char[] MagicChars = Magic.ToCharArray();
 
     public readonly static int Version = 1;
+    public readonly static string OshiroPostfix = ".oshiro";
 
     public readonly static Regex PathVerifyRegex =
         new Regex("[\"`?* #" + Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars())) + "]",
             RegexOptions.Compiled);
 
     public static string GetGhostFilePrefix(Session session)
-        => GetGhostFilePrefix(session.Area.GetSID(), session.Area.Mode, session.Level, session.RespawnPoint ?? default);
+        => GetGhostFilePrefix(session.Area.GetSID(), session.Area.Mode, session.Level);
 
-    public static string GetGhostFilePrefix(string sid, AreaMode mode, string level, Vector2 respawnPoint)
-        => PathVerifyRegex.Replace($"{sid}-{(char)('A' + (int)mode)}-{level}-{respawnPoint}-", "-");
+    public static string GetGhostFilePrefix(string sid, AreaMode mode, string level)
+        => PathVerifyRegex.Replace($"{sid}-{(char)('A' + (int)mode)}-{level}", "-");
 
     public static string GetGhostFilePath(Session session, string name, DateTime date)
-        => GetGhostFilePath(session.Area.GetSID(), session.Area.Mode, session.Level, session.RespawnPoint ?? default, name, date);
+        => GetGhostFilePath(session.Area.GetSID(), session.Area.Mode, session.Level, name, date);
 
-    public static string GetGhostFilePath(string sid, AreaMode mode, string level, Vector2 respawnPoint, string name, DateTime date)
+    public static string GetGhostFilePath(string sid, AreaMode mode, string level, string name, DateTime date)
         => Path.Combine(
             PathGhosts,
-            GetGhostFilePrefix(sid, mode, level, respawnPoint) +
-            PathVerifyRegex.Replace($"{name}-{date.ToString("yyyy-MM-dd-HH-mm-ss-fff", CultureInfo.InvariantCulture)}", "-") + ".oshiro"
+            GetGhostFilePrefix(sid, mode, level) +
+            PathVerifyRegex.Replace($"{name}-{date.ToString("yyyy-MM-dd-HH-mm-ss-fff", CultureInfo.InvariantCulture)}", "-") + OshiroPostfix
         );
 
     public static string[] GetAllGhostFilePaths(Session session)
         => Directory.GetFiles(
             PathGhosts,
-            GetGhostFilePrefix(session) + "*.oshiro"
+            GetGhostFilePrefix(session) + "*" + OshiroPostfix
         );
-
-    public static List<GhostData> ReadAllGhosts(Session session, List<GhostData> list = null) {
-        if (list == null) {
-            list = new List<GhostData>();
-        }
-
-        foreach (string filePath in GetAllGhostFilePaths(session)) {
-            GhostData ghost = new GhostData(filePath).Read();
-            if (ghost == null) {
-                continue;
-            }
-
-            list.Add(ghost);
-        }
-
-        return list;
-    }
 
     public static void ForAllGhosts(Session session, Func<int, GhostData, bool> cb) {
         if (cb == null) {
@@ -80,13 +64,10 @@ public class GhostData {
     public AreaMode Mode;
     public string From;
     public string Level;
-    public Vector2 RespawnPoint;
     public string Target;
 
     public string Name;
     public DateTime Date;
-
-    public bool Dead;
 
     public float? Opacity;
 
@@ -100,7 +81,7 @@ public class GhostData {
                 return _FilePath;
             }
 
-            return GetGhostFilePath(SID, Mode, Level, RespawnPoint, Name, Date);
+            return GetGhostFilePath(SID, Mode, Level, Name, Date);
         }
         set { _FilePath = value; }
     }
@@ -110,7 +91,7 @@ public class GhostData {
     public GhostFrame this[int i] {
         get {
             if (i < 0 || i >= Frames.Count) {
-                return default(GhostFrame);
+                return default;
             }
 
             return Frames[i];
@@ -128,7 +109,6 @@ public class GhostData {
             SID = session.Area.GetSID();
             Mode = session.Area.Mode;
             Level = session.Level;
-            RespawnPoint = session.RespawnPoint ?? default;
         }
     }
 
@@ -160,6 +140,7 @@ public class GhostData {
     public GhostData Read(BinaryReader reader) {
         if (reader.ReadInt16() != 0x0ade) {
             return null; // Endianness mismatch.
+            // Shout out to 0x0ade!
         }
 
         char[] magic = reader.ReadChars(MagicChars.Length);
@@ -188,7 +169,6 @@ public class GhostData {
         SID = reader.ReadNullTerminatedString();
         Mode = (AreaMode)reader.ReadInt32();
         Level = reader.ReadNullTerminatedString();
-        RespawnPoint = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         Target = reader.ReadNullTerminatedString();
 
         Name = reader.ReadNullTerminatedString();
@@ -199,10 +179,6 @@ public class GhostData {
             // The date was invalid. Let's ignore it.
             Date = DateTime.UtcNow;
         }
-
-        Dead = reader.ReadBoolean();
-
-        Opacity = reader.ReadBoolean() ? (float?)reader.ReadSingle() : null;
 
         if (version >= 1) {
             Run = new Guid(reader.ReadBytes(16));
@@ -253,24 +229,13 @@ public class GhostData {
         writer.WriteNullTerminatedString(SID);
         writer.Write((int)Mode);
         writer.WriteNullTerminatedString(Level);
-        writer.Write((float)RespawnPoint.X);
-        writer.Write((float)RespawnPoint.Y);
         writer.WriteNullTerminatedString(Target);
 
         writer.WriteNullTerminatedString(Name);
         writer.Write(Date.ToBinary());
 
-        writer.Write(Dead);
-
-        if (Opacity != null) {
-            writer.Write(true);
-            writer.Write(Opacity.Value);
-        } else {
-            writer.Write(false);
-        }
-
         writer.Write(Run.ToByteArray());
-
+        Logger.Log("Ghost", $"Write: Level = [{Level}], Run = {Run}");
         writer.Write(Frames.Count);
         writer.Write('\r');
         writer.Write('\n');

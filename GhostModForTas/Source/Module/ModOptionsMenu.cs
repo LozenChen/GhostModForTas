@@ -15,6 +15,10 @@ internal static class ModOptionsMenu {
 
     private static TextMenu.Item indexer;
     public static void CreateMenu(EverestModule everestModule, TextMenu menu, bool inGame, bool inPauseMenu = false) {
+        everestModule.CreateModMenuSection(menu, inGame, null);
+
+        return;
+
         TextMenu.Item mainItem = new OnOff("Enabled".ToDialogText(), ghostSettings.MainEnabled).Change(value => { ghostSettings.MainEnabled = value; UpdateEnableItems(value, true, everestModule, menu, inGame); });
         TextMenu.Item showInPauseMenu = new OnOff("Show In Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => {
             ghostSettings.ShowInPauseMenu = value;
@@ -139,7 +143,7 @@ internal static class HookPauseMenu {
     private static void CreateMenuInPause(this Level level, int returnIndex) {
         level.Paused = true;
         TextMenu menu = new TextMenu();
-        menu.Add(new HeaderExt("CU Variant Title".ToDialogText(), Color.Silver, Color.Black));
+        menu.Add(new HeaderExt("Ghost Title".ToDialogText(), Color.Silver, Color.Black));
         ModOptionsMenu.CreateMenu(GhostModule.Instance, menu, true, true);
 
         menu.OnESC = menu.OnCancel = () => {
@@ -167,7 +171,7 @@ internal static class HookPauseMenu {
 
 
 public static class DialogExtension {
-    internal static string ToDialogText(this string input) => Dialog.Clean("CEILING_ULTRA_" + input.ToUpper().Replace(" ", "_"));
+    internal static string ToDialogText(this string input) => Dialog.Clean("GHOST_MOD_FOR_TAS_" + input.ToUpper().Replace(" ", "_"));
 }
 
 public interface IEaseInItem {

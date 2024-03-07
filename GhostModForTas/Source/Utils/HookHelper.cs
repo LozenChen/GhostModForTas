@@ -1,9 +1,13 @@
+using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
+using Monocle;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using _Celeste = Celeste;
 
 namespace Celeste.Mod.GhostModForTas.Utils;
 internal static class HookHelper {
@@ -176,3 +180,116 @@ public static class CILCodeHelper {
     public static bool AsShift = true;
 }
 
+
+internal static class GhostMod_HookLoadLevel {
+
+    public delegate void LoadLevelHandler(_Celeste.Level level, Player.IntroTypes playerIntro, bool isFromLoader = false);
+
+    public static event LoadLevelHandler LoadLevel;
+
+    public static event LoadLevelHandler LoadLevel_Before;
+
+    private delegate void LoadLevelHandler_Parameter0();
+
+    private static event LoadLevelHandler_Parameter0 LoadLevel_Parameter0;
+
+    private static event LoadLevelHandler_Parameter0 LoadLevel_Before_Parameter0;
+
+    private delegate void LoadLevelHandler_Parameter1(_Celeste.Level level);
+
+    private static event LoadLevelHandler_Parameter1 LoadLevel_Parameter1;
+
+    private static event LoadLevelHandler_Parameter1 LoadLevel_Before_Parameter1;
+
+    private delegate void LoadLevelHandler_Parameter2(_Celeste.Level level, Player.IntroTypes playerIntro);
+
+    private static event LoadLevelHandler_Parameter2 LoadLevel_Parameter2;
+
+    private static event LoadLevelHandler_Parameter2 LoadLevel_Before_Parameter2;
+
+    [Initialize]
+    private static void Initialize() {
+        foreach (MethodInfo method in typeof(AttributeUtils).Assembly.GetTypesSafe().SelectMany(type => type
+        .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))) {
+            if (method.GetCustomAttribute<LoadLevelAttribute>() is not LoadLevelAttribute attr) {
+                continue;
+            }
+            if (attr.Before) {
+                switch (method.GetParameters().Length) {
+                    case 0: {
+                            LoadLevel_Before_Parameter0 += (LoadLevelHandler_Parameter0)method.CreateDelegate(typeof(LoadLevelHandler_Parameter0));
+                            break;
+                        }
+                    case 1: {
+                            LoadLevel_Before_Parameter1 += (LoadLevelHandler_Parameter1)method.CreateDelegate(typeof(LoadLevelHandler_Parameter1));
+                            break;
+                        }
+                    case 2: {
+                            LoadLevel_Before_Parameter2 += (LoadLevelHandler_Parameter2)method.CreateDelegate(typeof(LoadLevelHandler_Parameter2));
+                            break;
+                        }
+                    case 3: {
+                            LoadLevel_Before += (LoadLevelHandler)method.CreateDelegate(typeof(LoadLevelHandler));
+                            break;
+                        }
+                    default: {
+                            throw new Exception();
+                        }
+                }
+            } else {
+                switch (method.GetParameters().Length) {
+                    case 0: {
+                            LoadLevel_Parameter0 += (LoadLevelHandler_Parameter0)method.CreateDelegate(typeof(LoadLevelHandler_Parameter0));
+                            break;
+                        }
+                    case 1: {
+                            LoadLevel_Parameter1 += (LoadLevelHandler_Parameter1)method.CreateDelegate(typeof(LoadLevelHandler_Parameter1));
+                            break;
+                        }
+                    case 2: {
+                            LoadLevel_Parameter2 += (LoadLevelHandler_Parameter2)method.CreateDelegate(typeof(LoadLevelHandler_Parameter2));
+                            break;
+                        }
+                    case 3: {
+                            LoadLevel += (LoadLevelHandler)method.CreateDelegate(typeof(LoadLevelHandler));
+                            break;
+                        }
+                    default: {
+                            throw new Exception();
+                        }
+                }
+            }
+        }
+        if (LoadLevel_Parameter0 is not null) {
+            LoadLevel += (_, _, _) => LoadLevel_Parameter0.Invoke();
+        }
+        if (LoadLevel_Parameter1 is not null) {
+            LoadLevel += (level, _, _) => LoadLevel_Parameter1.Invoke(level);
+        }
+        if (LoadLevel_Parameter2 is not null) {
+            LoadLevel += (level, playerIntro, _) => LoadLevel_Parameter2.Invoke(level, playerIntro);
+        }
+        if (LoadLevel_Before_Parameter0 is not null) {
+            LoadLevel_Before += (_, _, _) => LoadLevel_Before_Parameter0.Invoke();
+        }
+        if (LoadLevel_Before_Parameter1 is not null) {
+            LoadLevel_Before += (level, _, _) => LoadLevel_Before_Parameter1.Invoke(level);
+        }
+        if (LoadLevel_Before_Parameter2 is not null) {
+            LoadLevel_Before += (level, playerIntro, _) => LoadLevel_Before_Parameter2.Invoke(level, playerIntro);
+        }
+
+        On.Celeste.Level.LoadLevel += OnLoadLevel;
+    }
+
+    [Unload]
+    private static void Unload() {
+        On.Celeste.Level.LoadLevel -= OnLoadLevel;
+    }
+
+    private static void OnLoadLevel(On.Celeste.Level.orig_LoadLevel orig, _Celeste.Level level, Player.IntroTypes playerIntro, bool isFromLoader = false) {
+        LoadLevel_Before?.Invoke(level, playerIntro, isFromLoader);
+        orig(level, playerIntro, isFromLoader);
+        LoadLevel?.Invoke(level, playerIntro, isFromLoader);
+    }
+}

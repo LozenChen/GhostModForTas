@@ -1,5 +1,5 @@
 using Celeste.Mod.GhostModForTas.Module;
-using Celeste.Mod.GhostModForTas.Recorder;
+using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Microsoft.Xna.Framework;
 using Monocle;
 
@@ -7,54 +7,30 @@ namespace Celeste.Mod.GhostModForTas.Entities;
 
 public class Ghost : Actor {
     public GhostReplayer Manager;
-
-    public Player Player;
-
     public PlayerSprite Sprite;
     public PlayerHair Hair;
     public int MachineState;
 
     public GhostData Data;
     public int FrameIndex = 0;
-    public GhostFrame? ForcedFrame;
-    public GhostFrame PrevFrame => ForcedFrame ?? (Data == null ? default(GhostFrame) : Data[FrameIndex - 1]);
-    public GhostFrame Frame => ForcedFrame ?? (Data == null ? default(GhostFrame) : Data[FrameIndex]);
-    public bool AutoForward = true;
+    public GhostFrame PrevFrame => Data == null ? default(GhostFrame) : Data[FrameIndex - 1];
+    public GhostFrame Frame => Data == null ? default(GhostFrame) : Data[FrameIndex];
 
     public Color Color = Color.White;
 
-    protected float alpha;
-    protected float alphaHair;
 
-    public Ghost(Player player)
-        : this(player, null) { }
-
-    public Ghost(Player player, GhostData data)
-        : base(player.Position) {
-        Player = player;
+    public Ghost(GhostData data)
+        : base(Vector2.Zero) {
         Data = data;
 
         Depth = 1;
         // Tag = Tags.PauseUpdate;
-
-        PlayerSpriteMode playerSpriteMode = player.Sprite.Mode;
-        if (GhostModule.ModuleSettings.ReversedPlayerSpriteMode) {
-            if (playerSpriteMode == PlayerSpriteMode.MadelineAsBadeline) {
-                if (player.Inventory.Backpack) {
-                    playerSpriteMode = PlayerSpriteMode.MadelineNoBackpack;
-                } else {
-                    playerSpriteMode = PlayerSpriteMode.Madeline;
-                }
-            } else {
-                playerSpriteMode = PlayerSpriteMode.MadelineAsBadeline;
-            }
-        }
-        Sprite = new PlayerSprite(playerSpriteMode);
-        Sprite.HairCount = player.Sprite.HairCount;
+        Sprite = new PlayerSprite(PlayerSpriteMode.MadelineAsBadeline);
         Add(Hair = new PlayerHair(Sprite));
-        Add(Sprite);
+        Add(Sprite); // add it later so it renders above hair
+        Hair.Color = Player.NormalBadelineHairColor;
 
-        Hair.Color = Player.NormalHairColor;
+        // Hair.AfterUpdate is not called when Ghost.Active is false, so we can't set it to false
     }
 
     public override void Added(Scene scene) {
@@ -69,31 +45,39 @@ public class Ghost : Actor {
         base.Removed(scene);
     }
 
+    public void UpdateByReplayer() {
+        Visible = (GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play;
+        Visible &= Frame.Data.HasPlayer;
+
+        if (Data != null) {
+            do {
+                FrameIndex++;
+            } while (
+                !PrevFrame.Data.HasPlayer && FrameIndex < Data.Frames.Count // Skip any frames not containing the data chunk.
+            );
+        }
+
+        UpdateSprite();
+        UpdateHair();
+
+        base.Update();
+    }
+    public override void Update() {
+        // do nothing
+    }
+
+
     public void UpdateHair() {
-        if (!Frame.Data.IsValid) {
+        if (!Frame.Data.HasPlayer) {
             return;
         }
 
-        Hair.Color = new Color(
-            (Frame.Data.HairColor.R * Color.R) / 255,
-            (Frame.Data.HairColor.G * Color.G) / 255,
-            (Frame.Data.HairColor.B * Color.B) / 255,
-            (Frame.Data.HairColor.A * Color.A) / 255
-        );
-        if (GhostModule.ModuleSettings.ReversedPlayerSpriteMode) {
-            if (Hair.Color == Player.NormalHairColor) {
-                Hair.Color = Player.NormalBadelineHairColor;
-            } else if (Hair.Color == Player.NormalBadelineHairColor) {
-                Hair.Color = Player.NormalHairColor;
-            }
-        }
-        Hair.Alpha = alphaHair;
         Hair.Facing = Frame.Data.Facing;
         Hair.SimulateMotion = Frame.Data.HairSimulateMotion;
     }
 
     public void UpdateSprite() {
-        if (!Frame.Data.IsValid) {
+        if (!Frame.Data.HasPlayer) {
             return;
         }
 
@@ -106,7 +90,7 @@ public class Ghost : Actor {
             (Frame.Data.Color.G * Color.G) / 255,
             (Frame.Data.Color.B * Color.B) / 255,
             (Frame.Data.Color.A * Color.A) / 255
-        ) * alpha;
+        );
 
         Sprite.Rate = Frame.Data.SpriteRate;
         Sprite.Justify = Frame.Data.SpriteJustify;
@@ -122,48 +106,5 @@ public class Ghost : Actor {
             // Play likes to fail randomly as the ID doesn't exist in an underlying dict.
             // Let's ignore this for now.
         }
-    }
-
-    public override void Update() {
-        Visible = ForcedFrame != null || ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play);
-        Visible &= Frame.Data.IsValid;
-        if (ForcedFrame == null && Data != null && Data.Dead) {
-            Visible &= GhostModule.ModuleSettings.ShowDeaths;
-        }
-
-        if (ForcedFrame == null && Data != null && AutoForward) {
-            do {
-                FrameIndex++;
-            } while (
-                !PrevFrame.Data.IsValid && FrameIndex < Data.Frames.Count // Skip any frames not containing the data chunk.
-            );
-        }
-
-        if (Data != null && Data.Opacity != null) {
-            alpha = Data.Opacity.Value;
-            alphaHair = Data.Opacity.Value;
-        } else {
-            float dist = (Player.Position - Position).LengthSquared();
-            dist -= GhostModule.ModuleSettings.InnerRadiusDist;
-            if (dist < 0f) {
-                dist = 0f;
-            }
-
-            if (GhostModule.ModuleSettings.BorderSize == 0) {
-                dist = dist < GhostModule.ModuleSettings.InnerRadiusDist ? 0f : 1f;
-            } else {
-                dist /= GhostModule.ModuleSettings.BorderSizeDist;
-            }
-
-            alpha = Calc.LerpClamp(GhostModule.ModuleSettings.InnerOpacityFactor, GhostModule.ModuleSettings.OuterOpacityFactor, dist);
-            alphaHair = Calc.LerpClamp(GhostModule.ModuleSettings.InnerHairOpacityFactor, GhostModule.ModuleSettings.OuterHairOpacityFactor, dist);
-        }
-
-        UpdateSprite();
-        UpdateHair();
-
-        Visible &= alpha > 0f;
-
-        base.Update();
     }
 }

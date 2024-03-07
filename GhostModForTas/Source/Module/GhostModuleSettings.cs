@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework.Input;
+using Monocle;
 using System;
 using System.IO;
 using TAS.EverestInterop;
-using Monocle;
 using YamlDotNet.Serialization;
 
 namespace Celeste.Mod.GhostModForTas.Module;
@@ -16,7 +16,6 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool ShowNames { get; set; } = true;
 
-    public bool ShowDeaths { get; set; } = true;
 
     [SettingIgnore]
 
@@ -26,8 +25,6 @@ public class GhostModuleSettings : EverestModuleSettings {
     public bool CompareTotalTime { get; set; } = true;
 
     public bool HighlightFastestGhost { get; set; } = true;
-
-    public bool ReversedPlayerSpriteMode { get; set; } = true;
 
     [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 10;
     [YamlIgnore][SettingIgnore] public float InnerOpacityFactor => InnerOpacity / 10f;
@@ -59,7 +56,7 @@ public class GhostModuleSettings : EverestModuleSettings {
             Audio.Play(SFX.ui_main_button_select);
 
             DirectoryInfo ghostDir = new DirectoryInfo(PathGhosts);
-            foreach (FileInfo file in ghostDir.GetFiles()) {
+            foreach (FileInfo file in ghostDir.GetFiles("*" + Recorder.Data.GhostData.OshiroPostfix)) {
                 file.Delete();
             }
         }));

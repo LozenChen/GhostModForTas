@@ -1,5 +1,5 @@
 using Celeste.Mod.GhostModForTas.Entities;
-using Celeste.Mod.GhostModForTas.Module;
+using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.SpeedrunTool.SaveLoad;
 using System;
 using System.Linq;
@@ -32,17 +32,17 @@ internal static class SaveStateUtils {
 
     private static void AddSaveLoadAction() {
         action = SaveLoadAction.SafeAdd((_, _) => {
-            run = GhostCore.Run;
-            ghostTime = GhostCompareTime.GhostTime;
-            lastGhostTime = GhostCompareTime.LastGhostTime;
-            currentTime = GhostCompareTime.CurrentTime;
-            lastCurrentTime = GhostCompareTime.LastCurrentTime;
+            run = GhostRecorder.Run;
+            ghostTime = GhostCompare.GhostTime;
+            lastGhostTime = GhostCompare.LastGhostTime;
+            currentTime = GhostCompare.CurrentTime;
+            lastCurrentTime = GhostCompare.LastCurrentTime;
         }, (_, _) => {
-            GhostCore.Run = run;
-            GhostCompareTime.GhostTime = ghostTime;
-            GhostCompareTime.LastGhostTime = lastGhostTime;
-            GhostCompareTime.CurrentTime = currentTime;
-            GhostCompareTime.LastCurrentTime = lastCurrentTime;
+            GhostRecorder.Run = run;
+            GhostCompare.GhostTime = ghostTime;
+            GhostCompare.LastGhostTime = lastGhostTime;
+            GhostCompare.CurrentTime = currentTime;
+            GhostCompare.LastCurrentTime = lastCurrentTime;
         });
     }
 

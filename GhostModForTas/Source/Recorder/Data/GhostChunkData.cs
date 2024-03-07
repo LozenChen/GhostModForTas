@@ -2,19 +2,18 @@ using Microsoft.Xna.Framework;
 using Monocle;
 using System.IO;
 
-namespace Celeste.Mod.GhostModForTas.Recorder;
+namespace Celeste.Mod.GhostModForTas.Recorder.Data;
 
 public struct GhostChunkData {
     public const string ChunkV1 = "data";
     public const string ChunkV2 = "data2";
     public const string ChunkV3 = "data3";
     public const string Chunk = ChunkV3;
-    public bool IsValid;
+    public bool HasPlayer;
 
     // V1
 
     public bool InControl;
-
     public Vector2 Position;
     public Vector2 Speed;
     public float Rotation;
@@ -43,8 +42,6 @@ public struct GhostChunkData {
     public long Time;
 
     public void Read(BinaryReader reader, int version) {
-        IsValid = true;
-
         InControl = reader.ReadBoolean();
 
         Position = new Vector2(reader.ReadSingle(), reader.ReadSingle());
@@ -54,7 +51,7 @@ public struct GhostChunkData {
         Color = new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
 
         SpriteRate = reader.ReadSingle();
-        SpriteJustify = reader.ReadBoolean() ? (Vector2?)new Vector2(reader.ReadSingle(), reader.ReadSingle()) : null;
+        SpriteJustify = reader.ReadBoolean() ? new Vector2(reader.ReadSingle(), reader.ReadSingle()) : null;
 
         Facing = (Facings)reader.ReadInt32();
 
@@ -68,7 +65,7 @@ public struct GhostChunkData {
             return;
         }
 
-        DashColor = reader.ReadBoolean() ? (Color?)new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()) : null;
+        DashColor = reader.ReadBoolean() ? new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()) : null;
         DashDir = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         DashWasB = reader.ReadBoolean();
 
