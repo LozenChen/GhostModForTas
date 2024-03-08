@@ -8,6 +8,7 @@ using MonoMod.Cil;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TAS.Input.Commands;
 
 namespace Celeste.Mod.GhostModForTas.Recorder;
@@ -51,6 +52,16 @@ internal static class GhostRecorder {
 
         Step(level);
     }
+
+    [FreezeUpdate]
+
+    public static void UpdateInFreezeFrame() {
+        IsFreezeFrame = true;
+        Recorder?.Update();
+        IsFreezeFrame = false;
+    }
+
+    internal static bool IsFreezeFrame = false;
 
     private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
         Run = Guid.NewGuid();
@@ -123,7 +134,7 @@ public class GhostRecorderEntity : Entity {
 
     public GhostRecorderEntity(Session session)
         : base() {
-        Depth = 1000000;
+        Depth = -10000000;
         Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Persistent;
         RevisitCount = new();
         Data = new GhostData(session);
@@ -137,6 +148,7 @@ public class GhostRecorderEntity : Entity {
         }
         Data.LevelVisitCount = RevisitCount[Data.Level];
         Data.TargetVisitCount = RevisitCount.TryGetValue(Data.Target, out int targetCount) ? targetCount + 1 : 1;
+        Data.SessionTime = Data.Frames.LastOrDefault().ChunkData.Time;
         Data.Write();
     }
 
@@ -161,7 +173,7 @@ public class GhostRecorderEntity : Entity {
         LastFrameData = new GhostFrame {
             ChunkData = new GhostChunkData {
                 HasPlayer = true,
-                UpdateHair = level.updateHair,
+                UpdateHair = !GhostRecorder.IsFreezeFrame && level.updateHair,
                 InControl = player.InControl,
 
                 Position = player.Position,

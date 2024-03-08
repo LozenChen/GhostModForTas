@@ -69,20 +69,20 @@ public class GhostData {
             List<GhostData> sortedGhostData = new();
             string nextLevel = session.Level;
             int revisitCount = 1;
-            bool find;
+            bool found;
             do {
-                find = false;
+                found = false;
                 foreach (GhostData data in ghostDatas) {
                     if (data.Level == nextLevel && data.LevelVisitCount == revisitCount) {
                         sortedGhostData.Add(data);
                         nextLevel = data.Target;
                         revisitCount = data.TargetVisitCount;
                         ghostDatas.Remove(data);
-                        find = true;
+                        found = true;
                         break;
                     }
                 }
-            } while (find);
+            } while (found);
             if (sortedGhostData.Count > 0) {
                 ghosts.Add(new Entities.Ghost(sortedGhostData));
             }
@@ -101,6 +101,7 @@ public class GhostData {
     public int TargetVisitCount = 1;
     public string Name;
     public DateTime Date;
+    public long SessionTime;
 
     public float? Opacity;
 
@@ -214,6 +215,8 @@ public class GhostData {
             Date = DateTime.UtcNow;
         }
 
+        SessionTime = reader.ReadInt64();
+
         if (version >= 1) {
             Run = new Guid(reader.ReadBytes(16));
         } else {
@@ -269,6 +272,7 @@ public class GhostData {
         writer.Write(TargetVisitCount);
         writer.WriteNullTerminatedString(Name);
         writer.Write(Date.ToBinary());
+        writer.Write(SessionTime);
 
         writer.Write(Run.ToByteArray());
         writer.Write(Frames.Count);

@@ -15,6 +15,7 @@ public class GhostModule : EverestModule {
         AttributeUtils.CollectMethods<UnloadAttribute>();
         AttributeUtils.CollectMethods<LoadContentAttribute>();
         AttributeUtils.CollectMethods<InitializeAttribute>();
+        AttributeUtils.CollectMethods<FreezeUpdateAttribute>();
         AttributeUtils.CollectMethods<TasDisableRunAttribute>();
         AttributeUtils.CollectMethods<TasEnableRunAttribute>();
         AttributeUtils.CollectMethods<ReloadAttribute>();

@@ -8,6 +8,11 @@ namespace Celeste.Mod.GhostModForTas.Entities;
 
 public class Ghost : Actor {
     public bool Done;
+    public bool ForceSync;
+    public bool WaitForPlayer;
+
+    public long LastSessionTime;
+    public static Vector2 DebugOffset = new Vector2(2f, -2f);
     public PlayerSprite Sprite;
     public PlayerHair Hair;
     public int MachineState;
@@ -50,7 +55,7 @@ public class Ghost : Actor {
     }
 
     public void UpdateByReplayer() {
-        if (Done) {
+        if (Done || WaitForPlayer) {
             return;
         }
         Visible = (GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play;
@@ -60,13 +65,7 @@ public class Ghost : Actor {
             return;
         }
         if (FrameIndex >= Data.Frames.Count) {
-            CurrentRoomByOrder++;
-            if (CurrentRoomByOrder < AllRoomData.Count) {
-                Data = AllRoomData[CurrentRoomByOrder];
-                FrameIndex = 0;
-            } else {
-                Done = true;
-                Visible = false;
+            if (!GotoNextRoom()) {
                 return;
             }
         }
@@ -74,6 +73,29 @@ public class Ghost : Actor {
         UpdateSprite();
         UpdateHair();
         base.Update();
+    }
+
+    public bool GotoNextRoom() {
+        LastSessionTime = Data.SessionTime;
+        CurrentRoomByOrder++;
+        if (CurrentRoomByOrder < AllRoomData.Count) {
+            Data = AllRoomData[CurrentRoomByOrder];
+            FrameIndex = 0;
+            WaitForPlayer = ForceSync;
+        } else {
+            Done = true;
+            Visible = false;
+            return false;
+        }
+        return true;
+    }
+
+    public void Sync() {
+        if (!WaitForPlayer && !Done) {
+            GotoNextRoom();
+        }
+        WaitForPlayer = false;
+        FrameIndex = -1; // so it becomes 0 after update
     }
 
     public override void Update() {
@@ -98,7 +120,7 @@ public class Ghost : Actor {
             return;
         }
 
-        Position = Frame.ChunkData.Position;
+        Position = Frame.ChunkData.Position + DebugOffset;
         Sprite.Rotation = Frame.ChunkData.Rotation;
         Sprite.Scale = Frame.ChunkData.Scale;
         Sprite.Scale.X = Sprite.Scale.X * (float)Frame.ChunkData.Facing;

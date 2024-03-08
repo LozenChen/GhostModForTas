@@ -2,7 +2,6 @@ using Celeste.Mod.GhostModForTas.Module;
 using Microsoft.Xna.Framework;
 using Monocle;
 using System;
-using System.Linq;
 
 namespace Celeste.Mod.GhostModForTas.Entities;
 
@@ -21,38 +20,20 @@ internal static class GhostCompare {
     [Load]
     public static void Load() {
         On.Celeste.Level.Render += LevelOnRender;
-        On.Celeste.Level.NextLevel += LevelOnNextLevel;
-        On.Celeste.Level.RegisterAreaComplete += LevelOnRegisterAreaComplete;
         On.Celeste.LevelLoader.ctor += LevelLoaderOnCtor;
     }
 
     [Unload]
     public static void Unload() {
         On.Celeste.Level.Render -= LevelOnRender;
-        On.Celeste.Level.NextLevel -= LevelOnNextLevel;
-        On.Celeste.Level.RegisterAreaComplete -= LevelOnRegisterAreaComplete;
         On.Celeste.LevelLoader.ctor -= LevelLoaderOnCtor;
     }
 
-    private static void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
-        orig(self, at, dir);
-        if (GhostReplayerLogic.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().ChunkData.Time is { } time) {
-            LastGhostTime = GhostTime;
-            GhostTime = time;
-            LastCurrentTime = CurrentTime;
-            CurrentTime = self.Session.Time;
-        }
-    }
-
-    private static void LevelOnRegisterAreaComplete(On.Celeste.Level.orig_RegisterAreaComplete orig, Level self) {
-        orig(self);
-
-        if (GhostReplayerLogic.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().ChunkData.Time is { } time) {
-            LastGhostTime = GhostTime;
-            GhostTime = time;
-            LastCurrentTime = CurrentTime;
-            CurrentTime = self.Session.Time;
-        }
+    public static void UpdateRoomTime(Level level, long time) {
+        LastGhostTime = GhostTime;
+        GhostTime = time;
+        LastCurrentTime = CurrentTime;
+        CurrentTime = level.Session.Time;
     }
 
     private static void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {

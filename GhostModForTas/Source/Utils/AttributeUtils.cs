@@ -1,4 +1,5 @@
 //#define AttributeDebug
+using MonoMod.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -109,6 +110,24 @@ internal static class AttributeUtils {
             }
         }
     }
+
+    [Initialize]
+    public static void HookEngineFreeze() {
+        typeof(Monocle.Engine).GetMethodInfo("Update").IlHook(ILEngineFreeze);
+    }
+
+    public static void ILEngineFreeze(ILContext il) {
+        ILCursor cursor = new(il);
+        if (cursor.TryGotoNext(ins => ins.MatchLdsfld<Monocle.Engine>(nameof(Monocle.Engine.FreezeTimer)), ins => ins.MatchLdcR4(0f))) {
+            cursor.Index += 3;
+            cursor.MoveAfterLabels();
+            cursor.EmitDelegate(InvokeFreezeUpdate);
+        }
+    }
+
+    private static void InvokeFreezeUpdate() {
+        Invoke<FreezeUpdateAttribute>();
+    }
 }
 
 
@@ -123,6 +142,9 @@ internal class LoadContentAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class InitializeAttribute : Attribute { }
+
+[AttributeUsage(AttributeTargets.Method)]
+internal class FreezeUpdateAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class TasDisableRunAttribute : Attribute { }

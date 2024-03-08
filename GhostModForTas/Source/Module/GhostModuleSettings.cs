@@ -24,6 +24,7 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool CompareTotalTime { get; set; } = true;
 
+    public bool ForceSync { get; set; } = false;
     public bool HighlightFastestGhost { get; set; } = true;
 
     [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 10;
