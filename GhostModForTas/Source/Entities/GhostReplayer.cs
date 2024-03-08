@@ -27,22 +27,18 @@ public class GhostReplayer : Entity {
 
     public List<Ghost> Ghosts = new List<Ghost>();
 
-
     public readonly static Color ColorGold = new Color(1f, 1f, 0f, 1f);
     public readonly static Color ColorNeutral = new Color(1f, 1f, 1f, 1f);
 
     public GhostReplayer(Level level)
         : base(Vector2.Zero) {
 
-        Tag = Tags.HUD;
+        Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Persistent;
 
         // Read and add all ghosts.
-        GhostData.ForAllGhosts(level.Session, (i, ghostData) => {
-            Ghost ghost = new Ghost(ghostData);
+        GhostData.FindAllGhosts(level.Session).ForEach(ghost => {
             level.Add(ghost);
             Ghosts.Add(ghost);
-            Logger.Log("Ghost Mod For Tas", $"Play Run: {ghostData.Run}");
-            return true;
         });
     }
 

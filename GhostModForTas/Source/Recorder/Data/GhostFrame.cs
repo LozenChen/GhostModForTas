@@ -6,13 +6,13 @@ namespace Celeste.Mod.GhostModForTas.Recorder.Data;
 public struct GhostFrame {
     public const string End = "\r\n";
 
-    public GhostChunkData Data;
+    public GhostChunkData ChunkData;
 
     public void Read(BinaryReader reader) {
         string chunk;
         // The last "chunk" type, \r\n (Windows linebreak), doesn't contain a length.
-        Data.HasPlayer = reader.ReadBoolean();
-        if (!Data.HasPlayer) {
+        ChunkData.HasPlayer = reader.ReadBoolean();
+        if (!ChunkData.HasPlayer) {
             while (reader.ReadNullTerminatedString() != End) {
                 // do nothing
             }
@@ -23,13 +23,13 @@ public struct GhostFrame {
             uint length = reader.ReadUInt32();
             switch (chunk) {
                 case GhostChunkData.ChunkV1:
-                    Data.Read(reader, 1);
+                    ChunkData.Read(reader, 1);
                     break;
                 case GhostChunkData.ChunkV2:
-                    Data.Read(reader, 2);
+                    ChunkData.Read(reader, 2);
                     break;
                 case GhostChunkData.ChunkV3:
-                    Data.Read(reader, 3);
+                    ChunkData.Read(reader, 3);
                     break;
 
                 default:
@@ -41,10 +41,10 @@ public struct GhostFrame {
     }
 
     public void Write(BinaryWriter writer) {
-        writer.Write(Data.HasPlayer);
+        writer.Write(ChunkData.HasPlayer);
 
-        if (Data.HasPlayer) {
-            WriteChunk(writer, Data.Write, GhostChunkData.Chunk);
+        if (ChunkData.HasPlayer) {
+            WriteChunk(writer, ChunkData.Write, GhostChunkData.Chunk);
         }
 
         writer.WriteNullTerminatedString(End);

@@ -36,7 +36,7 @@ internal static class GhostCompare {
 
     private static void LevelOnNextLevel(On.Celeste.Level.orig_NextLevel orig, Level self, Vector2 at, Vector2 dir) {
         orig(self, at, dir);
-        if (GhostReplayerLogic.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
+        if (GhostReplayerLogic.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().ChunkData.Time is { } time) {
             LastGhostTime = GhostTime;
             GhostTime = time;
             LastCurrentTime = CurrentTime;
@@ -47,7 +47,7 @@ internal static class GhostCompare {
     private static void LevelOnRegisterAreaComplete(On.Celeste.Level.orig_RegisterAreaComplete orig, Level self) {
         orig(self);
 
-        if (GhostReplayerLogic.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().Data.Time is { } time) {
+        if (GhostReplayerLogic.GhostReplayer?.Ghosts.FirstOrDefault()?.Data.Frames.LastOrDefault().ChunkData.Time is { } time) {
             LastGhostTime = GhostTime;
             GhostTime = time;
             LastCurrentTime = CurrentTime;

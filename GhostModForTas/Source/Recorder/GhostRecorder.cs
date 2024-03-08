@@ -6,10 +6,8 @@ using Mono.Cecil.Cil;
 using Monocle;
 using MonoMod.Cil;
 using System;
-using System.Collections;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using TAS.Input.Commands;
 
 namespace Celeste.Mod.GhostModForTas.Recorder;
@@ -18,7 +16,7 @@ internal static class GhostRecorder {
 
     public static string PathGhosts { get; internal set; }
 
-    public static GhostRecorderEntity recorder;
+    public static GhostRecorderEntity Recorder;
 
     public static Guid Run;
 
@@ -29,34 +27,34 @@ internal static class GhostRecorder {
             Directory.CreateDirectory(PathGhosts);
         }
 
-        On.Celeste.Player.Die += OnDie;
-
 
         typeof(LevelExit).GetConstructor(new Type[] { typeof(LevelExit.Mode), typeof(Session), typeof(HiresSnow) }).IlHook(il => {
             ILCursor cursor = new(il);
             cursor.Emit(OpCodes.Ldarg_1);
             cursor.EmitDelegate(OnExit);
         });
+
+        On.Celeste.Session.ctor += OnSessionCtor;
     }
 
     [Unload]
     public static void Unload() {
-        On.Celeste.Player.Die -= OnDie;
+        On.Celeste.Session.ctor -= OnSessionCtor;
     }
 
     [LoadLevel]
     public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
         if (isFromLoader) { // from a load command / load into a new level normally / from a restart ...
-            recorder?.RemoveSelf();
-            recorder = null;
-            Run = Guid.NewGuid();
+            Recorder?.RemoveSelf();
+            level.Add(Recorder = new GhostRecorderEntity(level.Session));
         }
 
-        if (playerInstance is null) {
-            level.Add(new Entity { new Coroutine(WaitForPlayer(level)) });
-        } else {
-            Step(level);
-        }
+        Step(level);
+    }
+
+    private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
+        Run = Guid.NewGuid();
+        orig(self);
     }
 
     public static void StartRecording() {
@@ -87,75 +85,33 @@ internal static class GhostRecorder {
 
     }
 
-    private static IEnumerator WaitForPlayer(Level level) {
-        while (level.Tracker.GetEntity<Player>() is null) {
-            yield return null;
-        }
-
-        Step(level);
-    }
-
     public static void OnExit(LevelExit.Mode mode) {
         if (Engine.Scene is not Level level) {
             return;
         }
         if (mode == LevelExit.Mode.Completed ||
             mode == LevelExit.Mode.CompletedInterlude) {
-            Step(level);
+            Step(level, levelExit: true);
         }
     }
 
-    public static void Step(Level level) {
-        if (ghostSettings.Mode == GhostModuleMode.Off) {
-            return;
-        }
-
-        string target = level.Session.Level;
-        Logger.Log("ghost", $"Stepping into {level.Session.Area.GetSID()} {target}");
-
-        // Write the ghost, even if we haven't gotten an IL PB.
-        // Maybe we left the level prematurely earlier?
-        if (recorder?.Data != null &&
+    public static void Step(Level level, bool levelExit = false) {
+        if (Recorder?.Data != null &&
             (ghostSettings.Mode & GhostModuleMode.Record) == GhostModuleMode.Record) {
-            recorder.Data.Target = target;
-            recorder.Data.Run = Run;
-            recorder.Data.Write();
-        }
-
-        if (recorder != null) {
-            recorder.RemoveSelf();
-        }
-        level.Add(recorder = new GhostRecorderEntity());
-        recorder.Data = new Data.GhostData(level.Session);
-        recorder.Data.Name = ghostSettings.Name;
-    }
-
-    public static PlayerDeadBody OnDie(On.Celeste.Player.orig_Die orig, Player player, Vector2 direction, bool evenIfInvincible, bool registerDeathInStats) {
-        PlayerDeadBody corpse = orig(player, direction, evenIfInvincible, registerDeathInStats);
-
-        if (recorder == null || recorder.Data == null) {
-            return corpse;
-        }
-
-        // This is hacky, but it works:
-        // Check the stack trace for Celeste.Level+* <Pause>*
-        // and throw away the data when we're just retrying.
-        foreach (StackFrame frame in new StackTrace().GetFrames()) {
-            MethodBase method = frame?.GetMethod();
-            if (method == null || method.DeclaringType == null) {
-                continue;
+            string target = levelExit ? "LevelExit" : level.Session.Level;
+            if (levelExit) {
+                Recorder.Data.Target = target;
+                Recorder.Data.Run = Run;
+                Recorder.WriteData();
+            } else if (target != Recorder.Data.Level) {
+                Recorder.Data.Target = target;
+                Recorder.Data.Run = Run;
+                Recorder.WriteData();
+                Recorder.Data = new Data.GhostData(level.Session);
+                Recorder.Data.Name = ghostSettings.Name;
             }
-
-            if (!method.DeclaringType.FullName.StartsWith("Celeste.Level+") ||
-                !method.Name.StartsWith("<Pause>")) {
-                continue;
-            }
-
-            recorder.Data = null;
-            return corpse;
+            // otherwise it's a respawn or something
         }
-
-        return corpse;
     }
 }
 public class GhostRecorderEntity : Entity {
@@ -163,11 +119,25 @@ public class GhostRecorderEntity : Entity {
 
     public GhostFrame LastFrameData;
 
-    public GhostRecorderEntity()
+    public Dictionary<string, int> RevisitCount;
+
+    public GhostRecorderEntity(Session session)
         : base() {
         Depth = 1000000;
+        Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Persistent;
+        RevisitCount = new();
+        Data = new GhostData(session);
+    }
 
-        Tag = Tags.HUD;
+    public void WriteData() {
+        if (RevisitCount.ContainsKey(Data.Level)) {
+            RevisitCount[Data.Level]++;
+        } else {
+            RevisitCount[Data.Level] = 1;
+        }
+        Data.LevelVisitCount = RevisitCount[Data.Level];
+        Data.TargetVisitCount = RevisitCount.TryGetValue(Data.Target, out int targetCount) ? targetCount + 1 : 1;
+        Data.Write();
     }
 
     public override void Update() {
@@ -177,23 +147,21 @@ public class GhostRecorderEntity : Entity {
     }
 
     public void RecordData() {
-        if ((Engine.Scene as Level)?.Session is not Session session) {
+        if (Engine.Scene is not Level level || level.Session is not Session session) {
             return;
         }
 
         if (playerInstance is not Player player) {
-            LastFrameData = new GhostFrame { Data = new GhostChunkData { HasPlayer = false } };
-            if (Data != null) {
-                Data.Frames.Add(LastFrameData);
-            }
+            LastFrameData = new GhostFrame { ChunkData = new GhostChunkData { HasPlayer = false } };
+            Data.Frames.Add(LastFrameData);
             return;
         }
 
         // A data frame is always a new frame, no matter if the previous one lacks data or not.
         LastFrameData = new GhostFrame {
-            Data = new GhostChunkData {
+            ChunkData = new GhostChunkData {
                 HasPlayer = true,
-
+                UpdateHair = level.updateHair,
                 InControl = player.InControl,
 
                 Position = player.Position,
@@ -219,15 +187,13 @@ public class GhostRecorderEntity : Entity {
         };
 
         if (player.StateMachine.State == Player.StRedDash) {
-            LastFrameData.Data.HairCount = 1;
+            LastFrameData.ChunkData.HairCount = 1;
         } else if (player.StateMachine.State != Player.StStarFly) {
-            LastFrameData.Data.HairCount = player.Dashes > 1 ? 5 : 4;
+            LastFrameData.ChunkData.HairCount = player.Dashes > 1 ? 5 : 4;
         } else {
-            LastFrameData.Data.HairCount = 7;
+            LastFrameData.ChunkData.HairCount = 7;
         }
 
-        if (Data != null) {
-            Data.Frames.Add(LastFrameData);
-        }
+        Data.Frames.Add(LastFrameData);
     }
 }

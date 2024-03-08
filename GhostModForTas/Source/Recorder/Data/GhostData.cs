@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using Monocle;
 using System;
 using System.Collections.Generic;
@@ -20,6 +19,8 @@ public class GhostData {
         new Regex("[\"`?* #" + Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars())) + "]",
             RegexOptions.Compiled);
 
+    public static string GetGhostFilePrefix_NoLevel(Session session)
+        => PathVerifyRegex.Replace($"{session.Area.GetSID()}-{(char)('A' + (int)session.Area.Mode)}", "-");
     public static string GetGhostFilePrefix(Session session)
         => GetGhostFilePrefix(session.Area.GetSID(), session.Area.Mode, session.Level);
 
@@ -33,31 +34,62 @@ public class GhostData {
         => Path.Combine(
             PathGhosts,
             GetGhostFilePrefix(sid, mode, level) +
-            PathVerifyRegex.Replace($"{name}-{date.ToString("yyyy-MM-dd-HH-mm-ss-fff", CultureInfo.InvariantCulture)}", "-") + OshiroPostfix
+            PathVerifyRegex.Replace($"-{name}-{date.ToString("yyyy-MM-dd-HH-mm-ss-fff", CultureInfo.InvariantCulture)}", "-") + OshiroPostfix
         );
 
-    public static string[] GetAllGhostFilePaths(Session session)
+    public static string[] GetAllGhostFilePaths_NoLevel(Session session)
+        => Directory.GetFiles(
+            PathGhosts,
+            GetGhostFilePrefix_NoLevel(session) + "*" + OshiroPostfix
+        );
+
+    public static string[] GetAllGhostFilePaths(Session session) // those belong to this level
         => Directory.GetFiles(
             PathGhosts,
             GetGhostFilePrefix(session) + "*" + OshiroPostfix
         );
 
-    public static void ForAllGhosts(Session session, Func<int, GhostData, bool> cb) {
-        if (cb == null) {
-            return;
-        }
-
-        string[] filePaths = GetAllGhostFilePaths(session);
+    public static List<Entities.Ghost> FindAllGhosts(Session session) {
+        string[] filePaths = GetAllGhostFilePaths_NoLevel(session);
+        Dictionary<Guid, List<GhostData>> dictionary = new();
+        List<Entities.Ghost> ghosts = new();
         for (int i = 0; i < filePaths.Length; i++) {
-            GhostData ghost = new GhostData(filePaths[i]).Read();
-            if (ghost == null) {
+            GhostData ghostData = new GhostData(filePaths[i]).Read();
+            if (ghostData?.Run is null) {
                 continue;
             }
-
-            if (!cb(i, ghost)) {
-                break;
+            if (dictionary.TryGetValue(ghostData.Run, out List<GhostData> list)) {
+                list.Add(ghostData);
+            } else {
+                dictionary.Add(ghostData.Run, new List<GhostData>() { ghostData });
             }
         }
+        foreach (Guid guid in dictionary.Keys) {
+            List<GhostData> ghostDatas = dictionary[guid];
+            List<GhostData> sortedGhostData = new();
+            string nextLevel = session.Level;
+            int revisitCount = 1;
+            bool find;
+            do {
+                find = false;
+                foreach (GhostData data in ghostDatas) {
+                    if (data.Level == nextLevel && data.LevelVisitCount == revisitCount) {
+                        sortedGhostData.Add(data);
+                        nextLevel = data.Target;
+                        revisitCount = data.TargetVisitCount;
+                        ghostDatas.Remove(data);
+                        find = true;
+                        break;
+                    }
+                }
+            } while (find);
+            if (sortedGhostData.Count > 0) {
+                ghosts.Add(new Entities.Ghost(sortedGhostData));
+            }
+            Logger.Log("GhostModForTas", $"Add Ghost: RunGuid = {guid}, RoomCount = {sortedGhostData.Count}");
+        }
+
+        return ghosts;
     }
 
     public string SID;
@@ -65,7 +97,8 @@ public class GhostData {
     public string From;
     public string Level;
     public string Target;
-
+    public int LevelVisitCount = 1;
+    public int TargetVisitCount = 1;
     public string Name;
     public DateTime Date;
 
@@ -170,7 +203,8 @@ public class GhostData {
         Mode = (AreaMode)reader.ReadInt32();
         Level = reader.ReadNullTerminatedString();
         Target = reader.ReadNullTerminatedString();
-
+        LevelVisitCount = reader.ReadInt32();
+        TargetVisitCount = reader.ReadInt32();
         Name = reader.ReadNullTerminatedString();
         long dateBin = reader.ReadInt64();
         try {
@@ -217,6 +251,7 @@ public class GhostData {
         using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8)) {
             Write(writer);
         }
+        Logger.Log("GhostModForTas", $"Write: SID = {SID}, Level = [{Level}], Target = [{Target}], RunGUID = {Run}");
     }
 
     public void Write(BinaryWriter writer) {
@@ -230,12 +265,12 @@ public class GhostData {
         writer.Write((int)Mode);
         writer.WriteNullTerminatedString(Level);
         writer.WriteNullTerminatedString(Target);
-
+        writer.Write(LevelVisitCount);
+        writer.Write(TargetVisitCount);
         writer.WriteNullTerminatedString(Name);
         writer.Write(Date.ToBinary());
 
         writer.Write(Run.ToByteArray());
-        Logger.Log("Ghost", $"Write: Level = [{Level}], Run = {Run}");
         writer.Write(Frames.Count);
         writer.Write('\r');
         writer.Write('\n');

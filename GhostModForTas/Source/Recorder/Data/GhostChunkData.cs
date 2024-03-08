@@ -10,7 +10,7 @@ public struct GhostChunkData {
     public const string ChunkV3 = "data3";
     public const string Chunk = ChunkV3;
     public bool HasPlayer;
-
+    public bool UpdateHair;
     // V1
 
     public bool InControl;
@@ -42,6 +42,7 @@ public struct GhostChunkData {
     public long Time;
 
     public void Read(BinaryReader reader, int version) {
+        UpdateHair = reader.ReadBoolean();
         InControl = reader.ReadBoolean();
 
         Position = new Vector2(reader.ReadSingle(), reader.ReadSingle());
@@ -78,6 +79,7 @@ public struct GhostChunkData {
     }
 
     public void Write(BinaryWriter writer) {
+        writer.Write(UpdateHair);
         writer.Write(InControl);
 
         writer.Write(Position.X);
