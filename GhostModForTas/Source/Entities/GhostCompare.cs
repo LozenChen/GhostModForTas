@@ -19,6 +19,8 @@ internal static class GhostCompare {
     public static readonly string StringLastRoom = "last room: ";
     public static readonly string StringTotal = "total    : ";
 
+    public static readonly string CorruptedData = "N/A";
+
     [Load]
     public static void Load() {
         On.Celeste.Level.Render += LevelOnRender;
@@ -52,6 +54,7 @@ internal static class GhostCompare {
             return;
         }
         if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play && GhostModule.ModuleSettings.ShowCompareTime) {
+            bool lastRoomDiffCorrupted = Complaint == ComplaintMode.GhostChange;
             int viewWidth = Engine.ViewWidth;
 
             float pixelScale = viewWidth / 320f;
@@ -73,6 +76,10 @@ internal static class GhostCompare {
                 timeStr1 = StringLastRoom;
                 timeStr2 = $"{FormatTime(diffRoomTime)}";
                 color2 = AheadBehindColor(diffRoomTime);
+                if (lastRoomDiffCorrupted) {
+                    timeStr2 = CorruptedData;
+                    color2 = BehindColor;
+                }
                 if (GhostModule.ModuleSettings.CompareTotalTime) {
                     timeStr3 = StringTotal;
                     timeStr4 = $"{FormatTime(diffTotalTime)}";

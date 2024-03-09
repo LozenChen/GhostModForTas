@@ -93,7 +93,9 @@ public class GhostReplayerEntity : Entity {
             foreach (Ghost ghost in Ghosts) {
                 ghost.Sync(lc);
             }
-
+            // if we go room A -> B -> D, ghost go A -> C -> D, then we should get noticed that no ghost when we goto room B, and ghost compare work again when we goto room D
+            // in this case (No Ghost), ghost compare will not update in room B, so in room D, we get player time = A -> D, ghost time = A -> D, so it still makes sense to compare last room time and total time
+            // in another case (GhostChange), ghost compare always work, total diff works well, but last room diff becomes wrong (only in this room)
             if (Ghosts.Where(x => !x.NotSynced).FirstOrDefault() is { } firstGhost) {
                 GhostCompare.UpdateRoomTime(level, firstGhost.LastSessionTime);
                 if (ComparerGhost != firstGhost) {
@@ -132,6 +134,7 @@ public class GhostReplayerEntity : Entity {
 
     public void RemoveReplayer(Entity replayer) {
         RemoveSelf();
+        Ghosts.ForEach(ghost => ghost.RemoveSelf());
         Ghosts.Clear();
         ComparerGhost = null;
     }

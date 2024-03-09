@@ -48,7 +48,7 @@ public class Ghost : Actor {
 
     public Ghost(List<GhostData> allData)
         : base(Vector2.Zero) {
-        Tag = Tags.Persistent;
+        Tag = Tags.Global;
         Active = false;
         AllRoomData = allData;
         CurrentRoomByOrder = 0;
