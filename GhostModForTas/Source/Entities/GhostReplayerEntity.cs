@@ -46,6 +46,7 @@ public class GhostReplayerEntity : Entity {
     public readonly static Color ColorGold = new Color(1f, 1f, 0f, 1f);
     public readonly static Color ColorNeutral = new Color(1f, 1f, 1f, 1f);
 
+
     public GhostReplayerEntity(Level level)
         : base(Vector2.Zero) {
         ForceSync = ghostSettings.ForceSync;
@@ -74,12 +75,6 @@ public class GhostReplayerEntity : Entity {
         foreach (Ghost ghost in Ghosts) {
             ghost.UpdateByReplayer();
         }
-    }
-
-    public void RemoveReplayer(Entity replayer) {
-        RemoveSelf();
-        Ghosts.Clear();
-        ComparerGhost = null;
     }
 
     public void HandleTransition(Level level) {
@@ -135,8 +130,10 @@ public class GhostReplayerEntity : Entity {
         RoomName = target;
     }
 
-    public static void ComplainAboutRouteChange() {
-        Logger.Log("Ghost", "TBA");
+    public void RemoveReplayer(Entity replayer) {
+        RemoveSelf();
+        Ghosts.Clear();
+        ComparerGhost = null;
     }
 
     public override void Removed(Scene scene) {
@@ -145,6 +142,8 @@ public class GhostReplayerEntity : Entity {
         Ghosts.Clear();
         ComparerGhost = null;
     }
+
+
 
     public override void Render() {
         /* Proposed colors:

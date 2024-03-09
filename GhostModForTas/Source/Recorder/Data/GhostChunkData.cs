@@ -1,6 +1,8 @@
 using Microsoft.Xna.Framework;
 using Monocle;
+using System;
 using System.IO;
+using TAS.Module;
 
 namespace Celeste.Mod.GhostModForTas.Recorder.Data;
 
@@ -16,7 +18,17 @@ public struct GhostChunkData {
     // V1
 
     public Vector2 Position;
+    public Vector2 Subpixel;
     public Vector2 Speed;
+    public float HitboxWidth;
+    public float HitboxHeight;
+    public float HitboxLeft;
+    public float HitboxTop;
+    public float HurtboxWidth;
+    public float HurtboxHeight;
+    public float HurtboxLeft;
+    public float HurtboxTop;
+    public string CustomInfo;
 
     // V2
     public bool UpdateHair;
@@ -42,7 +54,18 @@ public struct GhostChunkData {
 
 
         Position = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+        Subpixel = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         Speed = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+        HitboxWidth = reader.ReadSingle();
+        HitboxHeight = reader.ReadSingle();
+        HitboxLeft = reader.ReadSingle();
+        HitboxTop = reader.ReadSingle();
+        HurtboxWidth = reader.ReadSingle();
+        HurtboxHeight = reader.ReadSingle();
+        HurtboxLeft = reader.ReadSingle();
+        HurtboxTop = reader.ReadSingle();
+
+        CustomInfo = reader.ReadString();
 
         if (version < 3) {
             return;
@@ -53,7 +76,7 @@ public struct GhostChunkData {
         Scale = new Vector2(reader.ReadSingle(), reader.ReadSingle());
         Color = new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         Facing = (Facings)reader.ReadInt32();
-        CurrentAnimationID = reader.ReadNullTerminatedString();
+        CurrentAnimationID = reader.ReadString();
         CurrentAnimationFrame = reader.ReadInt32();
         HairColor = new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         HairSimulateMotion = reader.ReadBoolean();
@@ -66,10 +89,19 @@ public struct GhostChunkData {
 
         writer.Write(Position.X);
         writer.Write(Position.Y);
+        writer.Write(Subpixel.X);
+        writer.Write(Subpixel.Y);
         writer.Write(Speed.X);
         writer.Write(Speed.Y);
-
-
+        writer.Write(HitboxWidth);
+        writer.Write(HitboxHeight);
+        writer.Write(HitboxLeft);
+        writer.Write(HitboxTop);
+        writer.Write(HurtboxWidth);
+        writer.Write(HurtboxHeight);
+        writer.Write(HurtboxLeft);
+        writer.Write(HurtboxTop);
+        writer.Write(CustomInfo);
         writer.Write(UpdateHair);
         writer.Write(Rotation);
         writer.Write(Scale.X);
@@ -79,7 +111,7 @@ public struct GhostChunkData {
         writer.Write(Color.B);
         writer.Write(Color.A);
         writer.Write((int)Facing);
-        writer.WriteNullTerminatedString(CurrentAnimationID);
+        writer.Write(CurrentAnimationID);
         writer.Write(CurrentAnimationFrame);
         writer.Write(HairColor.R);
         writer.Write(HairColor.G);
@@ -88,4 +120,5 @@ public struct GhostChunkData {
         writer.Write(HairSimulateMotion);
         writer.Write(HairCount);
     }
+
 }

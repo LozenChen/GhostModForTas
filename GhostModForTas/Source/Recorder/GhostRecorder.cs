@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TAS.Input.Commands;
+using TAS.Module;
 
 namespace Celeste.Mod.GhostModForTas.Recorder;
 
@@ -48,6 +49,7 @@ internal static class GhostRecorder {
         if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
             Recorder?.RemoveSelf();
             level.Add(Recorder = new GhostRecorderEntity(level.Session));
+            CachedEntitiesForParse.Clear();
         }
 
         Step(level);
@@ -123,6 +125,11 @@ internal static class GhostRecorder {
             // otherwise it's a respawn or something
         }
     }
+
+    public static Dictionary<string, List<Entity>> CachedEntitiesForParse = new ();
+    public static string ParseTemplate() {
+        return TAS.EverestInterop.InfoHUD.InfoCustom.ParseTemplate(ghostSettings.CustomInfoTemplate, CelesteTasSettings.Instance.CustomInfoDecimals, CachedEntitiesForParse, false);
+    }
 }
 public class GhostRecorderEntity : Entity {
     public GhostData Data;
@@ -177,7 +184,17 @@ public class GhostRecorderEntity : Entity {
 
 
                 Position = player.Position,
+                Subpixel = player.movementCounter, // this is unncessary for rendering, but we need it in custom info
                 Speed = player.Speed,
+                HitboxWidth = player.Collider.Width,
+                HitboxHeight = player.Collider.Height,
+                HitboxLeft = player.Collider.Position.X,
+                HitboxTop = player.Collider.Position.Y,
+                HurtboxWidth = player.hurtbox.width,
+                HurtboxHeight = player.hurtbox.height,
+                HurtboxLeft = player.hurtbox.Position.X,
+                HurtboxTop = player.hurtbox.Position.Y,
+                CustomInfo = GhostRecorder.ParseTemplate(),
 
                 UpdateHair = !GhostRecorder.IsFreezeFrame && level.updateHair,
                 Rotation = player.Sprite.Rotation,

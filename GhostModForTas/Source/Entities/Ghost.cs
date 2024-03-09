@@ -1,7 +1,9 @@
 using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Monocle;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,12 +13,7 @@ public class Ghost : Actor {
     public bool Done;
     public bool ForceSync;
     public bool NotSynced;
-
     public long LastSessionTime;
-    public static Vector2 DebugOffset = new Vector2(2f, -2f);
-    public PlayerSprite Sprite;
-    public PlayerHair Hair;
-    public int MachineState;
 
     public GhostData Data;
     public List<GhostData> AllRoomData;
@@ -31,9 +28,22 @@ public class Ghost : Actor {
         }
     }
     public int FrameIndex;
-    public GhostFrame Frame => Data == null ? default(GhostFrame) : Data[FrameIndex];
+    public GhostChunkData Frame => Data[FrameIndex].ChunkData;
+    public string CustomInfo => Frame.CustomInfo;
 
+    public static Vector2 DebugOffset = new Vector2(2f, -2f);
+    public PlayerSprite Sprite;
+    public PlayerHair Hair;
     public Color Color = Color.White;
+
+    public float w1;
+    public float h1;
+    public float x1;
+    public float y1;
+    public float w2;
+    public float h2;
+    public float x2;
+    public float y2;
 
 
     public Ghost(List<GhostData> allData)
@@ -54,7 +64,7 @@ public class Ghost : Actor {
     public override void Added(Scene scene) {
         base.Added(scene);
 
-        Hair.Facing = Frame.ChunkData.Facing;
+        Hair.Facing = Frame.Facing;
         Hair.Start();
         UpdateHair();
     }
@@ -79,9 +89,10 @@ public class Ghost : Actor {
                 return;
             }
         }
-        Visible &= Frame.ChunkData.HasPlayer;
+        Visible &= Frame.HasPlayer;
         UpdateSprite();
         UpdateHair();
+        UpdateHitbox();
         base.Update();
     }
 
@@ -139,46 +150,101 @@ public class Ghost : Actor {
 
 
     public void UpdateHair() {
-        if (!Frame.ChunkData.HasPlayer) {
+        if (!Frame.HasPlayer) {
             return;
         }
 
-        Hair.Facing = Frame.ChunkData.Facing;
-        Hair.SimulateMotion = Frame.ChunkData.HairSimulateMotion;
-        if (Frame.ChunkData.UpdateHair) {
+        Hair.Facing = Frame.Facing;
+        Hair.SimulateMotion = Frame.HairSimulateMotion;
+        if (Frame.UpdateHair) {
             Hair.AfterUpdate();
         }
     }
 
     public void UpdateSprite() {
-        if (!Frame.ChunkData.HasPlayer) {
+        if (!Frame.HasPlayer) {
             return;
         }
 
-        Position = Frame.ChunkData.Position + DebugOffset;
+        Position = Frame.Position + DebugOffset;
 
         
-        Sprite.Rotation = Frame.ChunkData.Rotation;
-        Sprite.Scale = Frame.ChunkData.Scale;
-        Sprite.Scale.X = Sprite.Scale.X * (float)Frame.ChunkData.Facing;
+        Sprite.Rotation = Frame.Rotation;
+        Sprite.Scale = Frame.Scale;
+        Sprite.Scale.X = Sprite.Scale.X * (float)Frame.Facing;
         Sprite.Color = new Color(
-            (Frame.ChunkData.Color.R * Color.R) / 255,
-            (Frame.ChunkData.Color.G * Color.G) / 255,
-            (Frame.ChunkData.Color.B * Color.B) / 255,
-            (Frame.ChunkData.Color.A * Color.A) / 255
+            (Frame.Color.R * Color.R) / 255,
+            (Frame.Color.G * Color.G) / 255,
+            (Frame.Color.B * Color.B) / 255,
+            (Frame.Color.A * Color.A) / 255
         );
 
-        Sprite.HairCount = Frame.ChunkData.HairCount;
+        Sprite.HairCount = Frame.HairCount;
 
         try {
-            if (Sprite.CurrentAnimationID != Frame.ChunkData.CurrentAnimationID) {
-                Sprite.Play(Frame.ChunkData.CurrentAnimationID);
+            if (Sprite.CurrentAnimationID != Frame.CurrentAnimationID) {
+                Sprite.Play(Frame.CurrentAnimationID);
             }
 
-            Sprite.SetAnimationFrame(Frame.ChunkData.CurrentAnimationFrame);
+            Sprite.SetAnimationFrame(Frame.CurrentAnimationFrame);
         } catch {
             // Play likes to fail randomly as the ID doesn't exist in an underlying dict.
             // Let's ignore this for now.
         }
+    }
+
+    public void UpdateHitbox() {
+        if (!Frame.HasPlayer) {
+            return;
+        }
+        w1 = Frame.HitboxWidth;
+        h1 = Frame.HitboxHeight;
+        x1 = Frame.HitboxLeft;
+        y1 = Frame.HitboxTop;
+        w2 = Frame.HurtboxWidth;
+        h2 = Frame.HurtboxHeight;
+        x2 = Frame.HurtboxLeft;
+        y2 = Frame.HitboxTop;
+    }
+
+    public override void DebugRender(Camera camera) {
+        base.DebugRender(camera);
+        if (ghostSettings.ShowGhostHitbox) {
+            DrawHitbox(x1, y1, w1, h1, Color.Red);
+            DrawHitbox(x2, y2, w2, h2, Color.Lime);
+        }
+    }
+
+    // we use it so it's not affected by ActualCollideHitbox 
+
+    private void DrawHitbox(float x, float y, float width, float height, Color color) {
+        DrawHollowRect(Position.X + x, Position.Y + y, width, height, color);
+    }
+    private static void DrawHollowRect(float x, float y, float width, float height, Color color) {
+        int fx = (int)Math.Floor(x);
+        int fy = (int)Math.Floor(y);
+        int cw = (int)Math.Ceiling(width + x - fx);
+        int cy = (int)Math.Ceiling(height + y - fy);
+        OrigHollowRect(fx, fy, cw, cy, color);
+    }
+
+    private static Rectangle rect = new Rectangle();
+    private static readonly Texture2D texture2d = Monocle.Draw.Pixel.Texture.Texture_Safe;
+    private static readonly Rectangle clip = Monocle.Draw.Pixel.ClipRect;
+    private static readonly SpriteBatch sb = Monocle.Draw.SpriteBatch;
+    private static void OrigHollowRect(int x, int y, int width, int height, Color color) {
+        rect.X = x;
+        rect.Y = y;
+        rect.Width = width;
+        rect.Height = 1;
+        sb.Draw(texture2d, rect, clip, color);
+        rect.Y += height - 1;
+        sb.Draw(texture2d, rect, clip, color);
+        rect.Y -= height - 1;
+        rect.Width = 1;
+        rect.Height = height;
+        sb.Draw(texture2d, rect, clip, color);
+        rect.X += width - 1;
+        sb.Draw(texture2d, rect, clip, color);
     }
 }

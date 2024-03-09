@@ -26,7 +26,11 @@ public class GhostModuleSettings : EverestModuleSettings {
     public bool CompareTotalTime { get; set; } = true;
 
     public bool ForceSync { get; set; } = false;
+
+    public string CustomInfoTemplate { get; set; } = "{Player.Speed:}";
     public bool HighlightFastestGhost { get; set; } = true;
+
+    public bool ShowGhostHitbox { get; set; } = true;
 
     [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 10;
     [YamlIgnore][SettingIgnore] public float InnerOpacityFactor => InnerOpacity / 10f;
