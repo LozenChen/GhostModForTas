@@ -45,7 +45,7 @@ internal static class GhostRecorder {
 
     [LoadLevel]
     public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
-        if (isFromLoader) { // from a load command / load into a new level normally / from a restart ...
+        if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
             Recorder?.RemoveSelf();
             level.Add(Recorder = new GhostRecorderEntity(level.Session));
         }
@@ -109,17 +109,16 @@ internal static class GhostRecorder {
     public static void Step(Level level, bool levelExit = false) {
         if (Recorder?.Data != null &&
             (ghostSettings.Mode & GhostModuleMode.Record) == GhostModuleMode.Record) {
-            string target = levelExit ? "LevelExit" : level.Session.Level;
+            string target = levelExit ? LevelCount.Exit.Level : level.Session.Level;
             if (levelExit) {
-                Recorder.Data.Target = target;
+                Recorder.Data.TargetCount = new (target, 1);
                 Recorder.Data.Run = Run;
                 Recorder.WriteData();
-            } else if (target != Recorder.Data.Level) {
-                Recorder.Data.Target = target;
+            } else if (target != Recorder.Data.LevelCount.Level) {
+                Recorder.Data.TargetCount.Level = target;
                 Recorder.Data.Run = Run;
                 Recorder.WriteData();
                 Recorder.Data = new Data.GhostData(level.Session);
-                Recorder.Data.Name = ghostSettings.Name;
             }
             // otherwise it's a respawn or something
         }
@@ -135,19 +134,19 @@ public class GhostRecorderEntity : Entity {
     public GhostRecorderEntity(Session session)
         : base() {
         Depth = -10000000;
-        Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Persistent;
+        Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Global;
         RevisitCount = new();
         Data = new GhostData(session);
     }
 
     public void WriteData() {
-        if (RevisitCount.ContainsKey(Data.Level)) {
-            RevisitCount[Data.Level]++;
+        if (RevisitCount.ContainsKey(Data.LevelCount.Level)) {
+            RevisitCount[Data.LevelCount.Level]++;
         } else {
-            RevisitCount[Data.Level] = 1;
+            RevisitCount[Data.LevelCount.Level] = 1;
         }
-        Data.LevelVisitCount = RevisitCount[Data.Level];
-        Data.TargetVisitCount = RevisitCount.TryGetValue(Data.Target, out int targetCount) ? targetCount + 1 : 1;
+        Data.LevelCount.Count = RevisitCount[Data.LevelCount.Level];
+        Data.TargetCount.Count = RevisitCount.TryGetValue(Data.TargetCount.Level, out int targetCount) ? targetCount + 1 : 1;
         Data.SessionTime = Data.Frames.LastOrDefault().ChunkData.Time;
         Data.Write();
     }
@@ -172,39 +171,27 @@ public class GhostRecorderEntity : Entity {
         // A data frame is always a new frame, no matter if the previous one lacks data or not.
         LastFrameData = new GhostFrame {
             ChunkData = new GhostChunkData {
+
+                Time = session.Time,
                 HasPlayer = true,
-                UpdateHair = !GhostRecorder.IsFreezeFrame && level.updateHair,
-                InControl = player.InControl,
+
 
                 Position = player.Position,
                 Speed = player.Speed,
+
+                UpdateHair = !GhostRecorder.IsFreezeFrame && level.updateHair,
                 Rotation = player.Sprite.Rotation,
                 Scale = player.Sprite.Scale,
                 Color = player.Sprite.Color,
-
                 Facing = player.Facing,
-
                 CurrentAnimationID = player.Sprite.CurrentAnimationID,
                 CurrentAnimationFrame = player.Sprite.CurrentAnimationFrame,
 
                 HairColor = player.Hair.Color,
                 HairSimulateMotion = player.Hair.SimulateMotion,
-
-                DashColor = player.StateMachine.State == Player.StDash ? player.GetCurrentTrailColor() : (Color?)null,
-                DashDir = player.DashDir,
-                DashWasB = player.wasDashB,
-
-                Time = session.Time
+                HairCount = player.Sprite.HairCount
             }
         };
-
-        if (player.StateMachine.State == Player.StRedDash) {
-            LastFrameData.ChunkData.HairCount = 1;
-        } else if (player.StateMachine.State != Player.StStarFly) {
-            LastFrameData.ChunkData.HairCount = player.Dashes > 1 ? 5 : 4;
-        } else {
-            LastFrameData.ChunkData.HairCount = 7;
-        }
 
         Data.Frames.Add(LastFrameData);
     }

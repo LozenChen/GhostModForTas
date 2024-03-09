@@ -13,6 +13,7 @@ public class GhostData {
     public readonly static char[] MagicChars = Magic.ToCharArray();
 
     public readonly static int Version = 1;
+    // increase this int when we change the data structure in some future update
     public readonly static string OshiroPostfix = ".oshiro";
 
     public readonly static Regex PathVerifyRegex =
@@ -67,16 +68,14 @@ public class GhostData {
         foreach (Guid guid in dictionary.Keys) {
             List<GhostData> ghostDatas = dictionary[guid];
             List<GhostData> sortedGhostData = new();
-            string nextLevel = session.Level;
-            int revisitCount = 1;
+            LevelCount lc = new LevelCount(session.Level, 1);
             bool found;
             do {
                 found = false;
                 foreach (GhostData data in ghostDatas) {
-                    if (data.Level == nextLevel && data.LevelVisitCount == revisitCount) {
+                    if (data.LevelCount == lc) {
                         sortedGhostData.Add(data);
-                        nextLevel = data.Target;
-                        revisitCount = data.TargetVisitCount;
+                        lc = data.TargetCount;
                         ghostDatas.Remove(data);
                         found = true;
                         break;
@@ -94,18 +93,14 @@ public class GhostData {
 
     public string SID;
     public AreaMode Mode;
-    public string From;
-    public string Level;
-    public string Target;
-    public int LevelVisitCount = 1;
-    public int TargetVisitCount = 1;
+    public LevelCount LevelCount;
+    public LevelCount TargetCount;
     public string Name;
     public DateTime Date;
     public long SessionTime;
 
-    public float? Opacity;
-
     public Guid Run;
+    public string CustomInfoTemplate;
 
     protected string _FilePath;
 
@@ -115,7 +110,7 @@ public class GhostData {
                 return _FilePath;
             }
 
-            return GetGhostFilePath(SID, Mode, Level, Name, Date);
+            return GetGhostFilePath(SID, Mode, LevelCount.Level, Name, Date);
         }
         set { _FilePath = value; }
     }
@@ -142,7 +137,8 @@ public class GhostData {
         if (session != null) {
             SID = session.Area.GetSID();
             Mode = session.Area.Mode;
-            Level = session.Level;
+            LevelCount = new (session.Level, 1);
+            Name = ghostSettings.Name;
         }
     }
 
@@ -202,10 +198,8 @@ public class GhostData {
 
         SID = reader.ReadNullTerminatedString();
         Mode = (AreaMode)reader.ReadInt32();
-        Level = reader.ReadNullTerminatedString();
-        Target = reader.ReadNullTerminatedString();
-        LevelVisitCount = reader.ReadInt32();
-        TargetVisitCount = reader.ReadInt32();
+        LevelCount = new(reader.ReadNullTerminatedString(), reader.ReadInt32());
+        TargetCount = new(reader.ReadNullTerminatedString(), reader.ReadInt32());
         Name = reader.ReadNullTerminatedString();
         long dateBin = reader.ReadInt64();
         try {
@@ -217,11 +211,8 @@ public class GhostData {
 
         SessionTime = reader.ReadInt64();
 
-        if (version >= 1) {
-            Run = new Guid(reader.ReadBytes(16));
-        } else {
-            Run = Guid.Empty;
-        }
+        Run = new Guid(reader.ReadBytes(16));
+        CustomInfoTemplate = reader.ReadString();
 
         int count = reader.ReadInt32();
         reader.ReadChar(); // \r
@@ -254,7 +245,7 @@ public class GhostData {
         using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8)) {
             Write(writer);
         }
-        Logger.Log("GhostModForTas", $"Write: SID = {SID}, Level = [{Level}], Target = [{Target}], RunGUID = {Run}");
+        Logger.Log("GhostModForTas", $"Write: SID = {SID}, Level = [{LevelCount}], Target = [{TargetCount}], RunGUID = {Run}");
     }
 
     public void Write(BinaryWriter writer) {
@@ -266,15 +257,16 @@ public class GhostData {
 
         writer.WriteNullTerminatedString(SID);
         writer.Write((int)Mode);
-        writer.WriteNullTerminatedString(Level);
-        writer.WriteNullTerminatedString(Target);
-        writer.Write(LevelVisitCount);
-        writer.Write(TargetVisitCount);
+        writer.WriteNullTerminatedString(LevelCount.Level);
+        writer.Write(LevelCount.Count);
+        writer.WriteNullTerminatedString(TargetCount.Level);
+        writer.Write(TargetCount.Count);
         writer.WriteNullTerminatedString(Name);
         writer.Write(Date.ToBinary());
         writer.Write(SessionTime);
 
         writer.Write(Run.ToByteArray());
+        writer.WriteNullTerminatedString(CustomInfoTemplate);
         writer.Write(Frames.Count);
         writer.Write('\r');
         writer.Write('\n');
@@ -282,5 +274,36 @@ public class GhostData {
             GhostFrame frame = Frames[i];
             frame.Write(writer);
         }
+    }
+}
+
+public struct LevelCount {
+    public string Level;
+    public int Count;
+    public static readonly LevelCount Exit = new LevelCount("LevelExit", 1);
+    public LevelCount(string level, int count) {
+        Level = level;
+        Count = count;
+    }
+
+    public static bool operator == (LevelCount lc1, LevelCount lc2) {
+        return lc1.Count == lc2.Count && lc1.Level == lc2.Level;
+    }
+
+    public static bool operator !=(LevelCount lc1, LevelCount lc2) {
+        return lc1.Count != lc2.Count || lc1.Level != lc2.Level;
+    }
+    public override bool Equals(object obj) {
+        if (obj is LevelCount lc) {
+            return Equals(lc);
+        }
+        return false;
+    }
+    public bool Equals(LevelCount lc) {
+        return Count == lc.Count && Level == lc.Level;
+    }
+
+    public override int GetHashCode() {
+        return Level.GetHashCode() + Count;
     }
 }

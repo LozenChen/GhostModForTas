@@ -1,7 +1,9 @@
 using Celeste.Mod.GhostModForTas.Module;
+using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Monocle;
 using System;
+using System.Text;
 
 namespace Celeste.Mod.GhostModForTas.Entities;
 
@@ -20,13 +22,11 @@ internal static class GhostCompare {
     [Load]
     public static void Load() {
         On.Celeste.Level.Render += LevelOnRender;
-        On.Celeste.LevelLoader.ctor += LevelLoaderOnCtor;
     }
 
     [Unload]
     public static void Unload() {
         On.Celeste.Level.Render -= LevelOnRender;
-        On.Celeste.LevelLoader.ctor -= LevelLoaderOnCtor;
     }
 
     public static void UpdateRoomTime(Level level, long time) {
@@ -34,12 +34,21 @@ internal static class GhostCompare {
         GhostTime = time;
         LastCurrentTime = CurrentTime;
         CurrentTime = level.Session.Time;
+        Complaint = ComplaintMode.OK;
+    }
+
+    public static void ResetCompareTime() {
+        GhostTime = 0;
+        LastGhostTime = 0;
+        CurrentTime = 0;
+        LastCurrentTime = 0;
+        Complaint = ComplaintMode.OK;
     }
 
     private static void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
         orig(self);
 
-        if (GhostTime == 0) {
+        if (GhostTime == 0 && Complaint == ComplaintMode.OK) {
             return;
         }
         if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play && GhostModule.ModuleSettings.ShowCompareTime) {
@@ -68,18 +77,21 @@ internal static class GhostCompare {
                     timeStr3 = StringTotal;
                     timeStr4 = $"{FormatTime(diffTotalTime)}";
                     color4 = AheadBehindColor(diffTotalTime);
-                    timeStr = timeStr1 + timeStr2 + "\n" + timeStr3 + timeStr4;
                 } else {
                     timeStr3 = timeStr4 = "";
-                    timeStr = timeStr1 + timeStr2;
                 }
             } else {
                 timeStr1 = StringTotal;
                 timeStr2 = $"{FormatTime(diffTotalTime)}";
                 timeStr3 = timeStr4 = "";
                 color2 = AheadBehindColor(diffTotalTime);
-                timeStr = timeStr1 + timeStr2;
             }
+            if (Complaint == ComplaintMode.NoGhost) {
+                timeStr2 = timeStr4 = "";
+            }
+            timeStr = timeStr1 + timeStr2 
+                + ((timeStr3 == "") ? "" : "\n" + timeStr3 + timeStr4) 
+                + ((Complaint == ComplaintMode.OK) ? "" : "\n" + ComplaintText);
 
             Vector2 size = Draw.DefaultFont.MeasureString(timeStr) * fontSize;
 
@@ -120,20 +132,18 @@ internal static class GhostCompare {
 
             Draw.Text(Draw.DefaultFont, timeStr1, textPosition, Color.White * alpha, Vector2.Zero, scale, 0f);
             Draw.Text(Draw.DefaultFont, timeStr2, textPosition + Vector2.UnitX * offset.X, color2 * alpha, Vector2.Zero, scale, 0f);
-            Draw.Text(Draw.DefaultFont, timeStr3, textPosition + Vector2.UnitY * offset.Y, Color.White * alpha, Vector2.Zero, scale, 0f);
-            Draw.Text(Draw.DefaultFont, timeStr4, textPosition + offset, color4 * alpha, Vector2.Zero, scale, 0f);
+            if (timeStr3 != "") {
+                textPosition += Vector2.UnitY * offset.Y;
+                Draw.Text(Draw.DefaultFont, timeStr3, textPosition, Color.White * alpha, Vector2.Zero, scale, 0f);
+                Draw.Text(Draw.DefaultFont, timeStr4, textPosition + Vector2.UnitX * offset.X, color4 * alpha, Vector2.Zero, scale, 0f);
+            }
+            if (ComplaintText.IsNotNullOrEmpty()) {
+                textPosition += Vector2.UnitY * offset.Y;
+                Draw.Text(Draw.DefaultFont, ComplaintText, textPosition, Color.Red * alpha, Vector2.Zero, scale, 0f);
+            }
 
             Draw.SpriteBatch.End();
         }
-    }
-
-    private static void LevelLoaderOnCtor(On.Celeste.LevelLoader.orig_ctor orig, LevelLoader self, Session session, Vector2? startPosition) {
-        orig(self, session, startPosition);
-
-        GhostTime = 0;
-        LastGhostTime = 0;
-        CurrentTime = 0;
-        LastCurrentTime = 0;
     }
 
     private static string FormatTime(long time) {
@@ -161,4 +171,15 @@ internal static class GhostCompare {
             return Color.White;
         }
     }
+
+
+    public enum ComplaintMode { GhostChange, NoGhost, OK }
+
+    public static ComplaintMode Complaint = ComplaintMode.OK;
+
+    public static string ComplaintText => Complaint switch {
+            ComplaintMode.GhostChange => "Comparer Ghost changes\nis that a route change or a too short ghost?",
+            ComplaintMode.NoGhost => "No Ghost in this room\nis that a route change?",
+            _ => ""
+    };
 }

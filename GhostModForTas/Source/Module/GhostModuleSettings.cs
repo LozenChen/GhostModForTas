@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.Entities;
 using Microsoft.Xna.Framework.Input;
 using Monocle;
 using System;
@@ -60,6 +61,10 @@ public class GhostModuleSettings : EverestModuleSettings {
             foreach (FileInfo file in ghostDir.GetFiles("*" + Recorder.Data.GhostData.OshiroPostfix)) {
                 file.Delete();
             }
+
+            GhostCompare.ResetCompareTime();
+            GhostReplayer.Replayer?.RemoveSelf();
+            GhostReplayer.Replayer = null;
         }));
     }
 

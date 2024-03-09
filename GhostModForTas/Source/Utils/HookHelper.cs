@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Monocle;
 using _Celeste = Celeste;
 
 namespace Celeste.Mod.GhostModForTas.Utils;
@@ -289,5 +290,25 @@ internal static class GhostMod_HookLoadLevel {
         LoadLevel_Before?.Invoke(level, playerIntro, isFromLoader);
         orig(level, playerIntro, isFromLoader);
         LoadLevel?.Invoke(level, playerIntro, isFromLoader);
+    }
+}
+
+[Tracked(false)]
+internal class LoadLevelDetector : Entity {
+    public LoadLevelDetector() {
+        Tag = Tags.Global;
+        Active = Visible = false;
+    }
+
+    [LoadLevel]
+    public static void OnLoadLevel(Level level) {
+        if (level.Tracker.GetEntity<LoadLevelDetector>() is null) {
+            level.Add(new LoadLevelDetector());
+        }
+    }
+
+    public static bool IsStartingLevel(Level level, bool isFromLoader) {
+        // die and respawn will invoke level.reload
+        return isFromLoader && level.Tracker.GetEntity<LoadLevelDetector>() is null;
     }
 }

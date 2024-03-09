@@ -1,7 +1,9 @@
 using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
+using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Monocle;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,12 +15,14 @@ internal static class GhostReplayer {
     public static GhostReplayerEntity Replayer;
 
     [LoadLevel]
-    public static void OnLoadLevel(Level level) {
-        if (level.Tracker.GetEntity<GhostReplayerEntity>() is { } replayer) {
+    public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
+        if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
+            Replayer?.RemoveSelf();
+            level.Add(Replayer = new GhostReplayerEntity(level));
+        }
+        else if (!isFromLoader && level.Tracker.GetEntity<GhostReplayerEntity>() is { } replayer) {
             Replayer = replayer;
             Replayer.HandleTransition(level);
-        } else {
-            level.Add(Replayer = new GhostReplayerEntity(level));
         }
     }
 
@@ -35,6 +39,7 @@ public class GhostReplayerEntity : Entity {
     // it's originally named as GhostManager
 
     public List<Ghost> Ghosts = new List<Ghost>();
+    public Ghost ComparerGhost;
     public bool ForceSync = false;
     public string RoomName;
     public Dictionary<string, int> RevisitCount = new();
@@ -44,7 +49,7 @@ public class GhostReplayerEntity : Entity {
     public GhostReplayerEntity(Level level)
         : base(Vector2.Zero) {
         ForceSync = ghostSettings.ForceSync;
-        Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Persistent;
+        Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Global;
 
         // Read and add all ghosts.
         GhostData.FindAllGhosts(level.Session).ForEach(ghost => {
@@ -52,8 +57,16 @@ public class GhostReplayerEntity : Entity {
             Ghosts.Add(ghost);
             ghost.ForceSync = ForceSync;
         });
-        RoomName = level.Session.Level;
-        RevisitCount.Add(RoomName, 1);
+        if (Ghosts.Count == 0) {
+            PostUpdate += RemoveReplayer;
+            Active = false;
+        } else {
+            RoomName = level.Session.Level;
+            RevisitCount.Add(RoomName, 1);
+            ComparerGhost = Ghosts.FirstOrDefault();
+            GhostCompare.ResetCompareTime();
+        }
+
     }
 
     public override void Update() {
@@ -63,56 +76,74 @@ public class GhostReplayerEntity : Entity {
         }
     }
 
+    public void RemoveReplayer(Entity replayer) {
+        RemoveSelf();
+        Ghosts.Clear();
+        ComparerGhost = null;
+    }
+
     public void HandleTransition(Level level) {
-        if (RoomName == level.Session.Level) {
+        if (RoomName == level.Session.Level || !Active) {
             return;
         }
 
         string target = level.Session.Level;
+        if (RevisitCount.ContainsKey(target)) {
+            RevisitCount[target]++;
+        } else {
+            RevisitCount.Add(target, 1);
+        }
+        LevelCount lc = new LevelCount(target, RevisitCount[target]);
         if (ForceSync) {
             foreach (Ghost ghost in Ghosts) {
-                ghost.Sync();
+                ghost.Sync(lc);
             }
 
-            if (Ghosts?.FirstOrDefault() is { } firstGhost) {
-                if (firstGhost.Data.Level == target && firstGhost.LastSessionTime is { } time) {
-                    GhostCompare.UpdateRoomTime(level, time);
-                } else {
-                    ComplainAboutRouteChange();
+            if (Ghosts.Where(x => !x.NotSynced).FirstOrDefault() is { } firstGhost) {
+                GhostCompare.UpdateRoomTime(level, firstGhost.LastSessionTime);
+                if (ComparerGhost != firstGhost) {
+                    GhostCompare.Complaint = GhostCompare.ComplaintMode.GhostChange;
+                    ComparerGhost = firstGhost;
                 }
+            } else {
+                GhostCompare.Complaint = GhostCompare.ComplaintMode.NoGhost;
             }
         } else {
-            if (Ghosts?.FirstOrDefault()?.AllRoomData is { } list) {
-                bool found = false;
-                foreach (GhostData data in list) {
-                    if (data.Level == RoomName && data.LevelVisitCount == RevisitCount[RoomName] && data.Target == target) {
+            bool found = false;
+            foreach (Ghost ghost in Ghosts) {
+                foreach (GhostData data in ghost.AllRoomData) {
+                    if (data.LevelCount == new LevelCount(RoomName, RevisitCount[RoomName]) && data.TargetCount.Level == target) {
                         long time = data.SessionTime;
                         GhostCompare.UpdateRoomTime(level, time);
+                        if (ghost != ComparerGhost) {
+                            GhostCompare.Complaint = GhostCompare.ComplaintMode.GhostChange;
+                            ComparerGhost = ghost;
+                        }
                         found = true;
                         break;
                     }
                 }
-                if (!found) {
-                    ComplainAboutRouteChange();
+                if (found) {
+                    break;
                 }
             }
+            if (!found) {
+                GhostCompare.Complaint = GhostCompare.ComplaintMode.NoGhost;
+            }
+            
         }
         RoomName = target;
-        if (RevisitCount.ContainsKey(RoomName)) {
-            RevisitCount[RoomName]++;
-        } else {
-            RevisitCount.Add(RoomName, 1);
-        }
     }
 
     public static void ComplainAboutRouteChange() {
-
+        Logger.Log("Ghost", "TBA");
     }
 
     public override void Removed(Scene scene) {
         base.Removed(scene);
         Ghosts.ForEach(ghost => ghost.RemoveSelf());
         Ghosts.Clear();
+        ComparerGhost = null;
     }
 
     public override void Render() {

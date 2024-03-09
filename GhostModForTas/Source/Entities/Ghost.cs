@@ -3,13 +3,14 @@ using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Microsoft.Xna.Framework;
 using Monocle;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Celeste.Mod.GhostModForTas.Entities;
 
 public class Ghost : Actor {
     public bool Done;
     public bool ForceSync;
-    public bool WaitForPlayer;
+    public bool NotSynced;
 
     public long LastSessionTime;
     public static Vector2 DebugOffset = new Vector2(2f, -2f);
@@ -19,7 +20,16 @@ public class Ghost : Actor {
 
     public GhostData Data;
     public List<GhostData> AllRoomData;
-    public int CurrentRoomByOrder;
+    private int currentRoomByOrder;
+    public int CurrentRoomByOrder {
+        get => currentRoomByOrder;
+        set {
+            currentRoomByOrder = value;
+            if (currentRoomByOrder < AllRoomData.Count) {
+                Data = AllRoomData[currentRoomByOrder];
+            }
+        }
+    }
     public int FrameIndex;
     public GhostFrame Frame => Data == null ? default(GhostFrame) : Data[FrameIndex];
 
@@ -31,7 +41,6 @@ public class Ghost : Actor {
         Tag = Tags.Persistent;
         Active = false;
         AllRoomData = allData;
-        Data = AllRoomData[0];
         CurrentRoomByOrder = 0;
         Done = false;
         Depth = 1;
@@ -55,7 +64,7 @@ public class Ghost : Actor {
     }
 
     public void UpdateByReplayer() {
-        if (Done || WaitForPlayer) {
+        if (Done || NotSynced) {
             return;
         }
         Visible = (GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play;
@@ -65,7 +74,8 @@ public class Ghost : Actor {
             return;
         }
         if (FrameIndex >= Data.Frames.Count) {
-            if (!GotoNextRoom()) {
+            GotoNextRoom();
+            if (Done) {
                 return;
             }
         }
@@ -75,27 +85,52 @@ public class Ghost : Actor {
         base.Update();
     }
 
-    public bool GotoNextRoom() {
+    public void GotoNextRoom() {
         LastSessionTime = Data.SessionTime;
         CurrentRoomByOrder++;
         if (CurrentRoomByOrder < AllRoomData.Count) {
-            Data = AllRoomData[CurrentRoomByOrder];
             FrameIndex = 0;
-            WaitForPlayer = ForceSync;
+            NotSynced = ForceSync;
         } else {
             Done = true;
-            Visible = false;
-            return false;
         }
-        return true;
     }
 
-    public void Sync() {
-        if (!WaitForPlayer && !Done) {
-            GotoNextRoom();
+    public void Sync(LevelCount lc) {
+        NotSynced = true;
+        if (lc == LevelCount.Exit) {
+            if (AllRoomData.LastOrDefault().LevelCount != LevelCount.Exit) {
+                return;
+            }
+            Done = true;
+            CurrentRoomByOrder = AllRoomData.Count - 1;
+            LastSessionTime = Data.SessionTime;
+            FrameIndex = Data.Frames.Count - 1;
+            NotSynced = false;
+            return;
         }
-        WaitForPlayer = false;
-        FrameIndex = -1; // so it becomes 0 after update
+        if (Done) {
+            return;
+        }
+        int orig = CurrentRoomByOrder;
+        for (int i = orig; i < AllRoomData.Count; i++) {
+            if (AllRoomData[i].LevelCount == lc) {
+                LastSessionTime = i > 0 ? AllRoomData[i - 1].SessionTime : 0;
+                CurrentRoomByOrder = i;
+                FrameIndex = -1; // so it becomes 0 after update
+                NotSynced = false;
+                return;
+            }
+        }
+        for (int i = 0; i < orig - 1; i++) {
+            if (AllRoomData[i].LevelCount == lc) {
+                LastSessionTime = i > 0 ? AllRoomData[i - 1].SessionTime : 0;
+                CurrentRoomByOrder = i;
+                FrameIndex = -1;
+                NotSynced = false;
+                return;
+            }
+        }
     }
 
     public override void Update() {
@@ -121,6 +156,8 @@ public class Ghost : Actor {
         }
 
         Position = Frame.ChunkData.Position + DebugOffset;
+
+        
         Sprite.Rotation = Frame.ChunkData.Rotation;
         Sprite.Scale = Frame.ChunkData.Scale;
         Sprite.Scale.X = Sprite.Scale.X * (float)Frame.ChunkData.Facing;
@@ -131,8 +168,6 @@ public class Ghost : Actor {
             (Frame.ChunkData.Color.A * Color.A) / 255
         );
 
-        Sprite.Rate = Frame.ChunkData.SpriteRate;
-        Sprite.Justify = Frame.ChunkData.SpriteJustify;
         Sprite.HairCount = Frame.ChunkData.HairCount;
 
         try {
