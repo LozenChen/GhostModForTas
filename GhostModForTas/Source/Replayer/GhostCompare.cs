@@ -5,7 +5,7 @@ using Monocle;
 using System;
 using System.Text;
 
-namespace Celeste.Mod.GhostModForTas.Entities;
+namespace Celeste.Mod.GhostModForTas.Replayer;
 
 internal static class GhostCompare {
     public static long GhostTime;

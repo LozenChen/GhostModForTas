@@ -20,7 +20,6 @@ internal static class Loader {
         AttributeUtils.SendToTas<TasEnableRunAttribute>("TAS.EnableRunAttribute");
         AttributeUtils.SendToTas<TasDisableRunAttribute>("TAS.DisableRunAttribute");
         GhostModule.Instance.SaveSettings();
-        CILCodeHelper.InitializeAtLast();
         if (Reloading) {
             OnReload();
             Reloading = false;

@@ -1,4 +1,4 @@
-using Celeste.Mod.GhostModForTas.Entities;
+using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.SpeedrunTool.SaveLoad;
 using System;

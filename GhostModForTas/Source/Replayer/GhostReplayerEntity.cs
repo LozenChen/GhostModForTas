@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Celeste.Mod.GhostModForTas.Entities;
+namespace Celeste.Mod.GhostModForTas.Replayer;
 
 
 internal static class GhostReplayer {
@@ -16,6 +16,11 @@ internal static class GhostReplayer {
 
     [LoadLevel]
     public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
+        if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) != GhostModuleMode.Play) {
+            Replayer?.RemoveSelf();
+            return;
+        }
+
         if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
             Replayer?.RemoveSelf();
             level.Add(Replayer = new GhostReplayerEntity(level));
@@ -30,8 +35,7 @@ internal static class GhostReplayer {
 
     public static void UpdateInFreezeFrame() {
         Replayer?.Update();
-    }
-
+    }    
 }
 
 [Tracked(false)]

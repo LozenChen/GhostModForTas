@@ -1,4 +1,4 @@
-RecordCount: 1597
+RecordCount: 1606
 
 # CeilingUltra 1.2.7
 
@@ -8,7 +8,6 @@ console load 1
 ***
 #Start
   88
-
 
 GhostStartRecording
 #lvl_1
@@ -27,6 +26,8 @@ GhostStartRecording
   40
 
 #lvl_2
+  10
+
    1,J,G
    1,R,J
    6,R
@@ -365,4 +366,4 @@ GhostStartRecording
    1,D,J
   18
 
-ChapterTime: 0:39.984(2352)
+ChapterTime: 0:40.154(2362)

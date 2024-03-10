@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Celeste.Mod.GhostModForTas.Entities;
+namespace Celeste.Mod.GhostModForTas.Replayer;
 
 public class Ghost : Actor {
     public bool Done;
@@ -29,9 +29,27 @@ public class Ghost : Actor {
     }
     public int FrameIndex;
     public GhostChunkData Frame => Data[FrameIndex].ChunkData;
+
+    public string HudInfo {
+        get {
+            if (NotSynced) {
+                return Frame.HudInfo;
+            }
+            if (FrameIndex < Data.Frames.Count - 1) {
+                return Data[FrameIndex + 1].ChunkData.HudInfo;
+            }
+            else if (CurrentRoomByOrder < AllRoomData.Count - 1) {
+                return AllRoomData[CurrentRoomByOrder + 1][0].ChunkData.HudInfo;
+            } else {
+                return "EndOfGhost";
+            }
+        }
+    }
     public string CustomInfo => Frame.CustomInfo;
 
-    public static Vector2 DebugOffset = new Vector2(2f, -2f);
+    public string Name => Data.Name;
+
+    private static Vector2 debugOffset = new Vector2(2f, -2f);
     public PlayerSprite Sprite;
     public PlayerHair Hair;
     public Color Color = Color.White;
@@ -166,8 +184,8 @@ public class Ghost : Actor {
             return;
         }
 
-        Position = Frame.Position + DebugOffset;
-
+        // Position = Frame.Position + debugOffset;
+        Position = Frame.Position;
         
         Sprite.Rotation = Frame.Rotation;
         Sprite.Scale = Frame.Scale;

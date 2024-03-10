@@ -1,4 +1,5 @@
-using Celeste.Mod.GhostModForTas.Entities;
+using Celeste.Mod.GhostModForTas.Replayer;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Monocle;
 using System;
@@ -31,6 +32,13 @@ public class GhostModuleSettings : EverestModuleSettings {
     public bool HighlightFastestGhost { get; set; } = true;
 
     public bool ShowGhostHitbox { get; set; } = true;
+    public bool ShowHudInfo { get; set; } = true;
+
+    public bool ShowCustomInfo { get; set; } = true;
+
+    public bool ShowInfo => ShowHudInfo || ShowCustomInfo;
+
+    public Vector2 InfoPosition { get; set; } = Vector2.UnitX * 20f;
 
     [SettingRange(0, 10)] public int InnerOpacity { get; set; } = 10;
     [YamlIgnore][SettingIgnore] public float InnerOpacityFactor => InnerOpacity / 10f;

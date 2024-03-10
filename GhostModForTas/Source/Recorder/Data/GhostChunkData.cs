@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Monocle;
 using System;
 using System.IO;
+using TAS;
 using TAS.Module;
 
 namespace Celeste.Mod.GhostModForTas.Recorder.Data;
@@ -28,6 +29,7 @@ public struct GhostChunkData {
     public float HurtboxHeight;
     public float HurtboxLeft;
     public float HurtboxTop;
+    public string HudInfo;
     public string CustomInfo;
 
     // V2
@@ -64,7 +66,7 @@ public struct GhostChunkData {
         HurtboxHeight = reader.ReadSingle();
         HurtboxLeft = reader.ReadSingle();
         HurtboxTop = reader.ReadSingle();
-
+        HudInfo = reader.ReadString();
         CustomInfo = reader.ReadString();
 
         if (version < 3) {
@@ -101,6 +103,7 @@ public struct GhostChunkData {
         writer.Write(HurtboxHeight);
         writer.Write(HurtboxLeft);
         writer.Write(HurtboxTop);
+        writer.Write(HudInfo);
         writer.Write(CustomInfo);
         writer.Write(UpdateHair);
         writer.Write(Rotation);

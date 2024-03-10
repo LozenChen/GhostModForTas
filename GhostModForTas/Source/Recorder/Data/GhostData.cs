@@ -50,10 +50,10 @@ public class GhostData {
             GetGhostFilePrefix(session) + "*" + OshiroPostfix
         );
 
-    public static List<Entities.Ghost> FindAllGhosts(Session session) {
+    public static List<Replayer.Ghost> FindAllGhosts(Session session) {
         string[] filePaths = GetAllGhostFilePaths_NoLevel(session);
         Dictionary<Guid, List<GhostData>> dictionary = new();
-        List<Entities.Ghost> ghosts = new();
+        List<Replayer.Ghost> ghosts = new();
         for (int i = 0; i < filePaths.Length; i++) {
             GhostData ghostData = new GhostData(filePaths[i]).Read();
             if (ghostData?.Run is null) {
@@ -83,7 +83,7 @@ public class GhostData {
                 }
             } while (found);
             if (sortedGhostData.Count > 0) {
-                ghosts.Add(new Entities.Ghost(sortedGhostData));
+                ghosts.Add(new Replayer.Ghost(sortedGhostData));
             }
             Logger.Log("GhostModForTas", $"Add Ghost: RunGuid = {guid}, RoomCount = {sortedGhostData.Count}");
         }

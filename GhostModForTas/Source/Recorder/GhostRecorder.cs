@@ -1,6 +1,7 @@
 using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Utils;
+using Celeste.Mod.TASHelper.Module;
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using Monocle;
@@ -9,8 +10,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TAS;
+using TAS.EverestInterop.InfoHUD;
 using TAS.Input.Commands;
 using TAS.Module;
+using System.Text;
+using Celeste.Mod.GhostModForTas.Replayer;
+using MonoMod.RuntimeDetour;
 
 namespace Celeste.Mod.GhostModForTas.Recorder;
 
@@ -55,15 +61,18 @@ internal static class GhostRecorder {
         Step(level);
     }
 
+    internal static bool IsFreezeFrame = false;
+
     [FreezeUpdate]
 
     public static void UpdateInFreezeFrame() {
         IsFreezeFrame = true;
         Recorder?.Update();
+        if (Engine.Scene is Level level) {
+            GhostRecorderEntity.RestoreHudInfo(level, true);
+        }
         IsFreezeFrame = false;
     }
-
-    internal static bool IsFreezeFrame = false;
 
     private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
         Run = Guid.NewGuid();
@@ -120,6 +129,7 @@ internal static class GhostRecorder {
                 Recorder.Data.TargetCount.Level = target;
                 Recorder.Data.Run = Run;
                 Recorder.WriteData();
+                Logger.Log("Ghost", $"hi {Recorder.Data.Frames.Count}");
                 Recorder.Data = new Data.GhostData(level.Session);
             }
             // otherwise it's a respawn or something
@@ -138,12 +148,15 @@ public class GhostRecorderEntity : Entity {
 
     public Dictionary<string, int> RevisitCount;
 
+    public static string HudInfo;
+
     public GhostRecorderEntity(Session session)
         : base() {
         Depth = -10000000;
         Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Global;
         RevisitCount = new();
         Data = new GhostData(session);
+        lastFrameHudInfo = "";
     }
 
     public void WriteData() {
@@ -160,12 +173,15 @@ public class GhostRecorderEntity : Entity {
 
     public override void Update() {
         base.Update();
-
         RecordData();
     }
 
     public void RecordData() {
         if (Engine.Scene is not Level level || level.Session is not Session session) {
+            return;
+        }
+        if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Record) != GhostModuleMode.Record) {
+            RemoveSelf();
             return;
         }
 
@@ -184,7 +200,7 @@ public class GhostRecorderEntity : Entity {
 
 
                 Position = player.Position,
-                Subpixel = player.movementCounter, // this is unncessary for rendering, but we need it in custom info
+                Subpixel = player.movementCounter, // this is unncessary for rendering, but we need it in info hud to draw subpixel indicator
                 Speed = player.Speed,
                 HitboxWidth = player.Collider.Width,
                 HitboxHeight = player.Collider.Height,
@@ -194,7 +210,10 @@ public class GhostRecorderEntity : Entity {
                 HurtboxHeight = player.hurtbox.height,
                 HurtboxLeft = player.hurtbox.Position.X,
                 HurtboxTop = player.hurtbox.Position.Y,
-                CustomInfo = GhostRecorder.ParseTemplate(),
+                HudInfo = ghostSettings.ShowHudInfo ? lastFrameHudInfo : "",
+                // by OoO, Entities Update -> LoadLevel (which happens in Scene.OnEndOfFrame, in Scene.AfterUpdate) -> TAS Update hud info
+                // so we can't get an accurate readtime hud info here
+                CustomInfo = ghostSettings.ShowCustomInfo ? GhostRecorder.ParseTemplate() : "",
 
                 UpdateHair = !GhostRecorder.IsFreezeFrame && level.updateHair,
                 Rotation = player.Sprite.Rotation,
@@ -211,5 +230,61 @@ public class GhostRecorderEntity : Entity {
         };
 
         Data.Frames.Add(LastFrameData);
+    }
+
+    private static string lastFrameHudInfo = "";
+    public static string GetHudInfo() {
+        if (!TasSettings.Enabled || !TasSettings.InfoHud) {
+            return "";
+        }
+        StringBuilder stringBuilder = new();
+
+        if (TasSettings.InfoTasInput) {
+            InfoHud.WriteTasInput(stringBuilder);
+        }
+
+        string hudInfo = GameInfo.HudInfo;
+        if (hudInfo.IsNotEmpty()) {
+            if (stringBuilder.Length > 0) {
+                stringBuilder.AppendLine();
+            }
+
+            stringBuilder.Append(hudInfo);
+        }
+
+        return stringBuilder.ToString().Trim();
+    }
+
+
+    private static void SceneOnAfterUpdate(On.Monocle.Scene.orig_AfterUpdate orig, Scene self) {
+        orig(self);
+        if (self is Level level) {
+            RestoreHudInfo(level);
+        }
+    }
+
+    internal static void RestoreHudInfo(Level level, bool isFreezeFrame = false){
+        if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Record) != GhostModuleMode.Record) {
+            return;
+        }
+        if (isFreezeFrame) {
+            GameInfo.Update();
+        }
+        else if (Manager.UltraFastForwarding) {
+            GameInfo.Update(!level.wasPaused);
+        }
+        lastFrameHudInfo = GetHudInfo();
+    }
+
+    [Load]
+    private static void Load() {
+        using (DetourContext context = new DetourContext() { After = new List<string>() { "CelesteTAS-EverestInterop" } }) {
+            On.Monocle.Scene.AfterUpdate += SceneOnAfterUpdate;
+        }
+    }
+
+    [Unload]
+    private static void Unload() {
+        On.Monocle.Scene.AfterUpdate -= SceneOnAfterUpdate;
     }
 }
