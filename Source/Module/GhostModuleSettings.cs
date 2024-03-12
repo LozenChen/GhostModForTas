@@ -12,30 +12,54 @@ using YamlDotNet.Serialization;
 namespace Celeste.Mod.GhostModForTas.Module;
 
 public class GhostModuleSettings : EverestModuleSettings {
-    public GhostModuleMode Mode { get; set; } = GhostModuleMode.Both;
+    public GhostModuleMode Mode = GhostModuleMode.Both;
 
-    public string Name { get; set; } = "Ghost";
+    public string Name = "Ghost";
 
-    public bool ForceSync { get; set; } = false;
+    public bool ForceSync = false;
 
-    public bool CompareRoomTime { get; set; } = true;
+    public bool IsIGT = true;
 
-    public bool CompareTotalTime { get; set; } = true;
+    public bool CompareRoomTime = true;
 
-    [YamlIgnore]
+    public bool CompareTotalTime = true;
+
     public bool ShowCompareTime => CompareRoomTime || CompareTotalTime;
 
-    public bool ShowGhostHitbox { get; set; } = true;
-    public bool ShowHudInfo { get; set; } = true;
-    public bool UseCustomInfo { get; set; } = true;
+    public bool ShowGhostHitbox = true;
 
-    public string CustomInfoTemplate { get; set; } = "{Engine.TimeRate:}";
+    [YamlIgnore]
+    public bool LastManuallyConfigShowHudInfo;
 
-    public bool ShowInPauseMenu { get; set; } = true;
+    [YamlIgnore]
+    public bool LastManuallyConfigShowCustomInfo;
 
-    public bool ShowInfo => ShowHudInfo;
+    [YamlIgnore]
+    public bool ShowInfoEnabler = true;
 
-    [SettingIgnore]
+    public bool ShowHudInfo = true;
+    public bool ShowCustomInfo = true;
+
+    public bool ShowInfo => ShowHudInfo || ShowCustomInfo;
+
+
+    public string CustomInfoTemplate = "{Player.Depth:}";
+
+    public PlayerSpriteMode GhostSpriteMode = PlayerSpriteMode.Madeline;
+
+    public bool ShowInPauseMenu = true;
+
+
+    public Color HitboxColor = defaultHitboxColor;
+
+    [YamlIgnore]
+    public static readonly Color defaultHitboxColor = new Color(1f, 0f, 0f, 0.2f);
+
+    public Color HurtboxColor = defaultHurtboxColor;
+
+    [YamlIgnore]
+    public static readonly Color defaultHurtboxColor = new Color(0f, 1f, 0f, 0.2f);
+
     public Vector2 InfoPosition { get; set; } = Vector2.UnitX * 20f;
 
     public static void CreateClearAllRecordsEntry(TextMenu textMenu) {
@@ -95,8 +119,20 @@ public class GhostModuleSettings : EverestModuleSettings {
                 GhostModuleMode.Both => "Both"
             });
         } else if (GhostHotkey.InfoHudHotkey.Pressed) {
-            changed = true;
-            ShowHudInfo = !ShowHudInfo;
+            changed = false;
+            if (ShowInfoEnabler) {
+                ShowInfoEnabler = false;
+                ShowHudInfo = false;
+                ShowCustomInfo = false;
+            } else {
+                ShowInfoEnabler = true;
+                ShowHudInfo = LastManuallyConfigShowHudInfo;
+                ShowCustomInfo = LastManuallyConfigShowCustomInfo;
+                if (!ShowInfo) {
+                    ShowHudInfo = LastManuallyConfigShowHudInfo = true;
+                    ShowCustomInfo = LastManuallyConfigShowCustomInfo = true;
+                }
+            }
         } else if (GhostHotkey.GhostHitboxHotkey.Pressed) {
             changed = true;
             ShowGhostHitbox = !ShowGhostHitbox;

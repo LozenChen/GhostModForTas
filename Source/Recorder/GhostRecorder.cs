@@ -55,9 +55,14 @@ internal static class GhostRecorder {
         }
 
         Step(level);
+        if (level.Session.Time == 0L) { // a restart
+            RTASessionTime = 0L;
+        }
     }
 
     internal static bool IsFreezeFrame = false;
+
+    public static long RTASessionTime = 0L;
 
     [FreezeUpdate]
 
@@ -72,7 +77,23 @@ internal static class GhostRecorder {
 
     private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
         Run = Guid.NewGuid();
+        RTASessionTime = 0L;
         orig(self);
+    }
+
+    [Initialize]
+    private static void ILEngineUpdate() {
+        typeof(Engine).GetMethodInfo("Update").IlHook(il => {
+            ILCursor cursor = new ILCursor(il);
+            if (cursor.TryGotoNext(ins => ins.MatchLdsfld<Engine>(nameof(Engine.DashAssistFreeze)))) {
+                cursor.MoveAfterLabels();
+                cursor.EmitDelegate(IncreaseRTATimer);
+            }
+        });
+    }
+
+    private static void IncreaseRTATimer() {
+        RTASessionTime += 170000L;
     }
 
 
@@ -110,12 +131,12 @@ internal static class GhostRecorder {
             if (levelExit) {
                 Recorder.Data.TargetCount = new(target, 1);
                 Recorder.Data.Run = Run;
+                Recorder.Data.IsCompleted = true;
                 Recorder.WriteData();
             } else if (target != Recorder.Data.LevelCount.Level) {
                 Recorder.Data.TargetCount.Level = target;
                 Recorder.Data.Run = Run;
                 Recorder.WriteData();
-                Logger.Log("Ghost", $"hi {Recorder.Data.Frames.Count}");
                 Recorder.Data = new Data.GhostData(level.Session);
             }
             // otherwise it's a respawn or something
@@ -154,6 +175,7 @@ public class GhostRecorderEntity : Entity {
         Data.LevelCount.Count = RevisitCount[Data.LevelCount.Level];
         Data.TargetCount.Count = RevisitCount.TryGetValue(Data.TargetCount.Level, out int targetCount) ? targetCount + 1 : 1;
         Data.SessionTime = Data.Frames.LastOrDefault().ChunkData.Time;
+        Data.RTASessionTime = Data.Frames.LastOrDefault().ChunkData.RTATime;
         Data.Write();
     }
 
@@ -172,7 +194,7 @@ public class GhostRecorderEntity : Entity {
         }
 
         if (playerInstance is not Player player) {
-            LastFrameData = new GhostFrame { ChunkData = new GhostChunkData { HasPlayer = false } };
+            LastFrameData = new GhostFrame { ChunkData = new GhostChunkData { HasPlayer = false , Time = session.Time , RTATime = GhostRecorder.RTASessionTime } };
             Data.Frames.Add(LastFrameData);
             return;
         }
@@ -182,8 +204,9 @@ public class GhostRecorderEntity : Entity {
             ChunkData = new GhostChunkData {
 
                 Time = session.Time,
+                RTATime = GhostRecorder.RTASessionTime,
+                IsFreezeFrame = GhostRecorder.IsFreezeFrame,
                 HasPlayer = true,
-
 
                 Position = player.Position,
                 Subpixel = player.movementCounter, // this is unncessary for rendering, but we need it in info hud to draw subpixel indicator
@@ -196,10 +219,13 @@ public class GhostRecorderEntity : Entity {
                 HurtboxHeight = player.hurtbox.height,
                 HurtboxLeft = player.hurtbox.Position.X,
                 HurtboxTop = player.hurtbox.Position.Y,
-                HudInfo = ghostSettings.ShowHudInfo ? lastFrameHudInfo : "",
+                //HudInfo = ghostSettings.ShowHudInfo ? lastFrameHudInfo : "",
                 // by OoO, Entities Update -> LoadLevel (which happens in Scene.OnEndOfFrame, in Scene.AfterUpdate) -> TAS Update hud info
                 // so we can't get an accurate readtime hud info here
-                CustomInfo = ghostSettings.UseCustomInfo ? GhostRecorder.ParseTemplate() : "",
+                //CustomInfo = ghostSettings.ShowCustomInfo ? GhostRecorder.ParseTemplate() : "",
+
+                HudInfo = lastFrameHudInfo,
+                CustomInfo = GhostRecorder.ParseTemplate(),
 
                 UpdateHair = !GhostRecorder.IsFreezeFrame && level.updateHair,
                 Rotation = player.Sprite.Rotation,

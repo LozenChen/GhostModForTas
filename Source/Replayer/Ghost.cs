@@ -6,6 +6,7 @@ using Monocle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TAS.EverestInterop.Hitboxes;
 
 namespace Celeste.Mod.GhostModForTas.Replayer;
 
@@ -47,10 +48,14 @@ public class Ghost : Actor {
     public string CustomInfo => Frame.CustomInfo;
 
     public string Name => Data.Name;
+    public bool InFreezeFrame => Frame.IsFreezeFrame;
+
+    public int IsCompleted = 0;
 
     private static Vector2 debugOffset = new Vector2(2f, -2f);
     public PlayerSprite Sprite;
     public PlayerHair Hair;
+    public PlayerSpriteMode SpriteMode;
     public Color Color = Color.White;
 
     public float w1;
@@ -71,11 +76,16 @@ public class Ghost : Actor {
         CurrentRoomByOrder = 0;
         Done = false;
         Depth = 1;
-        Sprite = new PlayerSprite(PlayerSpriteMode.MadelineAsBadeline);
+        SpriteMode = ghostSettings.GhostSpriteMode;
+        Sprite = new PlayerSprite(SpriteMode);
         Add(Hair = new PlayerHair(Sprite));
         Add(Sprite); // add it later so it renders above hair
-        Hair.Color = OrigHairColor = Player.NormalBadelineHairColor;
+        Hair.Color = OrigHairColor = SpriteMode switch {
+            PlayerSpriteMode.Madeline or PlayerSpriteMode.MadelineNoBackpack or PlayerSpriteMode.Playback => Player.NormalHairColor,
+            PlayerSpriteMode.Badeline or PlayerSpriteMode.MadelineAsBadeline => Player.NormalBadelineHairColor
+        };
         FrameIndex = -1;
+        IsCompleted = allData.LastOrDefault().IsCompleted ? 1 : 0;
     }
 
     public override void Added(Scene scene) {
@@ -114,7 +124,7 @@ public class Ghost : Actor {
     }
 
     public void GotoNextRoom() {
-        LastSessionTime = Data.SessionTime;
+        LastSessionTime = Data.GetSessionTime();
         CurrentRoomByOrder++;
         if (CurrentRoomByOrder < AllRoomData.Count) {
             FrameIndex = 0;
@@ -132,7 +142,7 @@ public class Ghost : Actor {
             }
             Done = true;
             CurrentRoomByOrder = AllRoomData.Count - 1;
-            LastSessionTime = Data.SessionTime;
+            LastSessionTime = Data.GetSessionTime();
             FrameIndex = Data.Frames.Count - 1;
             NotSynced = false;
             return;
@@ -143,7 +153,7 @@ public class Ghost : Actor {
         int orig = CurrentRoomByOrder;
         for (int i = orig; i < AllRoomData.Count; i++) {
             if (AllRoomData[i].LevelCount == lc) {
-                LastSessionTime = i > 0 ? AllRoomData[i - 1].SessionTime : 0;
+                LastSessionTime = i > 0 ? AllRoomData[i - 1].GetSessionTime() : 0;
                 CurrentRoomByOrder = i;
                 FrameIndex = -1; // so it becomes 0 after update
                 NotSynced = false;
@@ -152,7 +162,7 @@ public class Ghost : Actor {
         }
         for (int i = 0; i < orig - 1; i++) {
             if (AllRoomData[i].LevelCount == lc) {
-                LastSessionTime = i > 0 ? AllRoomData[i - 1].SessionTime : 0;
+                LastSessionTime = i > 0 ? AllRoomData[i - 1].GetSessionTime() : 0;
                 CurrentRoomByOrder = i;
                 FrameIndex = -1;
                 NotSynced = false;
@@ -170,26 +180,24 @@ public class Ghost : Actor {
         if (!Frame.HasPlayer) {
             return;
         }
-
+        
         Hair.Facing = Frame.Facing;
         Hair.SimulateMotion = Frame.HairSimulateMotion;
+        /*
         Hair.Color = new Color(
             (OrigHairColor.R * Color.R) / 255,
             (OrigHairColor.G * Color.G) / 255,
             (OrigHairColor.B * Color.B) / 255,
             (OrigHairColor.A * Color.A) / 255
         );
-        /*
+ */
         Hair.Color = new Color(
             (Frame.HairColor.R * Color.R) / 255,
             (Frame.HairColor.G * Color.G) / 255,
             (Frame.HairColor.B * Color.B) / 255,
             (Frame.HairColor.A * Color.A) / 255
         );
-        */
-        if (Frame.UpdateHair) {
-            Hair.AfterUpdate();
-        }
+ 
     }
 
     public void UpdateSprite() {
@@ -203,12 +211,17 @@ public class Ghost : Actor {
         Sprite.Rotation = Frame.Rotation;
         Sprite.Scale = Frame.Scale;
         Sprite.Scale.X = Sprite.Scale.X * (float)Frame.Facing;
-        Sprite.Color = new Color(
-            (Frame.Color.R * Color.R) / 255,
-            (Frame.Color.G * Color.G) / 255,
-            (Frame.Color.B * Color.B) / 255,
-            (Frame.Color.A * Color.A) / 255
-        );
+        if (SpriteMode == PlayerSpriteMode.Playback) {
+            Sprite.Color = Hair.Color;
+        } else {
+            Sprite.Color = new Color(
+                (Frame.Color.R * Color.R) / 255,
+                (Frame.Color.G * Color.G) / 255,
+                (Frame.Color.B * Color.B) / 255,
+                (Frame.Color.A * Color.A) / 255
+            );
+        }
+
 
         Sprite.HairCount = Frame.HairCount;
 
@@ -221,6 +234,9 @@ public class Ghost : Actor {
         } catch {
             // Play likes to fail randomly as the ID doesn't exist in an underlying dict.
             // Let's ignore this for now.
+        }
+        if (Frame.UpdateHair) {
+            Hair.AfterUpdate();
         }
     }
 
@@ -241,10 +257,14 @@ public class Ghost : Actor {
     public override void DebugRender(Camera camera) {
         base.DebugRender(camera);
         if (ghostSettings.ShowGhostHitbox) {
-            DrawHitbox(x1, y1, w1, h1, Color.Red);
-            DrawHitbox(x2, y2, w2, h2, Color.Lime);
+            DrawHitbox(x1, y1, w1, h1, HitboxColor);
+            DrawHitbox(x2, y2, w2, h2, HurtboxColor);
         }
     }
+
+    public static Color HitboxColor = new Color(1f, 0f, 0f, 0.5f);
+
+    public static Color HurtboxColor = new Color(0f, 1f, 0f, 0.5f);
 
     // we use it so it's not affected by ActualCollideHitbox 
 

@@ -74,7 +74,7 @@ internal static class GhostHud {
         if (ghostSettings.ShowHudInfo && ghost.HudInfo.IsNotNullOrEmpty()) {
             stringBuilder.Append(ghost.HudInfo).AppendLine();
         }
-        if (ghostSettings.UseCustomInfo) {
+        if (ghostSettings.ShowCustomInfo) {
             stringBuilder.Append(ghost.CustomInfo);
         }
 
@@ -84,7 +84,8 @@ internal static class GhostHud {
             return;
         }
 
-        string title = ghost.Name + " " + GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().SessionTime, true);
+        string title = ghost.Name + " " + GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true) + (ghost.IsCompleted > 0 ? "" : "(Not Completed)");
+        Color titleColor = ghost.IsCompleted > 0 ? Color.Yellow : Color.SlateGray;
 
         int viewWidth = Engine.ViewWidth;
         int viewHeight = Engine.ViewHeight;
@@ -125,7 +126,7 @@ internal static class GhostHud {
         Vector2 textPosition = new(x + padding, y + padding);
         Vector2 scale = new(fontSize);
 
-        JetBrainsMonoFont.Draw(title, textPosition, Vector2.Zero, titleScale * scale, Color.Yellow * infoAlpha);
+        JetBrainsMonoFont.Draw(title, textPosition, Vector2.Zero, titleScale * scale, titleColor * infoAlpha);
         textPosition += Vector2.UnitY * titleSize.Y;
         JetBrainsMonoFont.Draw(text, textPosition, Vector2.Zero, scale, Color.White * infoAlpha);
 

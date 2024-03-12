@@ -27,6 +27,12 @@ public class GhostModule : EverestModule {
     }
 
     public override void Unload() {
+        if (!ghostSettings.ShowInfoEnabler) {
+            ghostSettings.ShowHudInfo = ghostSettings.LastManuallyConfigShowHudInfo;
+            ghostSettings.ShowCustomInfo = ghostSettings.LastManuallyConfigShowCustomInfo;
+            SaveSettings();
+        }
+
         Loader.Unload();
     }
 
@@ -38,6 +44,13 @@ public class GhostModule : EverestModule {
         if (firstLoad) {
             Loader.LoadContent();
         }
+    }
+
+    public override void LoadSettings() {
+        base.LoadSettings();
+        ghostSettings.LastManuallyConfigShowCustomInfo = ghostSettings.ShowCustomInfo;
+        ghostSettings.LastManuallyConfigShowHudInfo = ghostSettings.ShowHudInfo;
+        ghostSettings.ShowInfoEnabler = ghostSettings.ShowHudInfo | ghostSettings.ShowCustomInfo;
     }
 
     public override void CreateModMenuSection(TextMenu menu, bool inGame, FMOD.Studio.EventInstance snapshot) {

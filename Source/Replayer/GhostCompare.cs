@@ -1,4 +1,5 @@
 using Celeste.Mod.GhostModForTas.Module;
+using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Monocle;
@@ -34,7 +35,7 @@ internal static class GhostCompare {
         LastGhostTime = GhostTime;
         GhostTime = time;
         LastCurrentTime = CurrentTime;
-        CurrentTime = level.Session.Time;
+        CurrentTime = ghostSettings.IsIGT ? level.Session.Time : GhostRecorder.RTASessionTime;
         Complaint = ComplaintMode.OK;
     }
 

@@ -72,6 +72,7 @@
         <Publicize Include="CelesteTAS-EverestInterop:TAS.Input.Commands.TasCommandAttribute.MethodInfos" />
         <DoNotPublicize Include="Celeste:Monocle.Scene.OnEndOfFrame" />
         <DoNotPublicize Include="Celeste:Monocle.Entity.PostUpdate" />
+        <DoNotPublicize Include="Celeste:Celeste.Mod.TextInput.OnInput" />
     </ItemGroup>
 
     <PropertyGroup>

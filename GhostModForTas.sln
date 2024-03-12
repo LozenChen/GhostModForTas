@@ -3,20 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GhostModForTas", "GhostModForTas\GhostModForTas.csproj", "{35A55024-DC11-42BE-9066-B36F66BB9615}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GhostModForTas", "GhostModForTas.csproj", "{2D88C053-5CB6-4569-A65F-FD447C7CDA8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{35A55024-DC11-42BE-9066-B36F66BB9615}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{35A55024-DC11-42BE-9066-B36F66BB9615}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D88C053-5CB6-4569-A65F-FD447C7CDA8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D88C053-5CB6-4569-A65F-FD447C7CDA8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {813310BD-2DA2-4176-8F55-98F33D52A77C}
+		SolutionGuid = {0DE0C82C-92BD-44FA-8F3E-DF81B20560D1}
 	EndGlobalSection
 EndGlobal

@@ -98,6 +98,8 @@ public class GhostData {
     public string Name;
     public DateTime Date;
     public long SessionTime;
+    public long RTASessionTime;
+    public bool IsCompleted = false;
 
     public Guid Run;
     public string CustomInfoTemplate;
@@ -145,6 +147,10 @@ public class GhostData {
     public GhostData(string filePath)
         : this() {
         FilePath = filePath;
+    }
+
+    public long GetSessionTime() {
+        return ghostSettings.IsIGT ? SessionTime : RTASessionTime;
     }
 
     public GhostData Read() {
@@ -210,11 +216,16 @@ public class GhostData {
         }
 
         SessionTime = reader.ReadInt64();
+        RTASessionTime = reader.ReadInt64();
+        IsCompleted = reader.ReadBoolean();
 
         Run = new Guid(reader.ReadBytes(16));
         CustomInfoTemplate = reader.ReadString();
 
         int count = reader.ReadInt32();
+        if (count > 1E6) {
+            throw new Exception("GhostData out of date or corrupted. Please clear this Ghost file.");
+        }
         reader.ReadChar(); // \r
         reader.ReadChar(); // \n
         Frames = new List<GhostFrame>(count);
@@ -264,6 +275,8 @@ public class GhostData {
         writer.WriteNullTerminatedString(Name);
         writer.Write(Date.ToBinary());
         writer.Write(SessionTime);
+        writer.Write(RTASessionTime);
+        writer.Write(IsCompleted);
 
         writer.Write(Run.ToByteArray());
         writer.WriteNullTerminatedString(CustomInfoTemplate);

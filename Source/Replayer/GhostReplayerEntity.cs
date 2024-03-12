@@ -32,7 +32,9 @@ internal static class GhostReplayer {
     [FreezeUpdate]
 
     public static void UpdateInFreezeFrame() {
-        Replayer?.Update();
+        if (!ghostSettings.IsIGT) {
+            Replayer?.Update();
+        }
     }
 }
 
@@ -64,20 +66,30 @@ public class GhostReplayerEntity : Entity {
             PostUpdate += RemoveReplayer;
             Active = false;
         } else {
-            Ghosts.Sort((x, y) => System.Math.Sign(x.AllRoomData.LastOrDefault().SessionTime - y.AllRoomData.LastOrDefault().SessionTime));
+            Ghosts.Sort(GhostComparison.Instance);
             RoomName = level.Session.Level;
             RevisitCount.Add(RoomName, 1);
             ComparerGhost = Ghosts.FirstOrDefault();
             GhostCompare.ResetCompareTime();
         }
-
     }
+
 
     public override void Update() {
         base.Update();
-        foreach (Ghost ghost in Ghosts) {
-            ghost.UpdateByReplayer();
+        if (ghostSettings.IsIGT) {
+            foreach (Ghost ghost in Ghosts) {
+                do {
+                    ghost.UpdateByReplayer();
+                }
+                while (ghost.InFreezeFrame);
+            }
+        } else {
+            foreach (Ghost ghost in Ghosts) {
+                ghost.UpdateByReplayer();
+            }
         }
+        
     }
 
     public void HandleTransition(Level level) {
@@ -113,7 +125,7 @@ public class GhostReplayerEntity : Entity {
             foreach (Ghost ghost in Ghosts) {
                 foreach (GhostData data in ghost.AllRoomData) {
                     if (data.LevelCount == new LevelCount(RoomName, RevisitCount[RoomName]) && data.TargetCount.Level == target) {
-                        long time = data.SessionTime;
+                        long time = data.GetSessionTime();
                         GhostCompare.UpdateRoomTime(level, time);
                         if (ghost != ComparerGhost) {
                             GhostCompare.Complaint = GhostCompare.ComplaintMode.GhostChange;
@@ -159,5 +171,22 @@ public class GhostReplayerEntity : Entity {
         }
 
         base.Render();
+    }
+}
+
+public class GhostComparison : IComparer<Ghost> {
+
+    public static GhostComparison Instance = new GhostComparison();
+    public int Compare(Ghost ghost1, Ghost ghost2) {
+        int sign1 = ghost2.IsCompleted - ghost1.IsCompleted;
+        if (sign1 != 0) {
+            return sign1;
+        }
+
+        int sign2 = System.Math.Sign(ghost2.AllRoomData.Count - ghost1.AllRoomData.Count);
+        if (sign2 != 0) {
+            return sign2;
+        }
+        return System.Math.Sign(ghost1.AllRoomData.LastOrDefault().GetSessionTime() - ghost2.AllRoomData.LastOrDefault().GetSessionTime());
     }
 }

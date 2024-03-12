@@ -9,6 +9,8 @@ public struct GhostChunkData {
     public const string ChunkV3 = "v3";
     public const string Chunk = ChunkV3;
     public long Time;
+    public long RTATime;
+    public bool IsFreezeFrame;
     public bool HasPlayer;
 
 
@@ -44,7 +46,8 @@ public struct GhostChunkData {
 
     public void Read(BinaryReader reader, int version) {
         Time = reader.ReadInt64();
-
+        RTATime = reader.ReadInt64();
+        IsFreezeFrame = reader.ReadBoolean();
 
         if (version < 2) {
             return;
@@ -83,7 +86,8 @@ public struct GhostChunkData {
 
     public void Write(BinaryWriter writer) {
         writer.Write(Time);
-
+        writer.Write(RTATime);
+        writer.Write(IsFreezeFrame);
 
         writer.Write(Position.X);
         writer.Write(Position.Y);
