@@ -1,10 +1,12 @@
 using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
+using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
 using Mono.Cecil.Cil;
 using Monocle;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,16 +50,39 @@ internal static class GhostRecorder {
 
     [LoadLevel]
     public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
+        // softlock
+        if (isSoftlockReloading) {
+            level.Add(Recorder);
+            level.Add(GhostReplayer.Replayer);
+            GhostReplayer.Replayer?.Ghosts?.ForEach(level.Add);
+            isSoftlockReloading = false;
+            return;
+        }
+
+        // recorder
         if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
             Recorder?.RemoveSelf();
             level.Add(Recorder = new GhostRecorderEntity(level.Session));
             CachedEntitiesForParse.Clear();
         }
-
         Step(level);
         if (level.Session.Time == 0L) { // a restart
             RTASessionTime = 0L;
         }
+
+        // replayer
+        if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) != GhostModuleMode.Play) {
+            GhostReplayer.Replayer?.RemoveSelf();
+        } else {
+            if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
+                GhostReplayer.Replayer?.RemoveSelf();
+                level.Add(GhostReplayer.Replayer = new GhostReplayerEntity(level));
+            } else if (!isFromLoader && level.Tracker.GetEntity<GhostReplayerEntity>() is { } replayer) {
+                GhostReplayer.Replayer = replayer;
+                GhostReplayer.Replayer.HandleTransition(level);
+            }
+        }
+        
     }
 
     internal static bool IsFreezeFrame = false;
@@ -82,12 +107,20 @@ internal static class GhostRecorder {
     }
 
     [Initialize]
-    private static void ILEngineUpdate() {
+    private static void Initialize() {
         typeof(Engine).GetMethodInfo("Update").IlHook(il => {
             ILCursor cursor = new ILCursor(il);
             if (cursor.TryGotoNext(ins => ins.MatchLdsfld<Engine>(nameof(Engine.DashAssistFreeze)))) {
                 cursor.MoveAfterLabels();
                 cursor.EmitDelegate(IncreaseRTATimer);
+            }
+        });
+
+        typeof(Level).GetNestedType("<TransitionRoutine>d__29", System.Reflection.BindingFlags.NonPublic).GetMethodInfo("MoveNext").IlHook(il => {
+            ILCursor cursor = new ILCursor(il);
+            if (cursor.TryGotoNext(ins => ins.MatchCall<TimeSpan>("get_TotalSeconds"), ins => ins.MatchLdcR8(5))){
+                cursor.Index += 10;
+                cursor.EmitDelegate(MarkSoftlock);
             }
         });
     }
@@ -96,7 +129,18 @@ internal static class GhostRecorder {
         RTASessionTime += 170000L;
     }
 
+    private static bool isSoftlockReloading = false;
 
+    private static void MarkSoftlock() {
+        isSoftlockReloading = true;
+        if (Recorder is not null) {
+            Recorder.Scene = null;
+        }
+        if (GhostReplayer.Replayer is not null) {
+            GhostReplayer.Replayer.Scene = null;
+            GhostReplayer.Replayer.Ghosts.ForEach(x => x.Scene = null);
+        }
+    }
     /*
     [TasDisableRun]
     public static void StopRecording() {

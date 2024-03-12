@@ -85,7 +85,6 @@ public class GhostData {
             if (sortedGhostData.Count > 0) {
                 ghosts.Add(new Replayer.Ghost(sortedGhostData));
             }
-            Logger.Log("GhostModForTas", $"Add Ghost: RunGuid = {guid}, RoomCount = {sortedGhostData.Count}");
         }
 
         return ghosts;
@@ -256,7 +255,7 @@ public class GhostData {
         using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8)) {
             Write(writer);
         }
-        Logger.Log("GhostModForTas", $"Write: SID = {SID}, Level = [{LevelCount}], Target = [{TargetCount}], RunGUID = {Run}");
+        Logger.Log("GhostModForTas", $"Write: SID = {SID}, Level = {LevelCount}, Target = {TargetCount}, RunGUID = {Run}");
     }
 
     public void Write(BinaryWriter writer) {
@@ -318,5 +317,9 @@ public struct LevelCount {
 
     public override int GetHashCode() {
         return Level.GetHashCode() + Count;
+    }
+
+    public override string ToString() {
+        return $"[{Level}]@{Count switch { 1 => "1st", 2 => "2nd", 3 => "3rd", _ => $"{Count}th"}}";
     }
 }

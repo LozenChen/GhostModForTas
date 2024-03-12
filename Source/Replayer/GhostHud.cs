@@ -84,7 +84,7 @@ internal static class GhostHud {
             return;
         }
 
-        string title = ghost.Name + " " + GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true) + (ghost.IsCompleted > 0 ? "" : "(Not Completed)");
+        string title = ghost.Name + " " + GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true) + (ghost.IsCompleted > 0 ? "" : "Not Completed".ToDialogText());
         Color titleColor = ghost.IsCompleted > 0 ? Color.Yellow : Color.SlateGray;
 
         int viewWidth = Engine.ViewWidth;

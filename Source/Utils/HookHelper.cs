@@ -193,6 +193,10 @@ internal static class GhostMod_HookLoadLevel {
 
     [Initialize]
     private static void Initialize() {
+        LoadLevel = LoadLevel_Before = null;
+        LoadLevel_Parameter0 = LoadLevel_Before_Parameter0 = null;
+        LoadLevel_Parameter1 = LoadLevel_Before_Parameter1 = null;
+        LoadLevel_Parameter2 = LoadLevel_Before_Parameter2 = null;
         foreach (MethodInfo method in typeof(AttributeUtils).Assembly.GetTypesSafe().SelectMany(type => type
         .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))) {
             if (method.GetCustomAttribute<LoadLevelAttribute>() is not LoadLevelAttribute attr) {

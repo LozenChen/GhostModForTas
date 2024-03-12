@@ -3,6 +3,7 @@ using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Monocle;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,22 +13,22 @@ namespace Celeste.Mod.GhostModForTas.Replayer;
 internal static class GhostReplayer {
 
     public static GhostReplayerEntity Replayer;
-
-    [LoadLevel]
+    /* this is moved to GhostRecorder.OnLoadLevel, to handle softlock
     public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
         if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) != GhostModuleMode.Play) {
-            Replayer?.RemoveSelf();
+            GhostReplayer.Replayer?.RemoveSelf();
             return;
         }
 
         if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
-            Replayer?.RemoveSelf();
-            level.Add(Replayer = new GhostReplayerEntity(level));
+            GhostReplayer.Replayer?.RemoveSelf();
+            level.Add(GhostReplayer.Replayer = new GhostReplayerEntity(level));
         } else if (!isFromLoader && level.Tracker.GetEntity<GhostReplayerEntity>() is { } replayer) {
-            Replayer = replayer;
-            Replayer.HandleTransition(level);
+            GhostReplayer.Replayer = replayer;
+            GhostReplayer.Replayer.HandleTransition(level);
         }
     }
+    */
 
     [FreezeUpdate]
 
@@ -71,6 +72,9 @@ public class GhostReplayerEntity : Entity {
             RevisitCount.Add(RoomName, 1);
             ComparerGhost = Ghosts.FirstOrDefault();
             GhostCompare.ResetCompareTime();
+            foreach (Ghost ghost in Ghosts) {
+                Logger.Log("GhostModForTas", $"Add Ghost: RunGUID = {ghost.Data.Run}, Time = {GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true)}, RoomCount = {ghost.AllRoomData.Count}");
+            }
         }
     }
 
