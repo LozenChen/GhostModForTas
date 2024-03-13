@@ -61,52 +61,16 @@ internal static class AttributeUtils {
     }
 #endif
 
-    public static void SendToTas<TSource>(string attributeFullName) where TSource : Attribute {
-        if (ModUtils.GetType("CelesteTAS", attributeFullName) is not { } target) {
-            return;
-        }
-        if (MethodInfos.TryGetValue(typeof(TSource), out var sourceInfos) && TAS.Utils.AttributeUtils.MethodInfos.TryGetValue(target, out var targetInfos)) {
-            targetInfos = targetInfos.ToList().Apply(x => x.AddRange(sourceInfos)).Distinct();
-            MethodsSentToTas.Add(sourceInfos, target);
-        }
-    }
-
-    [Unload]
-    public static void ReclaimFromTas() {
-        foreach (KeyValuePair<IEnumerable<MethodInfo>, Type> pair in MethodsSentToTas) {
-            if (TAS.Utils.AttributeUtils.MethodInfos.TryGetValue(pair.Value, out var targetInfos)) {
-                targetInfos = targetInfos.ToList().Apply(x => {
-                    foreach (MethodInfo source in pair.Key) {
-                        x.Remove(source);
-                    }
-                });
-            }
-        }
-
-        IEnumerable<MethodInfo> localMethodInfos = typeof(AttributeUtils).Assembly.GetTypesSafe().SelectMany(type => type
-            .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
-            .Where(info => info.GetCustomAttributes<TasCommandAttribute>().IsNotEmpty());
-        IDictionary<TasCommandAttribute, MethodInfo> tasMethodInfos = TasCommandAttribute.MethodInfos;
-        foreach (MethodInfo methodInfo in localMethodInfos) {
-            IEnumerable<TasCommandAttribute> tasCommandAttributes = methodInfo.GetCustomAttributes<TasCommandAttribute>();
-            foreach (TasCommandAttribute tasCommandAttribute in tasCommandAttributes) {
-                tasMethodInfos.Remove(tasCommandAttribute);
-            }
-        }
-    }
-
-    private static readonly Dictionary<IEnumerable<MethodInfo>, Type> MethodsSentToTas = new();
 
     [Initialize]
     public static void CollectAndSendTasCommand() {
         IEnumerable<MethodInfo> localMethodInfos = typeof(AttributeUtils).Assembly.GetTypesSafe().SelectMany(type => type
             .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
             .Where(info => info.GetCustomAttributes<TasCommandAttribute>().IsNotEmpty());
-        IDictionary<TasCommandAttribute, MethodInfo> tasMethodInfos = TasCommandAttribute.MethodInfos;
         foreach (MethodInfo methodInfo in localMethodInfos) {
             IEnumerable<TasCommandAttribute> tasCommandAttributes = methodInfo.GetCustomAttributes<TasCommandAttribute>();
             foreach (TasCommandAttribute tasCommandAttribute in tasCommandAttributes) {
-                tasMethodInfos[tasCommandAttribute] = methodInfo;
+                TasCommandAttribute.MethodInfos[tasCommandAttribute] = methodInfo;
             }
         }
     }

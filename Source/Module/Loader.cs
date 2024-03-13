@@ -17,8 +17,8 @@ internal static class Loader {
     public static void Initialize() {
         HookHelper.InitializeAtFirst();
         AttributeUtils.Invoke<InitializeAttribute>();
-        AttributeUtils.SendToTas<TasEnableRunAttribute>("TAS.EnableRunAttribute");
-        AttributeUtils.SendToTas<TasDisableRunAttribute>("TAS.DisableRunAttribute");
+        typeof(TAS.Manager).GetMethod("DisableRun").HookAfter(() => AttributeUtils.Invoke<TasDisableRunAttribute>());
+        typeof(TAS.Manager).GetMethod("EnableRun").HookBefore(() => AttributeUtils.Invoke<TasEnableRunAttribute>());
         GhostModule.Instance.SaveSettings();
         if (Reloading) {
             OnReload();

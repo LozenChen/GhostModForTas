@@ -6,7 +6,6 @@ using Monocle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TAS.EverestInterop.Hitboxes;
 
 namespace Celeste.Mod.GhostModForTas.Replayer;
 
@@ -180,7 +179,7 @@ public class Ghost : Actor {
         if (!Frame.HasPlayer) {
             return;
         }
-        
+
         Hair.Facing = Frame.Facing;
         Hair.SimulateMotion = Frame.HairSimulateMotion;
         /*
@@ -197,7 +196,7 @@ public class Ghost : Actor {
             (Frame.HairColor.B * Color.B) / 255,
             (Frame.HairColor.A * Color.A) / 255
         );
- 
+
     }
 
     public void UpdateSprite() {

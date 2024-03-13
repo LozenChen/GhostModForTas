@@ -6,7 +6,6 @@ using Mono.Cecil.Cil;
 using Monocle;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +14,7 @@ using System.Text;
 using TAS;
 using TAS.EverestInterop.InfoHUD;
 using TAS.Module;
+using TAS.Input.Commands;
 
 namespace Celeste.Mod.GhostModForTas.Recorder;
 
@@ -62,8 +62,8 @@ internal static class GhostRecorder {
         // recorder
         if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
             Recorder?.RemoveSelf();
-            level.Add(Recorder = new GhostRecorderEntity(level.Session));
             CachedEntitiesForParse.Clear();
+            level.Add(Recorder = new GhostRecorderEntity(level.Session));
         }
         Step(level);
         if (level.Session.Time == 0L) { // a restart
@@ -71,7 +71,7 @@ internal static class GhostRecorder {
         }
 
         // replayer
-        if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) != GhostModuleMode.Play) {
+        if (!ghostSettings.Mode.Has(GhostModuleMode.Play)) {
             GhostReplayer.Replayer?.RemoveSelf();
         } else {
             if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
@@ -82,7 +82,7 @@ internal static class GhostRecorder {
                 GhostReplayer.Replayer.HandleTransition(level);
             }
         }
-        
+
     }
 
     internal static bool IsFreezeFrame = false;
@@ -118,9 +118,9 @@ internal static class GhostRecorder {
 
         typeof(Level).GetNestedType("<TransitionRoutine>d__29", System.Reflection.BindingFlags.NonPublic).GetMethodInfo("MoveNext").IlHook(il => {
             ILCursor cursor = new ILCursor(il);
-            if (cursor.TryGotoNext(ins => ins.MatchCall<TimeSpan>("get_TotalSeconds"), ins => ins.MatchLdcR8(5))){
+            if (cursor.TryGotoNext(ins => ins.MatchCall<TimeSpan>("get_TotalSeconds"), ins => ins.MatchLdcR8(5))) {
                 cursor.Index += 10;
-                cursor.EmitDelegate(MarkSoftlock);
+                cursor.EmitDelegate(EscapeFromAntiSoftlock);
             }
         });
     }
@@ -131,7 +131,7 @@ internal static class GhostRecorder {
 
     private static bool isSoftlockReloading = false;
 
-    private static void MarkSoftlock() {
+    private static void EscapeFromAntiSoftlock() {
         isSoftlockReloading = true;
         if (Recorder is not null) {
             Recorder.Scene = null;
@@ -141,22 +141,28 @@ internal static class GhostRecorder {
             GhostReplayer.Replayer.Ghosts.ForEach(x => x.Scene = null);
         }
     }
-    /*
-    [TasDisableRun]
-    public static void StopRecording() {
 
-    }
-
-
-    [TasCommand("GhostStartRecording", AliasNames = new[] { "GhostStartRecord", "StartGhostRecord", "StartGhostRecording" }, ExecuteTiming = ExecuteTiming.Runtime)]
-    public static void StartRecordingCommand() {
-    }
-
-    [TasCommand("GhostStopRecording")]
+    [TasCommand("StopGhostRecording", AliasNames = new[] { "GhostStopRecord", "StopGhostRecord", "GhostStopRecording" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StopRecordingCommand() {
-
+        if (origMode.HasValue) {
+            ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // record is stopped anyway
+            origMode = null;
+        }
     }
-    */
+
+    [TasDisableRun]
+    private static void OnTasDisableRun() {
+        StopRecordingCommand();
+    }
+
+
+    [TasCommand("StartGhostRecording", AliasNames = new[] { "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost", "RecordingGhost" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    public static void StartRecordingCommand() {
+        origMode = ghostSettings.Mode;
+        ghostSettings.Mode = GhostModuleMode.Record;
+    }
+
+    public static GhostModuleMode? origMode;
 
     public static void OnExit(LevelExit.Mode mode) {
         if (Engine.Scene is not Level level) {
@@ -228,6 +234,11 @@ public class GhostRecorderEntity : Entity {
         RecordData();
     }
 
+    public override void Removed(Scene scene) {
+        base.Removed(scene);
+        GhostRecorder.Recorder = null;
+    }
+
     public void RecordData() {
         if (Engine.Scene is not Level level || level.Session is not Session session) {
             return;
@@ -238,7 +249,7 @@ public class GhostRecorderEntity : Entity {
         }
 
         if (playerInstance is not Player player) {
-            LastFrameData = new GhostFrame { ChunkData = new GhostChunkData { HasPlayer = false , Time = session.Time , RTATime = GhostRecorder.RTASessionTime } };
+            LastFrameData = new GhostFrame { ChunkData = new GhostChunkData { HasPlayer = false, Time = session.Time, RTATime = GhostRecorder.RTASessionTime } };
             Data.Frames.Add(LastFrameData);
             return;
         }

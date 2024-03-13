@@ -15,6 +15,9 @@ internal static class SaveStateUtils {
     private static long lastGhostTime;
     private static long currentTime;
     private static long lastCurrentTime;
+    private static long RTASessionTime;
+    private static GhostRecorderEntity recorder;
+    private static GhostReplayerEntity replayer;
 
     [Initialize]
     public static void Initialize() {
@@ -37,12 +40,21 @@ internal static class SaveStateUtils {
             lastGhostTime = GhostCompare.LastGhostTime;
             currentTime = GhostCompare.CurrentTime;
             lastCurrentTime = GhostCompare.LastCurrentTime;
+            RTASessionTime = GhostRecorder.RTASessionTime;
+            recorder = GhostRecorder.Recorder.DeepCloneShared();
+            replayer = GhostReplayer.Replayer.DeepCloneShared();
         }, (_, _) => {
             GhostRecorder.Run = run;
             GhostCompare.GhostTime = ghostTime;
             GhostCompare.LastGhostTime = lastGhostTime;
             GhostCompare.CurrentTime = currentTime;
             GhostCompare.LastCurrentTime = lastCurrentTime;
+            GhostRecorder.RTASessionTime = RTASessionTime;
+            GhostRecorder.Recorder = recorder.DeepCloneShared();
+            GhostReplayer.Replayer = replayer.DeepCloneShared();
+        }, () => {
+            recorder = null;
+            replayer = null;
         });
     }
 

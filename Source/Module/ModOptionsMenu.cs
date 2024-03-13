@@ -1,4 +1,6 @@
+using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Utils;
+using Celeste.Mod.UI;
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using Monocle;
@@ -9,10 +11,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Celeste.Mod.UI;
-using static TAS.EverestInterop.Hitboxes.HitboxColor;
 using static Celeste.TextMenu;
 using static Celeste.TextMenuExt;
+using static TAS.EverestInterop.Hitboxes.HitboxColor;
 
 namespace Celeste.Mod.GhostModForTas.Module;
 
@@ -37,6 +38,13 @@ internal static class ModOptionsMenu {
         }));
 
         menu.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => ghostSettings.GhostSpriteMode = value));
+
+
+
+        TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Ghost Hitbox Color".ToDialogText(), menu, inGame, Color.Red);
+        menu.Add(hitboxColor);
+        TextMenu.Item hurtboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HurtboxColor, value => ghostSettings.HurtboxColor = value, "Ghost Hurtbox Color".ToDialogText(), menu, inGame, Color.Lime);
+        menu.Add(hurtboxColor);
         if (inGame) {
             SubHeaderExt remindText = new("Color Customization Remind".ToDialogText()) {
                 TextColor = Color.Gray,
@@ -49,10 +57,9 @@ internal static class ModOptionsMenu {
             HeightExtra = 0f
         };
         menu.Add(formatText);
-        TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Ghost Hitbox Color".ToDialogText(), menu, inGame, Color.Red);
-        menu.Add(hitboxColor);
-        TextMenu.Item hurtboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HurtboxColor, value => ghostSettings.HurtboxColor = value, "Ghost Hurtbox Color".ToDialogText(), menu, inGame, Color.Lime);
-        menu.Add(hurtboxColor);
+
+
+        menu.Add(new TextMenu.OnOff("Show Recorder Icon".ToDialogText(), ghostSettings.ShowRecorderIcon).Change(value => { ghostSettings.ShowRecorderIcon = value; RecordingIcon.Instance?.Update(); }));
         menu.Add(new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value));
         GhostModuleSettings.CreateClearAllRecordsEntry(menu);
         menu.Add(new TextMenu.Button(Dialog.Clean("options_keyconfig")).Pressed(() => {
@@ -101,7 +108,7 @@ internal static class ModOptionsMenu {
             new(GhostModuleMode.Off, "Mode Off".ToDialogText()),
             new(GhostModuleMode.Record, "Mode Record".ToDialogText()),
             new(GhostModuleMode.Play, "Mode Play".ToDialogText()),
-            new(GhostModuleMode.Both, "Mode Both".ToDialogText()),
+            // new(GhostModuleMode.Both, "Mode Both".ToDialogText()),
         };
     }
 
@@ -284,7 +291,8 @@ internal class EnumerableSliderExt<T> : TextMenuExt.EnumerableSlider<T> {
 
 internal static class ColorCustomization {
     public static TextMenu.Item CreateChangeColorItem(Func<Color> getter, Action<Color> setter, string name, TextMenu textMenu, bool inGame, Color defaultValue) {
-        TextMenu.Item item = new ButtonColorExt(name.ToDialogText(), getter, inGame).Pressed(inGame ? () => { } :
+        TextMenu.Item item = new ButtonColorExt(name.ToDialogText(), getter, inGame).Pressed(inGame ? () => { }
+        :
             () => {
                 OuiModOptionStringHexColor.DefaultString = ColorToHex(defaultValue);
                 Audio.Play("event:/ui/main/savefile_rename_start");

@@ -320,6 +320,6 @@ public struct LevelCount {
     }
 
     public override string ToString() {
-        return $"[{Level}]@{Count switch { 1 => "1st", 2 => "2nd", 3 => "3rd", _ => $"{Count}th"}}";
+        return $"[{Level}]@{Count switch { 1 => "1st", 2 => "2nd", 3 => "3rd", _ => $"{Count}th" }}";
     }
 }

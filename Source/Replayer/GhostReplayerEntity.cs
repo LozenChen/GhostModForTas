@@ -1,9 +1,6 @@
-using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
-using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Monocle;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -93,7 +90,7 @@ public class GhostReplayerEntity : Entity {
                 ghost.UpdateByReplayer();
             }
         }
-        
+
     }
 
     public void HandleTransition(Level level) {
