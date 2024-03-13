@@ -17,7 +17,6 @@ internal class RecordingIcon : Entity {
         Position = new Vector2(1920f, 1080f);
         Tag = Tags.HUD;
         Update();
-        Visible &= ghostSettings.Mode.HasFlag(Module.GhostModuleMode.Record);
         Instance = this;
     }
 
@@ -28,7 +27,7 @@ internal class RecordingIcon : Entity {
 
     public override void Update() {
         base.Update();
-        Visible = ghostSettings.ShowRecorderIcon && GhostRecorder.Recorder is not null;
+        Visible = ghostSettings.Mode.HasFlag(Module.GhostModuleMode.Record) & ghostSettings.ShowRecorderIcon && GhostRecorder.Recorder is not null;
     }
 
     public override void Render() {

@@ -21,7 +21,7 @@ internal static class ModOptionsMenu {
 
     public static void CreateMenu(EverestModule everestModule, TextMenu menu, bool inGame, bool inPauseMenu = false) {
         menu.Add(new TextMenuExt.EnumerableSlider<GhostModuleMode>("Mode".ToDialogText(), CreateMainModeOptions(),
-        ghostSettings.Mode).Change(value => ghostSettings.Mode = value));
+        ghostSettings.Mode).Change(value => { ghostSettings.Mode = value; RecordingIcon.Instance?.Update(); }));
 
         menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => ghostSettings.ForceSync = value));
         menu.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
@@ -41,9 +41,9 @@ internal static class ModOptionsMenu {
 
 
 
-        TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Ghost Hitbox Color".ToDialogText(), menu, inGame, Color.Red);
+        TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Hitbox Color".ToDialogText(), menu, inGame, Color.Red);
         menu.Add(hitboxColor);
-        TextMenu.Item hurtboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HurtboxColor, value => ghostSettings.HurtboxColor = value, "Ghost Hurtbox Color".ToDialogText(), menu, inGame, Color.Lime);
+        TextMenu.Item hurtboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HurtboxColor, value => ghostSettings.HurtboxColor = value, "Hurtbox Color".ToDialogText(), menu, inGame, Color.Lime);
         menu.Add(hurtboxColor);
         if (inGame) {
             SubHeaderExt remindText = new("Color Customization Remind".ToDialogText()) {
@@ -291,7 +291,7 @@ internal class EnumerableSliderExt<T> : TextMenuExt.EnumerableSlider<T> {
 
 internal static class ColorCustomization {
     public static TextMenu.Item CreateChangeColorItem(Func<Color> getter, Action<Color> setter, string name, TextMenu textMenu, bool inGame, Color defaultValue) {
-        TextMenu.Item item = new ButtonColorExt(name.ToDialogText(), getter, inGame).Pressed(inGame ? () => { }
+        TextMenu.Item item = new ButtonColorExt(name, getter, inGame).Pressed(inGame ? () => { }
         :
             () => {
                 OuiModOptionStringHexColor.DefaultString = ColorToHex(defaultValue);

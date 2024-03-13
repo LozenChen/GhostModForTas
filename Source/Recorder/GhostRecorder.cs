@@ -13,8 +13,8 @@ using System.Linq;
 using System.Text;
 using TAS;
 using TAS.EverestInterop.InfoHUD;
-using TAS.Module;
 using TAS.Input.Commands;
+using TAS.Module;
 
 namespace Celeste.Mod.GhostModForTas.Recorder;
 
@@ -145,7 +145,7 @@ internal static class GhostRecorder {
     [TasCommand("StopGhostRecording", AliasNames = new[] { "GhostStopRecord", "StopGhostRecord", "GhostStopRecording" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StopRecordingCommand() {
         if (origMode.HasValue) {
-            ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // record is stopped anyway
+            ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // recording is stopped anyway
             origMode = null;
         }
     }

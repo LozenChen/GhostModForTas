@@ -66,7 +66,7 @@ public class GhostModuleSettings : EverestModuleSettings {
     public bool ShowRecorderIcon = true;
 
     public static void CreateClearAllRecordsEntry(TextMenu textMenu) {
-        textMenu.Add(new TextMenu.Button("Clear All Records").Pressed(() => {
+        textMenu.Add(new TextMenu.Button("Clear All Records".ToDialogText()).Pressed(() => {
             if (!Directory.Exists(PathGhosts)) {
                 Audio.Play(SFX.ui_main_button_invalid);
                 return;
@@ -111,8 +111,7 @@ public class GhostModuleSettings : EverestModuleSettings {
             changed = true;
             if (GhostRecorder.origMode.HasValue) {
                 GhostRecorder.StopRecordingCommand();
-            }
-            else {
+            } else {
                 Mode = Mode switch {
                     GhostModuleMode.Off => GhostModuleMode.Record,
                     GhostModuleMode.Record => GhostModuleMode.Play,
