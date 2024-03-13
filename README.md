@@ -4,7 +4,9 @@
 
 ----
 
-This Celeste mod is base on DemoJameson's [GhostMod](https://github.com/DemoJameson/GhostMod), which is a fork of Everest Team's [GhostMod](https://github.com/EverestAPI/GhostMod)
+This Celeste mod is based on DemoJameson's [GhostMod](https://github.com/DemoJameson/GhostMod), which is a fork of Everest Team's [GhostMod](https://github.com/EverestAPI/GhostMod)
+
+https://gamebanana.com/mods/500759
 
 # How to use
 
