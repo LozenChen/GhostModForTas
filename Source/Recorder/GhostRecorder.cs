@@ -26,6 +26,14 @@ internal static class GhostRecorder {
 
     public static Guid Run;
 
+    internal static bool IsFreezeFrame = false;
+
+    public static long RTASessionTime = 0L;
+
+    private static bool isSoftlockReloading = false;
+
+    public static GhostModuleMode? origMode;
+
     [Load]
     public static void Load() {
         PathGhosts = Path.Combine(Everest.PathSettings, "GhostsForTas");
@@ -46,6 +54,12 @@ internal static class GhostRecorder {
     [Unload]
     public static void Unload() {
         On.Celeste.Session.ctor -= OnSessionCtor;
+    }
+
+    private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
+        Run = Guid.NewGuid();
+        RTASessionTime = 0L;
+        orig(self);
     }
 
     [LoadLevel]
@@ -85,10 +99,6 @@ internal static class GhostRecorder {
 
     }
 
-    internal static bool IsFreezeFrame = false;
-
-    public static long RTASessionTime = 0L;
-
     [FreezeUpdate]
 
     public static void UpdateInFreezeFrame() {
@@ -98,12 +108,6 @@ internal static class GhostRecorder {
             GhostRecorderEntity.RestoreHudInfo(level, true);
         }
         IsFreezeFrame = false;
-    }
-
-    private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
-        Run = Guid.NewGuid();
-        RTASessionTime = 0L;
-        orig(self);
     }
 
     [Initialize]
@@ -129,7 +133,6 @@ internal static class GhostRecorder {
         RTASessionTime += 170000L;
     }
 
-    private static bool isSoftlockReloading = false;
 
     private static void EscapeFromAntiSoftlock() {
         isSoftlockReloading = true;
@@ -162,7 +165,10 @@ internal static class GhostRecorder {
         ghostSettings.Mode = GhostModuleMode.Record;
     }
 
-    public static GhostModuleMode? origMode;
+    [TasCommand("GhostReplay", AliasNames = new[] { "GhostPlay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    public static void GhostReplayCommand() {
+        ghostSettings.Mode = GhostModuleMode.Play;
+    }
 
     public static void OnExit(LevelExit.Mode mode) {
         if (Engine.Scene is not Level level) {

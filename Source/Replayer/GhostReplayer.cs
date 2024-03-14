@@ -27,6 +27,12 @@ internal static class GhostReplayer {
     }
     */
 
+    public static void Clear() {
+        Replayer?.RemoveSelf();
+        Replayer = null;
+        GhostCompare.ResetCompareTime();
+    }
+
     [FreezeUpdate]
 
     public static void UpdateInFreezeFrame() {

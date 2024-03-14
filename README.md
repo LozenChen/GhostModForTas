@@ -4,7 +4,7 @@
 
 ----
 
-This Celeste mod is based on DemoJameson's [GhostMod](https://github.com/DemoJameson/GhostMod), which is a fork of Everest Team's [GhostMod](https://github.com/EverestAPI/GhostMod)
+This Celeste mod is based on DemoJameson's [GhostMod](https://github.com/DemoJameson/GhostMod), which is a fork of Everest Team's [GhostMod](https://github.com/EverestAPI/GhostMod).
 
 https://gamebanana.com/mods/500759
 
@@ -36,6 +36,24 @@ Step5: Switch to PLAY mode manually, and enter the same level, to play your reco
 
 - If you change the route (e.g. enter a room that the ghost doesn't enter, and vice versa), then the comparing time system will refuse to show the comparison.
 
-# Hotkey
+# Hotkeys
 
 - You can use hotkeys to switch modes.
+
+# Commands
+
+- You can use "ghost_off", "ghost_record", "ghost_play" to switch modes in console.
+
+# TasCommands
+
+- You can use "StartGhostRecording" to switch to RECORD mode in tas. Alias names include "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost" and "RecordingGhost".
+
+- You can use "StopGhostRecording" to stop recording. Alias names include "GhostStopRecord", "StopGhostRecord" and "GhostStopRecording". Though it's easier to do that by just stopping the tas.
+
+- You can use "GhostReplay" to switch in PLAY mode in tas. Alias names include "GhostPlay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode" and "ReplayGhostMode".
+
+- "StartGhostRecording" and "GhostReplay" should be before the first frame in the tas file.
+
+# Issues
+
+- There may be some incompatibility with savestates. Please let me know.

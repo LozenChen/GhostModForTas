@@ -261,9 +261,9 @@ public class Ghost : Actor {
         }
     }
 
-    public static Color HitboxColor = new Color(1f, 0f, 0f, 0.5f);
+    public Color HitboxColor = ghostSettings.HitboxColor;
 
-    public static Color HurtboxColor = new Color(0f, 1f, 0f, 0.5f);
+    public Color HurtboxColor = ghostSettings.HurtboxColor;
 
     // we use it so it's not affected by ActualCollideHitbox 
 

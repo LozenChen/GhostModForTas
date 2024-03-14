@@ -146,17 +146,40 @@ public class GhostModuleSettings : EverestModuleSettings {
         }
 #pragma warning restore CS8524
         return changed;
-
-        static void Refresh(string text) {
-            method.Invoke(null, new object[] { text });
-        }
     }
 
     private static MethodInfo method = null;
 
+    private static void Refresh(string text) {
+        method.Invoke(null, new object[] { text });
+    }
+
     [Initialize]
     private static void Initialize() {
         method = ModUtils.GetType("TASHelper", "Celeste.Mod.TASHelper.Entities.HotkeyWatcher")?.GetMethodInfo("Refresh") ?? typeof(GhostHotkeyWatcher).GetMethodInfo("Refresh");
+    }
+
+    [Monocle.Command("ghost_record", "[GhostModForTas] Switch to RECORD mode")]
+    public static void SwtichToRecordConsoleCommand() {
+        ghostSettings.Mode = GhostModuleMode.Record;
+        GhostReplayer.Clear();
+        RecordingIcon.Instance?.Update();
+        Refresh("GhostMod Mode = Record");
+    }
+
+    [Monocle.Command("ghost_play", "[GhostModForTas] Switch to PLAY mode")]
+    public static void SwtichToPlayConsoleCommand() {
+        ghostSettings.Mode = GhostModuleMode.Play;
+        RecordingIcon.Instance?.Update();
+        Refresh("GhostMod Mode = Play");
+    }
+
+    [Monocle.Command("ghost_off", "[GhostModForTas] Switch to OFF mode")]
+    public static void SwtichToOffConsoleCommand() {
+        ghostSettings.Mode = GhostModuleMode.Off;
+        GhostReplayer.Clear();
+        RecordingIcon.Instance?.Update();
+        Refresh("GhostMod Mode = Off");
     }
 }
 

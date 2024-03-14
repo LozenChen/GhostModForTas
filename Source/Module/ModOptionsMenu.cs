@@ -1,4 +1,5 @@
 using Celeste.Mod.GhostModForTas.Recorder;
+using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
 using Celeste.Mod.UI;
 using Microsoft.Xna.Framework;
@@ -21,9 +22,9 @@ internal static class ModOptionsMenu {
 
     public static void CreateMenu(EverestModule everestModule, TextMenu menu, bool inGame, bool inPauseMenu = false) {
         menu.Add(new TextMenuExt.EnumerableSlider<GhostModuleMode>("Mode".ToDialogText(), CreateMainModeOptions(),
-        ghostSettings.Mode).Change(value => { ghostSettings.Mode = value; RecordingIcon.Instance?.Update(); }));
+        ghostSettings.Mode).Change(value => { ghostSettings.Mode = value; GhostReplayer.Clear(); RecordingIcon.Instance?.Update(); }));
 
-        menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => ghostSettings.ForceSync = value));
+        menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => { ghostSettings.ForceSync = value; GhostReplayer.Clear(); }));
         menu.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
         menu.Add(new TextMenu.OnOff("Compare Room Time".ToDialogText(), ghostSettings.CompareRoomTime).Change(value => ghostSettings.CompareRoomTime = value));
         menu.Add(new TextMenu.OnOff("Compare Total Time".ToDialogText(), ghostSettings.CompareTotalTime).Change(value => ghostSettings.CompareTotalTime = value));
@@ -37,13 +38,13 @@ internal static class ModOptionsMenu {
             GhostModule.Instance.SaveSettings();
         }));
 
-        menu.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => ghostSettings.GhostSpriteMode = value));
+        menu.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => { ghostSettings.GhostSpriteMode = value; GhostReplayer.Clear(); }));
 
 
 
-        TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Hitbox Color".ToDialogText(), menu, inGame, Color.Red);
+        TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Hitbox Color".ToDialogText(), menu, inGame, GhostModuleSettings.defaultHitboxColor);
         menu.Add(hitboxColor);
-        TextMenu.Item hurtboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HurtboxColor, value => ghostSettings.HurtboxColor = value, "Hurtbox Color".ToDialogText(), menu, inGame, Color.Lime);
+        TextMenu.Item hurtboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HurtboxColor, value => ghostSettings.HurtboxColor = value, "Hurtbox Color".ToDialogText(), menu, inGame, GhostModuleSettings.defaultHurtboxColor);
         menu.Add(hurtboxColor);
         if (inGame) {
             SubHeaderExt remindText = new("Color Customization Remind".ToDialogText()) {
