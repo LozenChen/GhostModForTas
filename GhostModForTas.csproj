@@ -84,14 +84,6 @@
     <EmbeddedResource Remove="lib-stripped\**" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Dialog\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="everest.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="lib-stripped\**" />
   </ItemGroup>
 </Project>
