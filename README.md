@@ -48,13 +48,13 @@ Step5: Switch to PLAY mode manually, or use a StartGhostReplay command in the sa
 
 - A TasCommand is a command that only works in tas files.
 
-- You can use *"StartGhostRecording"* to switch to RECORD mode in tas. Alias names include "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost", "RecordingGhost", "GhostRecordMode" and "RecordGhostMode".
+- You can use ***"StartGhostRecording"*** to switch to RECORD mode in tas. Alias names include "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost", "RecordingGhost", "GhostRecordMode" and "RecordGhostMode".
 
-- You can use *"StopGhostRecording"* to stop recording. Though it's easier to do that by just stopping the tas. Alias names include "GhostStopRecord", "StopGhostRecord" and "GhostStopRecording".
+- You can use ***"StopGhostRecording"*** to stop recording. Though it's easier to do that by just stopping the tas. Alias names include "GhostStopRecord", "StopGhostRecord" and "GhostStopRecording".
 
-- You can use *"StartGhostReplay"* to switch in PLAY mode in tas. Alias names include "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost" , "GhostPlay", "GhostReplay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode" and "ReplayGhostMode".
+- You can use ***"StartGhostReplay"*** to switch in PLAY mode in tas. Alias names include "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost" , "GhostPlay", "GhostReplay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode" and "ReplayGhostMode".
 
-- You can use *"StopGhostReplay"* to stop replay. Alias names include "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostStopReplay", "GhostStopPlay", "StopGhostReplaying", "StopGhostPlaying", "StopReplayingGhost", "StopPlayingGhost", "GhostStopReplaying" and "GhostStopPlaying".
+- You can use ***"StopGhostReplay"*** to stop replay. Alias names include "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostStopReplay", "GhostStopPlay", "StopGhostReplaying", "StopGhostPlaying", "StopReplayingGhost", "StopPlayingGhost", "GhostStopReplaying" and "GhostStopPlaying".
 
 - "StartGhostRecording" and "StartGhostReplay" should be before the first frame in the tas file. Or at least, they should be put in the same position of a tas file. Otherwise, you will find that the Ghost starts running earlier/later than it should be.
 
