@@ -1,4 +1,3 @@
-using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

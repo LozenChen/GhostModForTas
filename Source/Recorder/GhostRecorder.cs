@@ -168,7 +168,7 @@ internal static class GhostRecorder {
             ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // recording is stopped anyway, but if originally replaying, then ok
             origMode = null;
             ghostSettings.UpdateStateText();
-        } 
+        }
 
         // recorder will remove itself when it finds RECORD mode is gone, we dont want recording to continue in this case
         // replayer will just hide itself instead, coz we may want to show the ghosts later
@@ -185,7 +185,7 @@ internal static class GhostRecorder {
         ghostSettings.UpdateStateText();
     }
 
-    [TasCommand("StartGhostReplay", AliasNames = new[] { "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost" , "GhostPlay", "GhostReplay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    [TasCommand("StartGhostReplay", AliasNames = new[] { "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost", "GhostPlay", "GhostReplay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StartGhostReplayCommand() {
         origMode ??= ghostSettings.Mode;
         if (!ghostSettings.Mode.HasFlag(GhostModuleMode.Play) && Engine.Scene is Level level && (GhostReplayer.Replayer is null || GhostReplayer.Replayer.Scene != level)) {
