@@ -18,7 +18,7 @@ Step3: Whenever you finishes a room, a Ghost file will be written to storage.
 
 Step4: Wait until your tas finishes, or use a StopGhostRecording command, to stop recording. Note that if the last recording room is not finished, then it will be dropped.
 
-Step5: Switch to PLAY mode manually, or use a StartGhostPlay command in the same position where the StartGhostRecording command was, and enter the same level, to play your records ("Ghosts").
+Step5: Switch to PLAY mode manually, or use a StartGhostReplay command in the same position where the StartGhostRecording command was, and enter the same level, to play your records ("Ghosts").
 
 # Force Sync
 
