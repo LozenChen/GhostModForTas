@@ -219,6 +219,9 @@ internal static class GhostRecorder {
             (ghostSettings.Mode.HasFlag(GhostModuleMode.Record))) {
             string target = levelExit ? LevelCount.Exit.Level : level.Session.Level;
             if (levelExit) {
+                if (level.Session.Area.SID == "Celeste/LostLevels") {
+                    return; // drop this
+                }
                 Recorder.Data.TargetCount = new(target, 1);
                 Recorder.Data.Run = Run;
                 Recorder.Data.IsCompleted = true;
@@ -226,6 +229,9 @@ internal static class GhostRecorder {
             } else if (target != Recorder.Data.LevelCount.Level) {
                 Recorder.Data.TargetCount.Level = target;
                 Recorder.Data.Run = Run;
+                if (target == "end-cinematic" && level.Session.Area.GetLevelSet() == "Celeste") {
+                    Recorder.Data.IsCompleted = true;
+                }
                 Recorder.WriteData();
                 Recorder.Data = new Data.GhostData(level.Session);
             }

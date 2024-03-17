@@ -66,17 +66,16 @@ public class GhostData {
                 dictionary.Add(ghostData.Run, new List<GhostData>() { ghostData });
             }
         }
-        LevelCount lc = new LevelCount(session.Level, 1);
-        Logger.Log("GhostModForTas", $"Current Level: {lc}");
         if (dictionary.IsNullOrEmpty()) {
             Logger.Log("GhostModForTas", "No Ghost in this Level!");
         }
         foreach (Guid guid in dictionary.Keys) {
+            LevelCount lc = new LevelCount(session.Level, 1);
             List<GhostData> ghostDatas = dictionary[guid];
             List<GhostData> sortedGhostData = new();
             bool found;
 
-            ghostDatas.ForEach(x => Logger.Log("GhostModForTas", $"Try Read GhostData {guid}: {x.LevelCount}"));
+            // ghostDatas.ForEach(x => Logger.Log("GhostModForTas", $"Try Read GhostData {guid}: {x.LevelCount}"));
 
             do {
                 found = false;

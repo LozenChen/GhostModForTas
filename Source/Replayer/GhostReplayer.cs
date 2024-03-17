@@ -199,6 +199,10 @@ public class GhostComparison : IComparer<Ghost> {
             return sign1;
         }
 
+        if (ghost1.IsCompleted > 0) {
+            return System.Math.Sign(ghost1.AllRoomData.LastOrDefault().GetSessionTime() - ghost2.AllRoomData.LastOrDefault().GetSessionTime());
+        }
+
         int sign2 = System.Math.Sign(ghost2.AllRoomData.Count - ghost1.AllRoomData.Count);
         if (sign2 != 0) {
             return sign2;

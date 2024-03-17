@@ -32,6 +32,8 @@ Step5: Switch to PLAY mode manually, or use a StartGhostReplay command in the sa
 
 - Ghost custom info are calculated when you record the ghosts. So when you are playing the Ghost files, changing the Custom Info Template will not provide you more info.
 
+- Ghost info HUD is disabled whenever TAS Info HUD is disabled, no matter what we've chosen in mod menu.
+
 ## Ghost Compare Time
 
 - If you change the route (e.g. enter a room that the ghost doesn't enter, and vice versa), then the comparing time system will refuse to show the comparison.

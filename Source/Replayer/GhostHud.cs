@@ -62,7 +62,8 @@ internal static class GhostHud {
     private static void DrawInfo(Scene scene) {
         // we also stop to draw info if the orig info hud doesn't draw
         infoIsDrawn = false;
-        if (!ghostSettings.ShowInfo || !TasSettings.Enabled || !TasSettings.InfoHud || (GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) != GhostModuleMode.Play) {
+
+        if (!ghostSettings.ShowInfo || !TasSettings.Enabled || !TasSettings.InfoHud || !ghostSettings.Mode.HasFlag(GhostModuleMode.Play)) {
             return;
         }
 
@@ -79,10 +80,6 @@ internal static class GhostHud {
         }
 
         string text = stringBuilder.ToString().Trim();
-
-        if (string.IsNullOrEmpty(text)) {
-            return;
-        }
 
         string title = ghost.Name + " " + GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true) + (ghostSettings.IsIGT ? "" : "(RTA)") + (ghost.IsCompleted > 0 ? "" : "Not Completed".ToDialogText());
         Color titleColor = ghost.IsCompleted > 0 ? Color.Yellow : Color.SlateGray;
