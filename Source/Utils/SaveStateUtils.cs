@@ -34,6 +34,7 @@ internal static class SaveStateUtils {
     }
 
     private static void AddSaveLoadAction() {
+        StateManager.Instance.ClearState(); // game crash if you saved before, hot reload, and load state, (mostly crash for reason like some mod type does not exist in the tracker) so we need to clear state when game reload
         action = SaveLoadAction.SafeAdd((_, _) => {
             run = GhostRecorder.Run;
             ghostTime = GhostCompare.GhostTime;

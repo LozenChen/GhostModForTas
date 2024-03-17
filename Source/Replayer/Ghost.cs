@@ -1,4 +1,5 @@
 using Celeste.Mod.GhostModForTas.Recorder.Data;
+using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monocle;
@@ -84,6 +85,7 @@ public class Ghost : Actor {
         };
         FrameIndex = -1;
         IsCompleted = allData.LastOrDefault().IsCompleted ? 1 : 0;
+        ModImports.AddGravityComponent(this);
     }
 
     public override void Added(Scene scene) {
@@ -114,6 +116,7 @@ public class Ghost : Actor {
             }
         }
         Visible &= Frame.HasPlayer;
+        ModImports.SetActorGravity(this, Frame.IsInverted);
         UpdateSprite();
         UpdateHair();
         UpdateHitbox();
@@ -207,7 +210,7 @@ public class Ghost : Actor {
 
         Sprite.Rotation = Frame.Rotation;
         Sprite.Scale = Frame.Scale;
-        Sprite.Scale.X = Sprite.Scale.X * (float)Frame.Facing;
+        Sprite.Scale.X *= (float)Frame.Facing;
         if (SpriteMode == PlayerSpriteMode.Playback) {
             Sprite.Color = Hair.Color;
         } else {
@@ -248,16 +251,19 @@ public class Ghost : Actor {
         w2 = Frame.HurtboxWidth;
         h2 = Frame.HurtboxHeight;
         x2 = Frame.HurtboxLeft;
-        y2 = Frame.HitboxTop;
+        y2 = Frame.HurtboxTop;
     }
 
     public override void Render() {
+        Sprite.Scale.Y *= Frame.IsInverted ? -1 : 1;
         base.Render();
+        Sprite.Scale.Y *= Frame.IsInverted ? -1 : 1;
     }
 
     public override void DebugRender(Camera camera) {
         base.DebugRender(camera);
         if (Visible && ghostSettings.ShowGhostHitbox) {
+            // we dont need to handle GravityHelper Position/Hitbox here, coz what we recorded is already inverted
             DrawHitbox(x1, y1, w1, h1, HitboxColor);
             DrawHitbox(x2, y2, w2, h2, HurtboxColor);
         }

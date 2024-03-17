@@ -185,7 +185,7 @@ internal static class GhostRecorder {
         ghostSettings.UpdateStateText();
     }
 
-    [TasCommand("StartGhostReplay", AliasNames = new[] { "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost", "GhostPlay", "GhostReplay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    [TasCommand("StartGhostReplay", AliasNames = new[] { "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost", "GhostPlay", "GhostReplay", "GhostStartPlay", "GhostStartPlaying", "GhostStartReplay", "GhostStartReplaying", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StartGhostReplayCommand() {
         origMode ??= ghostSettings.Mode;
         if (!ghostSettings.Mode.HasFlag(GhostModuleMode.Play) && Engine.Scene is Level level && (GhostReplayer.Replayer is null || GhostReplayer.Replayer.Scene != level)) {
@@ -216,7 +216,7 @@ internal static class GhostRecorder {
 
     public static void Step(Level level, bool levelExit = false) {
         if (Recorder?.Data != null &&
-            (ghostSettings.Mode & GhostModuleMode.Record) == GhostModuleMode.Record) {
+            (ghostSettings.Mode.HasFlag(GhostModuleMode.Record))) {
             string target = levelExit ? LevelCount.Exit.Level : level.Session.Level;
             if (levelExit) {
                 Recorder.Data.TargetCount = new(target, 1);
@@ -334,7 +334,8 @@ public class GhostRecorderEntity : Entity {
 
                 HairColor = player.Hair.Color,
                 HairSimulateMotion = player.Hair.SimulateMotion,
-                HairCount = player.Sprite.HairCount
+                HairCount = player.Sprite.HairCount,
+                IsInverted = ModImports.IsPlayerInverted,
             }
         };
 

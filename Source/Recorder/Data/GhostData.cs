@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.Utils;
 using Monocle;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ public class GhostData {
     public readonly static string Magic = "everest-ghost\r\n";
     public readonly static char[] MagicChars = Magic.ToCharArray();
 
-    public readonly static int Version = 1;
+    public readonly static int Version = 2;
     // increase this int when we change the data structure in some future update
     public readonly static string OshiroPostfix = ".oshiro";
 
@@ -65,11 +66,18 @@ public class GhostData {
                 dictionary.Add(ghostData.Run, new List<GhostData>() { ghostData });
             }
         }
+        LevelCount lc = new LevelCount(session.Level, 1);
+        Logger.Log("GhostModForTas", $"Current Level: {lc}");
+        if (dictionary.IsNullOrEmpty()) {
+            Logger.Log("GhostModForTas", "No Ghost in this Level!");
+        }
         foreach (Guid guid in dictionary.Keys) {
             List<GhostData> ghostDatas = dictionary[guid];
             List<GhostData> sortedGhostData = new();
-            LevelCount lc = new LevelCount(session.Level, 1);
             bool found;
+
+            ghostDatas.ForEach(x => Logger.Log("GhostModForTas", $"Try Read GhostData {guid}: {x.LevelCount}"));
+
             do {
                 found = false;
                 foreach (GhostData data in ghostDatas) {
@@ -161,7 +169,7 @@ public class GhostData {
 
         if (!File.Exists(FilePath)) {
             // File doesn't exist - load nothing.
-            Logger.Log("ghost", $"Ghost doesn't exist: {FilePath}");
+            Logger.Log("GhostModForTas", $"Ghost doesn't exist: {FilePath}");
             Frames = new List<GhostFrame>();
             return null;
         }
@@ -190,8 +198,9 @@ public class GhostData {
         }
 
         int version = reader.ReadInt32();
-        // Don't read data from the future, but try to read data from the past.
-        if (version > Version) {
+        // Don't read data from the past.
+        if (version < Version) {
+            Logger.Log("GhostModForTas", $"Ghost out of date: {FilePath}");
             return null;
         }
 

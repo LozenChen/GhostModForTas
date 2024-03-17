@@ -41,6 +41,7 @@ public struct GhostChunkData {
     public Color HairColor;
     public bool HairSimulateMotion;
     public int HairCount;
+    public bool IsInverted;
 
     // V3
 
@@ -82,6 +83,7 @@ public struct GhostChunkData {
         HairColor = new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         HairSimulateMotion = reader.ReadBoolean();
         HairCount = reader.ReadInt32();
+        IsInverted = reader.ReadBoolean();
     }
 
     public void Write(BinaryWriter writer) {
@@ -122,6 +124,7 @@ public struct GhostChunkData {
         writer.Write(HairColor.A);
         writer.Write(HairSimulateMotion);
         writer.Write(HairCount);
+        writer.Write(IsInverted);
     }
 
 }

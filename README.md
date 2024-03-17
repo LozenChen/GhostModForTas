@@ -60,7 +60,7 @@ Alias names include "GhostStopRecord", "StopGhostRecord" and "GhostStopRecording
 
 - You can use ***"StartGhostReplay"*** to switch in PLAY mode in tas.
 
-Alias names include "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost" , "GhostPlay", "GhostReplay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode" and "ReplayGhostMode".
+Alias names include "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost" , "GhostPlay", "GhostReplay", "GhostStartPlay", "GhostStartPlaying", "GhostStartReplay", "GhostStartReplaying", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode" and "ReplayGhostMode".
 
 - You can use ***"StopGhostReplay"*** to stop replay.
 

@@ -78,7 +78,7 @@ public class GhostReplayerEntity : Entity {
             ComparerGhost = Ghosts.FirstOrDefault();
             GhostCompare.ResetCompareTime();
             foreach (Ghost ghost in Ghosts) {
-                Logger.Log("GhostModForTas", $"Add Ghost: RunGUID = {ghost.Data.Run}, Time = {GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true)}, RoomCount = {ghost.AllRoomData.Count}");
+                Logger.Log("GhostModForTas", $"Add Ghost: RunGUID = {ghost.Data.Run}, Time = {GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true)}, RoomCount = {ghost.AllRoomData.Count}, Route = {string.Join(" -> ", ghost.AllRoomData.Select(x => x.LevelCount.ToString()))}");
             }
         }
     }

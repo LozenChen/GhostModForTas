@@ -23,6 +23,8 @@ internal static class Loader {
         if (Reloading) {
             OnReload();
             Reloading = false;
+        } else {
+            AttributeUtils.CollectAndSendTasCommand();
         }
     }
 

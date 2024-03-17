@@ -49,6 +49,9 @@
     <Reference Include="FNA">
       <HintPath>lib-stripped\FNA.dll</HintPath>
     </Reference>
+    <Reference Include="GravityHelper">
+      <HintPath>lib-stripped\GravityHelper.dll</HintPath>
+    </Reference>
     <Reference Include="MMHOOK_Celeste">
       <HintPath>lib-stripped\MMHOOK_Celeste.dll</HintPath>
     </Reference>

@@ -62,7 +62,6 @@ internal static class AttributeUtils {
 #endif
 
 
-    [Initialize]
     public static void CollectAndSendTasCommand() {
         IEnumerable<MethodInfo> localMethodInfos = typeof(AttributeUtils).Assembly.GetTypesSafe().SelectMany(type => type
             .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
