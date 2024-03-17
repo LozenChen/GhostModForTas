@@ -38,7 +38,7 @@ Step5: Switch to PLAY mode manually, or use a StartGhostReplay command in the sa
 
 ## Hotkeys
 
-- You can use hotkeys to switch modes.
+- You can use hotkeys to switch modes. It's configurable in the in-game menu.
 
 ## Commands
 
@@ -68,7 +68,7 @@ Alias names include "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostS
 
 - "StartGhostRecording" and "StartGhostReplay" should be before the first frame in the tas file. Or at least, they should be put in the same position of a tas file. Otherwise, you will find that the Ghost starts running earlier/later than it should be.
 
-- When tas ends, the mode will return to PLAY or OFF mode, depending on its original value. It will never return to RECORD mode.
+- When tas ends, the mode will return to PLAY or OFF mode (if it's changed by a TasCommand), depending on its original value. It will never return to RECORD mode.
 
 ## Issues
 
