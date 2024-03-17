@@ -119,12 +119,7 @@ public class GhostModuleSettings : EverestModuleSettings {
                     GhostModuleMode.Both => GhostModuleMode.Off
                 };
             }
-            Refresh("GhostMod Mode = " + Mode switch {
-                GhostModuleMode.Off => "Off",
-                GhostModuleMode.Record => "Record",
-                GhostModuleMode.Play => "Play",
-                GhostModuleMode.Both => "Both"
-            });
+            UpdateStateText();
         } else if (GhostHotkey.InfoHudHotkey.Pressed) {
             changed = false;
             if (ShowInfoEnabler) {
@@ -154,6 +149,15 @@ public class GhostModuleSettings : EverestModuleSettings {
         method.Invoke(null, new object[] { text });
     }
 
+    public void UpdateStateText() {
+        Refresh("GhostMod Mode = " + Mode switch {
+            GhostModuleMode.Off => "Off",
+            GhostModuleMode.Record => "Record",
+            GhostModuleMode.Play => "Play",
+            GhostModuleMode.Both => "Both"
+        });
+    }
+
     [Initialize]
     private static void Initialize() {
         method = ModUtils.GetType("TASHelper", "Celeste.Mod.TASHelper.Entities.HotkeyWatcher")?.GetMethodInfo("Refresh") ?? typeof(GhostHotkeyWatcher).GetMethodInfo("Refresh");
@@ -164,14 +168,14 @@ public class GhostModuleSettings : EverestModuleSettings {
         ghostSettings.Mode = GhostModuleMode.Record;
         GhostReplayer.Clear();
         RecordingIcon.Instance?.Update();
-        Refresh("GhostMod Mode = Record");
+        ghostSettings.UpdateStateText();
     }
 
     [Monocle.Command("ghost_play", "[GhostModForTas] Switch to PLAY mode")]
     public static void SwtichToPlayConsoleCommand() {
         ghostSettings.Mode = GhostModuleMode.Play;
         RecordingIcon.Instance?.Update();
-        Refresh("GhostMod Mode = Play");
+        ghostSettings.UpdateStateText();
     }
 
     [Monocle.Command("ghost_off", "[GhostModForTas] Switch to OFF mode")]
@@ -179,7 +183,7 @@ public class GhostModuleSettings : EverestModuleSettings {
         ghostSettings.Mode = GhostModuleMode.Off;
         GhostReplayer.Clear();
         RecordingIcon.Instance?.Update();
-        Refresh("GhostMod Mode = Off");
+        ghostSettings.UpdateStateText();
     }
 }
 

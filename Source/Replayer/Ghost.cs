@@ -103,7 +103,6 @@ public class Ghost : Actor {
         if (Done || NotSynced) {
             return;
         }
-        Visible = (GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play;
         FrameIndex++;
 
         if (FrameIndex < 0) { // how
@@ -253,13 +252,18 @@ public class Ghost : Actor {
         y2 = Frame.HitboxTop;
     }
 
+    public override void Render() {
+        base.Render();
+    }
+
     public override void DebugRender(Camera camera) {
         base.DebugRender(camera);
-        if (ghostSettings.ShowGhostHitbox) {
+        if (Visible && ghostSettings.ShowGhostHitbox) {
             DrawHitbox(x1, y1, w1, h1, HitboxColor);
             DrawHitbox(x2, y2, w2, h2, HurtboxColor);
         }
     }
+
 
     public Color HitboxColor = ghostSettings.HitboxColor;
 

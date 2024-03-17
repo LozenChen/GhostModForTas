@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Microsoft.Xna.Framework;
 using Monocle;
@@ -59,6 +60,7 @@ public class GhostReplayerEntity : Entity {
         : base(Vector2.Zero) {
         ForceSync = ghostSettings.ForceSync;
         Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Global;
+        Depth = 1;
 
         // Read and add all ghosts.
         GhostData.FindAllGhosts(level.Session).ForEach(ghost => {
@@ -96,7 +98,10 @@ public class GhostReplayerEntity : Entity {
                 ghost.UpdateByReplayer();
             }
         }
-
+        Visible = ghostSettings.Mode.HasFlag(GhostModuleMode.Play);
+        foreach (Ghost ghost in Ghosts) {
+            ghost.Visible = Visible;
+        }
     }
 
     public void HandleTransition(Level level) {
@@ -178,6 +183,10 @@ public class GhostReplayerEntity : Entity {
         }
 
         base.Render();
+    }
+
+    public override void DebugRender(Camera camera) {
+        base.DebugRender(camera);
     }
 }
 

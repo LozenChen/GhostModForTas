@@ -46,13 +46,17 @@ Step5: Switch to PLAY mode manually, and enter the same level, to play your reco
 
 # TasCommands
 
-- You can use "StartGhostRecording" to switch to RECORD mode in tas. Alias names include "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost" and "RecordingGhost".
+- You can use "StartGhostRecording" to switch to RECORD mode in tas. Alias names include "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost", "RecordingGhost", "GhostRecordMode" and "RecordGhostMode".
 
 - You can use "StopGhostRecording" to stop recording. Alias names include "GhostStopRecord", "StopGhostRecord" and "GhostStopRecording". Though it's easier to do that by just stopping the tas.
 
-- You can use "GhostReplay" to switch in PLAY mode in tas. Alias names include "GhostPlay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode" and "ReplayGhostMode".
+- You can use "StartGhostReplay" to switch in PLAY mode in tas. Alias names include "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost" , "GhostPlay", "GhostReplay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode" and "ReplayGhostMode".
 
-- "StartGhostRecording" and "GhostReplay" should be before the first frame in the tas file.
+- You can use "StopGhostReplay" to stop replay. Alias names include "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostStopReplay", "GhostStopPlay", "StopGhostReplaying", "StopGhostPlaying", "StopReplayingGhost", "StopPlayingGhost", "GhostStopReplaying" and "GhostStopPlaying".
+
+- "StartGhostRecording" and "StartGhostReplay" should be before the first frame in the tas file. Or at least, they should be put in the same position of a tas file. Otherwise, you will find that the Ghost starts running earlier/later than it should be.
+
+- When tas ends, the mode will return to PLAY or OFF mode, depending on its original value. It will never return to RECORD mode.
 
 # Issues
 

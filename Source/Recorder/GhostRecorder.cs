@@ -75,9 +75,7 @@ internal static class GhostRecorder {
 
         // recorder
         if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
-            Recorder?.RemoveSelf();
-            CachedEntitiesForParse.Clear();
-            level.Add(Recorder = new GhostRecorderEntity(level.Session));
+            CreateNewRecorder(level);
         }
         Step(level);
         if (level.Session.Time == 0L) { // a restart
@@ -89,14 +87,23 @@ internal static class GhostRecorder {
             GhostReplayer.Replayer?.RemoveSelf();
         } else {
             if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
-                GhostReplayer.Replayer?.RemoveSelf();
-                level.Add(GhostReplayer.Replayer = new GhostReplayerEntity(level));
+                CreateNewReplayer(level);
             } else if (!isFromLoader && level.Tracker.GetEntity<GhostReplayerEntity>() is { } replayer) {
                 GhostReplayer.Replayer = replayer;
                 GhostReplayer.Replayer.HandleTransition(level);
             }
         }
+    }
 
+    private static void CreateNewRecorder(Level level) {
+        Recorder?.RemoveSelf();
+        CachedEntitiesForParse.Clear();
+        level.Add(Recorder = new GhostRecorderEntity(level.Session));
+    }
+
+    private static void CreateNewReplayer(Level level) {
+        GhostReplayer.Replayer?.RemoveSelf();
+        level.Add(GhostReplayer.Replayer = new GhostReplayerEntity(level));
     }
 
     [FreezeUpdate]
@@ -147,27 +154,54 @@ internal static class GhostRecorder {
 
     [TasCommand("StopGhostRecording", AliasNames = new[] { "GhostStopRecord", "StopGhostRecord", "GhostStopRecording" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StopRecordingCommand() {
-        if (origMode.HasValue) {
+        if (ghostSettings.Mode.HasFlag(GhostModuleMode.Record) && origMode.HasValue) {
             ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // recording is stopped anyway
             origMode = null;
+            ghostSettings.UpdateStateText();
         }
+        // the recorder will remove itself when it finds that RECORD mode is gone
     }
 
     [TasDisableRun]
     private static void OnTasDisableRun() {
-        StopRecordingCommand();
+        if (origMode.HasValue) {
+            ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // recording is stopped anyway, but if originally replaying, then ok
+            origMode = null;
+            ghostSettings.UpdateStateText();
+        } 
+
+        // recorder will remove itself when it finds RECORD mode is gone, we dont want recording to continue in this case
+        // replayer will just hide itself instead, coz we may want to show the ghosts later
     }
 
 
-    [TasCommand("StartGhostRecording", AliasNames = new[] { "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost", "RecordingGhost" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    [TasCommand("StartGhostRecording", AliasNames = new[] { "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost", "RecordingGhost", "GhostRecordMode", "RecordGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StartRecordingCommand() {
-        origMode = ghostSettings.Mode;
+        origMode ??= ghostSettings.Mode;
+        if (!ghostSettings.Mode.HasFlag(GhostModuleMode.Record) && Engine.Scene is Level level && (Recorder is null || Recorder.Scene != level)) {
+            CreateNewRecorder(level);
+        }
         ghostSettings.Mode = GhostModuleMode.Record;
+        ghostSettings.UpdateStateText();
     }
 
-    [TasCommand("GhostReplay", AliasNames = new[] { "GhostPlay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
-    public static void GhostReplayCommand() {
+    [TasCommand("StartGhostReplay", AliasNames = new[] { "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost" , "GhostPlay", "GhostReplay", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    public static void StartGhostReplayCommand() {
+        origMode ??= ghostSettings.Mode;
+        if (!ghostSettings.Mode.HasFlag(GhostModuleMode.Play) && Engine.Scene is Level level && (GhostReplayer.Replayer is null || GhostReplayer.Replayer.Scene != level)) {
+            CreateNewReplayer(level);
+        }
         ghostSettings.Mode = GhostModuleMode.Play;
+        ghostSettings.UpdateStateText();
+    }
+
+    [TasCommand("StopGhostReplay", AliasNames = new[] { "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostStopReplay", "GhostStopPlay", "StopGhostReplaying", "StopGhostPlaying", "StopReplayingGhost", "StopPlayingGhost", "GhostStopReplaying", "GhostStopPlaying" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    public static void StopReplayCommand() {
+        if (ghostSettings.Mode.HasFlag(GhostModuleMode.Play) && origMode.HasValue) {
+            ghostSettings.Mode = origMode.Value & GhostModuleMode.Record; // replaying is stopped anyway
+            origMode = null;
+            ghostSettings.UpdateStateText();
+        }
     }
 
     public static void OnExit(LevelExit.Mode mode) {
@@ -204,6 +238,8 @@ internal static class GhostRecorder {
         return TAS.EverestInterop.InfoHUD.InfoCustom.ParseTemplate(ghostSettings.CustomInfoTemplate, CelesteTasSettings.Instance.CustomInfoDecimals, CachedEntitiesForParse, false);
     }
 }
+
+[Tracked(false)]
 public class GhostRecorderEntity : Entity {
     public GhostData Data;
 
