@@ -69,7 +69,7 @@
         <PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>
     </PropertyGroup>
     <ItemGroup>
-        <Publicize Include="Celeste" />
+        <Publicize Include="Celeste" IncludeCompilerGeneratedMembers="false"/>
         <Publicize Include="CelesteTAS-EverestInterop:TAS.Utils.AttributeUtils.MethodInfos" />
         <Publicize Include="CelesteTAS-EverestInterop:TAS.EverestInterop.InfoHUD.InfoHud.WriteTasInput" />
         <Publicize Include="CelesteTAS-EverestInterop:TAS.Input.Commands.TasCommandAttribute.MethodInfos" />

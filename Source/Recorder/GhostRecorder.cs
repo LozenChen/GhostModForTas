@@ -2,7 +2,6 @@ using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
-using Mono.Cecil.Cil;
 using Monocle;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
@@ -41,21 +40,30 @@ internal static class GhostRecorder {
             Directory.CreateDirectory(PathGhosts);
         }
 
-
-        typeof(LevelExit).GetConstructor(new Type[] { typeof(LevelExit.Mode), typeof(Session), typeof(HiresSnow) }).IlHook(il => {
-            ILCursor cursor = new(il);
-            cursor.Emit(OpCodes.Ldarg_1);
-            cursor.EmitDelegate(OnExit);
-        });
-
+        Everest.Events.Level.OnExit += LevelOnExit;
+        Everest.Events.Level.OnComplete += LevelOnComplete;
         On.Celeste.Session.ctor += OnSessionCtor;
     }
 
     [Unload]
     public static void Unload() {
+        Everest.Events.Level.OnExit -= LevelOnExit;
+        Everest.Events.Level.OnComplete -= LevelOnComplete;
         On.Celeste.Session.ctor -= OnSessionCtor;
     }
+    private static void LevelOnExit(Level level, LevelExit _, LevelExit.Mode mode, Session __, HiresSnow ___) {
+        if (mode == LevelExit.Mode.Completed ||
+            mode == LevelExit.Mode.CompletedInterlude) {
+            level.OnEndOfFrame += () => Step(level, levelExit: true);
+            // level exit or level complete are called when some entity update
+            // and we can not guarantee that our Recorder updates after it
+            // so we do it when EndOfFrame (which is still before (level = Engine.Scene) becomes nextScene)
+        }
+    }
 
+    private static void LevelOnComplete(Level level) {
+        level.OnEndOfFrame += () => Step(level, levelExit: true);
+    }
     private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
         Run = Guid.NewGuid();
         RTASessionTime = 0L;
@@ -204,34 +212,19 @@ internal static class GhostRecorder {
         }
     }
 
-    public static void OnExit(LevelExit.Mode mode) {
-        if (Engine.Scene is not Level level) {
-            return;
-        }
-        if (mode == LevelExit.Mode.Completed ||
-            mode == LevelExit.Mode.CompletedInterlude) {
-            Step(level, levelExit: true);
-        }
-    }
-
     public static void Step(Level level, bool levelExit = false) {
         if (Recorder?.Data != null &&
             (ghostSettings.Mode.HasFlag(GhostModuleMode.Record))) {
             string target = levelExit ? LevelCount.Exit.Level : level.Session.Level;
             if (levelExit) {
-                if (level.Session.Area.SID == "Celeste/LostLevels") {
-                    return; // drop this
-                }
                 Recorder.Data.TargetCount = new(target, 1);
                 Recorder.Data.Run = Run;
                 Recorder.Data.IsCompleted = true;
                 Recorder.WriteData();
+                Recorder.Data = null;
             } else if (target != Recorder.Data.LevelCount.Level) {
                 Recorder.Data.TargetCount.Level = target;
                 Recorder.Data.Run = Run;
-                if (target == "end-cinematic" && level.Session.Area.GetLevelSet() == "Celeste") {
-                    Recorder.Data.IsCompleted = true;
-                }
                 Recorder.WriteData();
                 Recorder.Data = new Data.GhostData(level.Session);
             }
@@ -288,7 +281,7 @@ public class GhostRecorderEntity : Entity {
     }
 
     public void RecordData() {
-        if (Engine.Scene is not Level level || level.Session is not Session session) {
+        if (Engine.Scene is not Level level || level.Session is not Session session || Data is null) {
             return;
         }
         if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Record) != GhostModuleMode.Record) {

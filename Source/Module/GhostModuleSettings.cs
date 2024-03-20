@@ -15,7 +15,7 @@ namespace Celeste.Mod.GhostModForTas.Module;
 public class GhostModuleSettings : EverestModuleSettings {
     public GhostModuleMode Mode = GhostModuleMode.Off; // we don't provide BOTH mode in menu, as i think we don't actually need it in normal tas making 
 
-    public string Name = "Ghost";
+    public string DefaultName = "Ghost";
 
     public bool ForceSync = false;
 
