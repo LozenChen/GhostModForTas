@@ -108,6 +108,16 @@ public class GhostReplayerEntity : Entity {
         }
     }
 
+    public void OnLevelEnd(Level level) {
+        LevelCount lc = LevelCount.Exit;
+        if (RevisitCount.ContainsKey(lc.Level)) {
+            RevisitCount[lc.Level]++;
+        } else {
+            RevisitCount.Add(lc.Level, 1);
+        }
+        HandleTransitionCore(level, lc);
+    }
+
     public void HandleTransition(Level level) {
         if (RoomName == level.Session.Level || !Active) {
             return;
@@ -120,6 +130,11 @@ public class GhostReplayerEntity : Entity {
             RevisitCount.Add(target, 1);
         }
         LevelCount lc = new LevelCount(target, RevisitCount[target]);
+        HandleTransitionCore(level, lc);
+    }
+
+    public void HandleTransitionCore(Level level, LevelCount lc) {
+        string target = lc.Level;
         if (ForceSync) {
             foreach (Ghost ghost in Ghosts) {
                 ghost.Sync(lc);

@@ -54,7 +54,7 @@ internal static class GhostRecorder {
     private static void LevelOnExit(Level level, LevelExit _, LevelExit.Mode mode, Session __, HiresSnow ___) {
         if (mode == LevelExit.Mode.Completed ||
             mode == LevelExit.Mode.CompletedInterlude) {
-            level.OnEndOfFrame += () => Step(level, levelExit: true);
+            level.OnEndOfFrame += () => OnLevelEnd(level);
             // level exit or level complete are called when some entity update
             // and we can not guarantee that our Recorder updates after it
             // so we do it when EndOfFrame (which is still before (level = Engine.Scene) becomes nextScene)
@@ -62,8 +62,14 @@ internal static class GhostRecorder {
     }
 
     private static void LevelOnComplete(Level level) {
-        level.OnEndOfFrame += () => Step(level, levelExit: true);
+        level.OnEndOfFrame += () => OnLevelEnd(level);
     }
+
+    private static void OnLevelEnd(Level level) {
+        Step(level, levelExit: true);
+        GhostReplayer.Replayer?.OnLevelEnd(level);
+    }
+
     private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
         Run = Guid.NewGuid();
         RTASessionTime = 0L;

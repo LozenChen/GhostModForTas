@@ -1,5 +1,5 @@
 - Name: GhostModForTas
-  Version: 1.0.4
+  Version: 1.0.5
   DLL: bin/Release/net452/GhostModForTas.dll
   Dependencies:
     - Name: Everest
