@@ -137,7 +137,7 @@ public class Ghost : Actor {
     public void Sync(LevelCount lc) {
         NotSynced = true;
         if (lc == LevelCount.Exit) {
-            if (AllRoomData.LastOrDefault().LevelCount != LevelCount.Exit) {
+            if (IsCompleted == 0) {
                 return;
             }
             Done = true;
