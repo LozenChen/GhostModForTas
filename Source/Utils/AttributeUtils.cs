@@ -77,6 +77,7 @@ internal static class AttributeUtils {
     [Initialize]
     public static void HookEngineFreeze() {
         typeof(Monocle.Engine).GetMethodInfo("Update").IlHook(ILEngineFreeze);
+        typeof(Level).GetMethodInfo("Update").IlHook(ILLevelSkipCutscene);
     }
 
     public static void ILEngineFreeze(ILContext il) {
@@ -88,8 +89,21 @@ internal static class AttributeUtils {
         }
     }
 
+    public static void ILLevelSkipCutscene(ILContext il) {
+        ILCursor cursor = new(il);
+        if (cursor.TryGotoNext(ins => ins.MatchLdfld<Level>(nameof(Level.SkippingCutscene)))) {
+            cursor.Index += 2;
+            cursor.MoveAfterLabels();
+            cursor.EmitDelegate(InvokeSkippingCutsceneUpdate);
+        }
+    }
+
     private static void InvokeFreezeUpdate() {
         Invoke<FreezeUpdateAttribute>();
+    }
+
+    private static void InvokeSkippingCutsceneUpdate() {
+        Invoke<SkippingCutsceneUpdateAttribute>();
     }
 }
 
@@ -108,6 +122,9 @@ internal class InitializeAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class FreezeUpdateAttribute : Attribute { }
+
+[AttributeUsage(AttributeTargets.Method)]
+internal class SkippingCutsceneUpdateAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class TasDisableRunAttribute : Attribute { }

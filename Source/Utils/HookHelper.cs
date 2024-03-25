@@ -28,7 +28,7 @@ internal static class HookHelper {
     }
 
     // check https://jatheplayer.github.io/celeste/ilhookview/ before creating a hook, to avoid conflict
-
+    // 完全限定名: https://learn.microsoft.com/zh-cn/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names
     public static void OnHook(this MethodBase from, Delegate to) {
         Hooks.Add(new Hook(from, to));
     }
@@ -116,7 +116,7 @@ public static class CILCodeHelper {
         if (useCommand) {
             Celeste.Commands.Log("------------------------------");
         }
-        Logger.Log(LogLevel.Debug, "Ghost Mod For Tas", "---- CILCodeLogger ----");
+        Logger.Log(LogLevel.Debug, "GhostModForTas", "---- CILCodeLogger ----");
         if (Apply) {
             if (AsShift) {
                 ilCursor.Index += Position;
@@ -133,7 +133,7 @@ public static class CILCodeHelper {
             } else {
                 str = $"{ilCursor.Next.Offset:x4}, {ilCursor.Next.OpCode}, {ilCursor.Next.Operand}";
             }
-            Mod.Logger.Log(LogLevel.Debug, "Ghost Mod For Tas", str);
+            Mod.Logger.Log(LogLevel.Debug, "GhostModForTas", str);
             if (useCommand) {
                 Celeste.Commands.Log(str);
             }

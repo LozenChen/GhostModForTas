@@ -41,6 +41,11 @@ internal static class GhostReplayer {
             Replayer?.Update();
         }
     }
+
+    [SkippingCutsceneUpdate]
+    public static void UpdateInSkippingCutsceneFrame() {
+        Replayer?.Update();
+    }
 }
 
 [Tracked(false)]

@@ -5,6 +5,7 @@ using Celeste.Mod.GhostModForTas.Utils;
 using Monocle;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,15 +24,27 @@ internal static class GhostRecorder {
 
     public static GhostRecorderEntity Recorder;
 
-    public static Guid Run;
+    [Obsolete]
+    public static Guid Run => (Guid)DynamicData.For(Engine.Scene.GetSession()).Get(guidName);
 
     internal static bool IsFreezeFrame = false;
 
-    public static long RTASessionTime = 0L;
+    public static long RTASessionTime {
+        get => Engine.Scene is Level level && DynamicData.For(level.Session).TryGet(rtaCounterName, out long val) ? val : 0L;
+        set {
+            if (Engine.Scene is Level level) {
+                DynamicData.For(level.Session).Set(rtaCounterName, value);
+            }
+        }
+    }
 
     private static bool isSoftlockReloading = false;
 
     public static GhostModuleMode? origMode;
+
+    public const string guidName = "GhostModForTas:GUID";
+
+    public const string rtaCounterName = "GhostModForTas:RTASessionTime";
 
     [Load]
     public static void Load() {
@@ -71,10 +84,14 @@ internal static class GhostRecorder {
     }
 
     private static void OnSessionCtor(On.Celeste.Session.orig_ctor orig, Session self) {
-        Run = Guid.NewGuid();
-        RTASessionTime = 0L;
         orig(self);
+        DynamicData.For(self).Set(guidName, Guid.NewGuid());
+        DynamicData.For(self).Set(rtaCounterName, 0L);
+        // we don't use class static field here
+        // coz session may get created during our play
+        // e.g. when you use a new saveslot, and go to a checkpoint, then Checkpoint.Update -> Level.AutoSave -> ... -> UserIO.SaveThread -> UserIO.Save<(Mod)SaveData> will finally creates 3 sessions
     }
+
 
     [LoadLevel]
     public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
@@ -129,6 +146,14 @@ internal static class GhostRecorder {
             GhostRecorderEntity.RestoreHudInfo(level, true);
         }
         IsFreezeFrame = false;
+    }
+
+    [SkippingCutsceneUpdate]
+    public static void UpdateInSkippingCutsceneFrame() {
+        Recorder?.Update();
+        if (Engine.Scene is Level level) {
+            GhostRecorderEntity.RestoreHudInfo(level, true);
+        }
     }
 
     [Initialize]
@@ -224,13 +249,13 @@ internal static class GhostRecorder {
             string target = levelExit ? LevelCount.Exit.Level : level.Session.Level;
             if (levelExit) {
                 Recorder.Data.TargetCount = new(target, 1);
-                Recorder.Data.Run = Run;
+                Recorder.Data.Run = (Guid)DynamicData.For(level.Session).Get(guidName);
                 Recorder.Data.IsCompleted = true;
                 Recorder.WriteData();
                 Recorder.Data = null;
             } else if (target != Recorder.Data.LevelCount.Level) {
                 Recorder.Data.TargetCount.Level = target;
-                Recorder.Data.Run = Run;
+                Recorder.Data.Run = (Guid)DynamicData.For(level.Session).Get(guidName);
                 Recorder.WriteData();
                 Recorder.Data = new Data.GhostData(level.Session);
             }
