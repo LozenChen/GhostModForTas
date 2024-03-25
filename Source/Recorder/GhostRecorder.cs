@@ -78,7 +78,7 @@ internal static class GhostRecorder {
         level.OnEndOfFrame += () => OnLevelEnd(level);
     }
 
-    [Monocle.Command("ghost_mark_level_end", "Manually tell GhostModForTas that current level is ended. E.g. use it when return to map after collecting cassettes.")]
+    [Monocle.Command("ghost_mark_level_end", "Manually instruct GhostModForTas that current level is ended. E.g. use it when you return to map after collecting cassettes.")]
     public static void ManuallyMarkLevelEnd() {
         if (Engine.Scene is Level level) {
             level.OnEndOfFrame += () => OnLevelEnd(level);

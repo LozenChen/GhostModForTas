@@ -91,9 +91,9 @@ internal static class AttributeUtils {
 
     public static void ILLevelUpdate(ILContext il) {
         ILCursor cursor = new(il);
-        if (cursor.TryGotoNext(ins => ins.MatchLdfld<Level>(nameof(Level.unpauseTimer)))){
+        if (cursor.TryGotoNext(ins => ins.MatchLdfld<Level>(nameof(Level.unpauseTimer)))) {
             cursor.Index++;
-            if (cursor.TryGotoNext(ins => ins.MatchLdfld<Level>(nameof(Level.unpauseTimer)))){
+            if (cursor.TryGotoNext(ins => ins.MatchLdfld<Level>(nameof(Level.unpauseTimer)))) {
                 cursor.EmitDelegate(InvokeUnpauseUpdate);
             }
         }
