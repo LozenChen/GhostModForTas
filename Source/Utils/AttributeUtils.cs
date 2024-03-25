@@ -77,7 +77,7 @@ internal static class AttributeUtils {
     [Initialize]
     public static void HookEngineFreeze() {
         typeof(Monocle.Engine).GetMethodInfo("Update").IlHook(ILEngineFreeze);
-        typeof(Level).GetMethodInfo("Update").IlHook(ILLevelSkipCutscene);
+        typeof(Level).GetMethodInfo("Update").IlHook(ILLevelUpdate);
     }
 
     public static void ILEngineFreeze(ILContext il) {
@@ -89,8 +89,14 @@ internal static class AttributeUtils {
         }
     }
 
-    public static void ILLevelSkipCutscene(ILContext il) {
+    public static void ILLevelUpdate(ILContext il) {
         ILCursor cursor = new(il);
+        if (cursor.TryGotoNext(ins => ins.MatchLdfld<Level>(nameof(Level.unpauseTimer)))){
+            cursor.Index++;
+            if (cursor.TryGotoNext(ins => ins.MatchLdfld<Level>(nameof(Level.unpauseTimer)))){
+                cursor.EmitDelegate(InvokeUnpauseUpdate);
+            }
+        }
         if (cursor.TryGotoNext(ins => ins.MatchLdfld<Level>(nameof(Level.SkippingCutscene)))) {
             cursor.Index += 2;
             cursor.MoveAfterLabels();
@@ -104,6 +110,10 @@ internal static class AttributeUtils {
 
     private static void InvokeSkippingCutsceneUpdate() {
         Invoke<SkippingCutsceneUpdateAttribute>();
+    }
+
+    private static void InvokeUnpauseUpdate() {
+        Invoke<UnpauseUpdateAttribute>(); // why do we have this hell: we need to update literally every frame, but if player updates this frame, then we need to update after player
     }
 }
 
@@ -125,6 +135,9 @@ internal class FreezeUpdateAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class SkippingCutsceneUpdateAttribute : Attribute { }
+
+[AttributeUsage(AttributeTargets.Method)]
+internal class UnpauseUpdateAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class TasDisableRunAttribute : Attribute { }

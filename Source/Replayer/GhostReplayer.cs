@@ -42,9 +42,24 @@ internal static class GhostReplayer {
         }
     }
 
+    [UnpauseUpdate]
     [SkippingCutsceneUpdate]
-    public static void UpdateInSkippingCutsceneFrame() {
+    public static void UpdateInSpecialFrame() {
         Replayer?.Update();
+    }
+
+    [Monocle.Command("ghost_forward", "Make GhostReplayer forward/delay some frames if the parameter is positive/negative. Only works when ForceSync = false.")]
+    public static void GhostReplayForward(int frames) {
+        if (Replayer is not { } replayer || replayer.ForceSync) {
+            return;
+        }
+        if (frames > 0) {
+            for (int i = 0; i < frames; i++) {
+                replayer.Update();
+            }
+        } else {
+            replayer.waitingFrames = -frames;
+        }
     }
 }
 
@@ -59,6 +74,7 @@ public class GhostReplayerEntity : Entity {
     public Dictionary<string, int> RevisitCount = new();
     public readonly static Color ColorGold = new Color(1f, 1f, 0f, 1f);
     public readonly static Color ColorNeutral = new Color(1f, 1f, 1f, 1f);
+    public int waitingFrames = 0;
 
 
     public GhostReplayerEntity(Level level)
@@ -95,6 +111,10 @@ public class GhostReplayerEntity : Entity {
 
     public override void Update() {
         base.Update();
+        if (!ForceSync && waitingFrames > 0) {
+            waitingFrames--;
+            return;
+        }
         if (ghostSettings.IsIGT) {
             foreach (Ghost ghost in Ghosts) {
                 do {

@@ -78,6 +78,13 @@ internal static class GhostRecorder {
         level.OnEndOfFrame += () => OnLevelEnd(level);
     }
 
+    [Monocle.Command("ghost_mark_level_end", "Manually tell GhostModForTas that current level is ended. E.g. use it when return to map after collecting cassettes.")]
+    public static void ManuallyMarkLevelEnd() {
+        if (Engine.Scene is Level level) {
+            level.OnEndOfFrame += () => OnLevelEnd(level);
+        }
+    }
+
     private static void OnLevelEnd(Level level) {
         Step(level, levelExit: true);
         GhostReplayer.Replayer?.OnLevelEnd(level);
@@ -148,8 +155,9 @@ internal static class GhostRecorder {
         IsFreezeFrame = false;
     }
 
+    [UnpauseUpdate]
     [SkippingCutsceneUpdate]
-    public static void UpdateInSkippingCutsceneFrame() {
+    public static void UpdateInSpecialFrame() {
         Recorder?.Update();
         if (Engine.Scene is Level level) {
             GhostRecorderEntity.RestoreHudInfo(level, true);
