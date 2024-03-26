@@ -48,7 +48,7 @@ internal static class GhostReplayer {
         Replayer?.Update();
     }
 
-    [Monocle.Command("ghost_forward", "Make GhostReplayer forward/delay some frames. Only works when ForceSync = false.")]
+    [Monocle.Command("ghost_forward", "Make GhostReplayer advance/delay some frames. Only works when ForceSync = false.")]
     public static void GhostReplayForward(int frames) {
         if (Replayer is not { } replayer || replayer.ForceSync) {
             return;

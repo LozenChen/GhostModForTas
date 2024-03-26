@@ -48,7 +48,7 @@ Step5: Switch to PLAY mode manually, or use a StartGhostReplay command in the sa
 
 - Use "ghost_mark_level_end" to manually instruct that current level is completed. E.g. use it when you return to map after collecting cassettes (use it both when RECORD and PLAY).
 
-- Use "ghost_forward" to make GhostReplayer forward/delay some frames. Only works when ForceSync = false.
+- Use "ghost_forward" to make GhostReplayer advance/delay some frames. Only works when ForceSync = false.
 
 ## TasCommands
 
