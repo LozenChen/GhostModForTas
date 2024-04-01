@@ -134,6 +134,9 @@ public class GhostReplayerEntity : Entity {
     }
 
     public void OnLevelEnd(Level level) {
+        if (!Active) {
+            return;
+        }
         LevelCount lc = LevelCount.Exit;
         if (RevisitCount.ContainsKey(lc.Level)) {
             RevisitCount[lc.Level]++;
