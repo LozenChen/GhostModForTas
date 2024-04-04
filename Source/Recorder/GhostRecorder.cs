@@ -24,16 +24,17 @@ internal static class GhostRecorder {
 
     public static GhostRecorderEntity Recorder;
 
-    [Obsolete]
-    public static Guid Run => (Guid)DynamicData.For(Engine.Scene.GetSession()).Get(guidName);
+    public static Guid Run => (data?.TryGet(guidName, out object val) ?? false) ? (Guid) val : Guid.Empty;
 
     internal static bool IsFreezeFrame = false;
 
+    internal static DynamicData data;
+
     public static long RTASessionTime {
-        get => Engine.Scene is Level level && DynamicData.For(level.Session).TryGet(rtaCounterName, out long val) ? val : 0L;
+        get => (data?.TryGet(rtaCounterName, out long val) ?? false) ? val : 0L;
         set {
-            if (Engine.Scene is Level level) {
-                DynamicData.For(level.Session).Set(rtaCounterName, value);
+            if (Engine.Scene is Level) {
+                data?.Set(rtaCounterName, value);
             }
         }
     }
@@ -103,6 +104,8 @@ internal static class GhostRecorder {
     [LoadLevel]
     public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
         // softlock
+        data = DynamicData.For(level.Session);
+
         if (isSoftlockReloading) {
             level.Add(Recorder);
             level.Add(GhostReplayer.Replayer);
@@ -257,13 +260,13 @@ internal static class GhostRecorder {
             string target = levelExit ? LevelCount.Exit.Level : level.Session.Level;
             if (levelExit) {
                 Recorder.Data.TargetCount = new(target, 1);
-                Recorder.Data.Run = (Guid)DynamicData.For(level.Session).Get(guidName);
+                Recorder.Data.Run = Run;
                 Recorder.Data.IsCompleted = true;
                 Recorder.WriteData();
                 Recorder.Data = null;
             } else if (target != Recorder.Data.LevelCount.Level) {
                 Recorder.Data.TargetCount.Level = target;
-                Recorder.Data.Run = (Guid)DynamicData.For(level.Session).Get(guidName);
+                Recorder.Data.Run = Run;
                 Recorder.WriteData();
                 Recorder.Data = new Data.GhostData(level.Session);
             }
