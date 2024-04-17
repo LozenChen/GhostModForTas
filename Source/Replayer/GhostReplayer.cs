@@ -211,6 +211,8 @@ public class GhostReplayerEntity : Entity {
         Ghosts.ForEach(ghost => ghost.RemoveSelf());
         Ghosts.Clear();
         ComparerGhost = null;
+        GhostReplayer.Replayer = null;
+        GhostCompare.ResetCompareTime();
     }
 
     public override void Removed(Scene scene) {
