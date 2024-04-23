@@ -107,8 +107,8 @@ internal static class GhostRecorder {
         data = DynamicData.For(level.Session);
 
         if (isSoftlockReloading) {
-            level.Add(Recorder);
-            level.Add(GhostReplayer.Replayer);
+            Recorder?.Apply(level.Add);
+            GhostReplayer.Replayer?.Apply(level.Add);
             GhostReplayer.Replayer?.Ghosts?.ForEach(level.Add);
             isSoftlockReloading = false;
             return;
