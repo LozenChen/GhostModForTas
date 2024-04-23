@@ -24,7 +24,7 @@ internal static class GhostRecorder {
 
     public static GhostRecorderEntity Recorder;
 
-    public static Guid Run => (data?.TryGet(guidName, out object val) ?? false) ? (Guid) val : Guid.Empty;
+    public static Guid Run => (data?.TryGet(guidName, out object val) ?? false) ? (Guid)val : Guid.Empty;
 
     internal static bool IsFreezeFrame = false;
 
