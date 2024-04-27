@@ -41,7 +41,7 @@ public class GhostModuleSettings : EverestModuleSettings {
     public bool ShowInfoEnabler = true;
 
     public bool ShowHudInfo = true;
-    public bool ShowCustomInfo = true;
+    public bool ShowCustomInfo = false;
 
     public bool ShowInfo => ShowHudInfo || ShowCustomInfo;
 

@@ -244,7 +244,6 @@ public class GhostReplayerEntity : Entity {
         if (ComparerGhost is not null) {
             ComparerGhost.Color = ColorGold;
         }
-
         base.Render();
     }
 

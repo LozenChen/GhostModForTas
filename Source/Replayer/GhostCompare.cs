@@ -155,10 +155,11 @@ internal static class GhostCompare {
 
     internal static string FormatTime(long time, bool ignorePlus = false) {
         string sign = time > 0 ? (ignorePlus ? "" : "+") : time < 0 ? "-" : " ";
+        string sign2 = sign == " " ? "" : sign;
         time = Math.Abs(time);
         TimeSpan timeSpan = TimeSpan.FromTicks(time);
         return ghostSettings.TimeFormat switch {
-            TimeFormats.SecondAndFrame => $"{sign}{timeSpan.VeryShortGameplayFormat()}({sign}{time / TimeSpan.FromSeconds(Engine.RawDeltaTime).Ticks}f)",
+            TimeFormats.SecondAndFrame => $"{sign}{timeSpan.VeryShortGameplayFormat()}({sign2}{time / TimeSpan.FromSeconds(Engine.RawDeltaTime).Ticks}f)",
             TimeFormats.SecondOnly => $"{sign}{timeSpan.VeryShortGameplayFormat()}{(timeSpan.TotalMinutes >= 1.0 ? "" : "s")}",
             TimeFormats.FrameOnly => $"{sign}{time / TimeSpan.FromSeconds(Engine.RawDeltaTime).Ticks}f",
             _ => "",
