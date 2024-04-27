@@ -25,9 +25,11 @@ internal static class ModOptionsMenu {
         ghostSettings.Mode).Change(value => { ghostSettings.Mode = value; GhostReplayer.Clear(); RecordingIcon.Instance?.Update(); }));
 
         menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => { ghostSettings.ForceSync = value; GhostReplayer.Clear(); }));
+        menu.Add(new TextMenuExt.EnumerableSlider<TimeFormats>("Time Format".ToDialogText(), CreateTimeFormatOptions(), ghostSettings.TimeFormat).Change(value => ghostSettings.TimeFormat = value));
         menu.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
         menu.Add(new TextMenu.OnOff("Compare Room Time".ToDialogText(), ghostSettings.CompareRoomTime).Change(value => ghostSettings.CompareRoomTime = value));
         menu.Add(new TextMenu.OnOff("Compare Total Time".ToDialogText(), ghostSettings.CompareTotalTime).Change(value => ghostSettings.CompareTotalTime = value));
+        menu.Add(new TextMenu.OnOff("Show Ghost Sprite".ToDialogText(), ghostSettings.ShowGhostSprite).Change(value => ghostSettings.ShowGhostSprite = value));
         menu.Add(new TextMenu.OnOff("Show Ghost Hitbox".ToDialogText(), ghostSettings.ShowGhostHitbox).Change(value => ghostSettings.ShowGhostHitbox = value));
         menu.Add(new TextMenu.OnOff("Show HUD Info".ToDialogText(), ghostSettings.ShowHudInfo).Change(value => { ghostSettings.ShowHudInfo = value; ghostSettings.LastManuallyConfigShowHudInfo = value; ghostSettings.ShowInfoEnabler = true; }));
         menu.Add(new TextMenu.OnOff("Show Custom Info".ToDialogText(), ghostSettings.ShowCustomInfo).Change(value => { ghostSettings.ShowCustomInfo = value; ghostSettings.LastManuallyConfigShowCustomInfo = value; ghostSettings.ShowInfoEnabler = true; }));
@@ -102,6 +104,14 @@ internal static class ModOptionsMenu {
         return new List<KeyValuePair<bool, string>> {
             new(false, "RTA"),
             new(true, "IGT")
+        };
+    }
+
+    private static IEnumerable<KeyValuePair<TimeFormats, string>> CreateTimeFormatOptions() {
+        return new List<KeyValuePair<TimeFormats, string>> {
+            new(TimeFormats.SecondAndFrame, "-0.017(-1f)"),
+            new(TimeFormats.SecondOnly, "-0.017s"),
+            new(TimeFormats.FrameOnly, "-1f")
         };
     }
     private static IEnumerable<KeyValuePair<GhostModuleMode, string>> CreateMainModeOptions() {

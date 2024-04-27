@@ -3,6 +3,7 @@ using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Microsoft.Xna.Framework;
 using Monocle;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Celeste.Mod.GhostModForTas.Replayer;
@@ -84,11 +85,23 @@ public class GhostReplayerEntity : Entity {
         Depth = 1;
 
         // Read and add all ghosts.
-        GhostData.FindAllGhosts(level.Session).ForEach(ghost => {
-            level.Add(ghost);
-            Ghosts.Add(ghost);
-            ghost.ForceSync = ForceSync;
-        });
+        if (Logger.GetLogLevel("GhostModForTas") == LogLevel.Verbose) {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            CreateGhosts();
+            stopwatch.Stop();
+            Logger.Log("GhostModForTas", $"Reading Ghosts costs {stopwatch.ElapsedMilliseconds} ms.");
+        } else {
+            CreateGhosts();
+        }
+
+        void CreateGhosts() {
+            GhostData.FindAllGhosts(level.Session).ForEach(ghost => {
+                level.Add(ghost);
+                Ghosts.Add(ghost);
+                ghost.ForceSync = ForceSync;
+            });
+        }
+
         if (Ghosts.Count == 0) {
             PostUpdate += RemoveReplayer;
             Active = false;
@@ -115,6 +128,11 @@ public class GhostReplayerEntity : Entity {
             waitingFrames--;
             return;
         }
+        Ghost.ShowSprite = ghostSettings.ShowGhostSprite;
+        Visible = ghostSettings.Mode.HasFlag(GhostModuleMode.Play);
+        foreach (Ghost ghost in Ghosts) {
+            ghost.Visible = Visible;
+        }
         if (ghostSettings.IsIGT) {
             foreach (Ghost ghost in Ghosts) {
                 do {
@@ -126,10 +144,6 @@ public class GhostReplayerEntity : Entity {
             foreach (Ghost ghost in Ghosts) {
                 ghost.UpdateByReplayer();
             }
-        }
-        Visible = ghostSettings.Mode.HasFlag(GhostModuleMode.Play);
-        foreach (Ghost ghost in Ghosts) {
-            ghost.Visible = Visible;
         }
     }
 

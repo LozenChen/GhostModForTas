@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -71,24 +72,28 @@ public class GhostData {
         }
         foreach (Guid guid in dictionary.Keys) {
             LevelCount lc = new LevelCount(session.Level, 1);
-            List<GhostData> ghostDatas = dictionary[guid];
+            GhostData[] ghostDatas = dictionary[guid].OrderBy(x => x.RTASessionTime).ToArray();
             List<GhostData> sortedGhostData = new();
-            bool found;
 
             // ghostDatas.ForEach(x => Logger.Log("GhostModForTas", $"Try Read GhostData {guid}: {x.LevelCount}"));
 
+            int head = 0;
+            int tail = ghostDatas.Length;
+
+            bool found;
             do {
                 found = false;
-                foreach (GhostData data in ghostDatas) {
-                    if (data.LevelCount == lc) {
-                        sortedGhostData.Add(data);
-                        lc = data.TargetCount;
-                        ghostDatas.Remove(data);
+                for (int i = head; i < tail; i++) {
+                    if (ghostDatas[i].LevelCount == lc) {
+                        sortedGhostData.Add(ghostDatas[i]);
+                        lc = ghostDatas[i].TargetCount;
+                        head = i + 1;
                         found = true;
                         break;
                     }
                 }
             } while (found);
+
             if (sortedGhostData.Count > 0) {
                 ghosts.Add(new Replayer.Ghost(sortedGhostData));
             }

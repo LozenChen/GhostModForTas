@@ -27,6 +27,8 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool ShowCompareTime => CompareRoomTime || CompareTotalTime;
 
+    public bool ShowGhostSprite = true;
+
     public bool ShowGhostHitbox = true;
 
     [YamlIgnore]
@@ -64,6 +66,8 @@ public class GhostModuleSettings : EverestModuleSettings {
     public Vector2 InfoPosition = new Vector2(280f, 20f);
 
     public bool ShowRecorderIcon = true;
+
+    public TimeFormats TimeFormat = TimeFormats.SecondAndFrame;
 
     public static void CreateClearAllRecordsEntry(TextMenu textMenu) {
         textMenu.Add(new TextMenu.Button("Clear All Records".ToDialogText()).Pressed(() => {
@@ -194,3 +198,5 @@ public enum GhostModuleMode {
     Play = 1 << 1,
     Both = Record | Play
 }
+
+public enum TimeFormats { SecondAndFrame, SecondOnly, FrameOnly };

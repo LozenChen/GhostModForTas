@@ -255,10 +255,15 @@ public class Ghost : Actor {
     }
 
     public override void Render() {
+        if (!ShowSprite) {
+            return;
+        }
         Sprite.Scale.Y *= Frame.IsInverted ? -1 : 1;
         base.Render();
         Sprite.Scale.Y *= Frame.IsInverted ? -1 : 1;
     }
+
+    public static bool ShowSprite = true;
 
     public override void DebugRender(Camera camera) {
         base.DebugRender(camera);
