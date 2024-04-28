@@ -44,7 +44,7 @@ internal static class SaveStateUtils {
             lastCurrentTime = GhostCompare.LastCurrentTime;
             recorder = GhostRecorder.Recorder.DeepCloneShared();
             replayer = GhostReplayer.Replayer.DeepCloneShared();
-            data = GhostRecorder.data.DeepCloneShared();
+            data = GhostRecorder.dyn_data.DeepCloneShared();
         }, (_, _) => {
             GhostCompare.GhostTime = ghostTime;
             GhostCompare.LastGhostTime = lastGhostTime;
@@ -52,7 +52,7 @@ internal static class SaveStateUtils {
             GhostCompare.LastCurrentTime = lastCurrentTime;
             GhostRecorder.Recorder = recorder.DeepCloneShared();
             GhostReplayer.Replayer = replayer.DeepCloneShared();
-            GhostRecorder.data = data.DeepCloneShared();
+            GhostRecorder.dyn_data = data.DeepCloneShared();
         }, () => {
             recorder = null;
             replayer = null;
@@ -92,7 +92,7 @@ internal static class TH_SaveStateUtils {
             lastCurrentTime = GhostCompare.LastCurrentTime;
             recorder = GhostRecorder.Recorder.TH_DeepCloneShared();
             replayer = GhostReplayer.Replayer.TH_DeepCloneShared();
-            data = GhostRecorder.data.TH_DeepCloneShared();
+            data = GhostRecorder.dyn_data.TH_DeepCloneShared();
         }, (_, _) => {
             GhostCompare.GhostTime = ghostTime;
             GhostCompare.LastGhostTime = lastGhostTime;
@@ -100,7 +100,7 @@ internal static class TH_SaveStateUtils {
             GhostCompare.LastCurrentTime = lastCurrentTime;
             GhostRecorder.Recorder = recorder.TH_DeepCloneShared();
             GhostReplayer.Replayer = replayer.TH_DeepCloneShared();
-            GhostRecorder.data = data.TH_DeepCloneShared();
+            GhostRecorder.dyn_data = data.TH_DeepCloneShared();
         }, () => {
             recorder = null;
             replayer = null;

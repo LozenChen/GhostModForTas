@@ -24,17 +24,17 @@ internal static class GhostRecorder {
 
     public static GhostRecorderEntity Recorder;
 
-    public static Guid Run => (data?.TryGet(guidName, out object val) ?? false) ? (Guid)val : Guid.Empty;
+    public static Guid Run => (dyn_data?.TryGet(guidName, out object val) ?? false) ? (Guid)val : Guid.Empty;
 
     internal static bool IsFreezeFrame = false;
 
-    internal static DynamicData data;
+    internal static DynamicData dyn_data;
 
     public static long RTASessionTime {
-        get => (data?.TryGet(rtaCounterName, out long val) ?? false) ? val : 0L;
+        get => (dyn_data?.TryGet(rtaCounterName, out long val) ?? false) ? val : 0L;
         set {
             if (Engine.Scene is Level) {
-                data?.Set(rtaCounterName, value);
+                dyn_data?.Set(rtaCounterName, value);
             }
         }
     }
@@ -104,7 +104,7 @@ internal static class GhostRecorder {
     [LoadLevel]
     public static void OnLoadLevel(Level level, Player.IntroTypes playerIntro, bool isFromLoader) {
         // softlock
-        data = DynamicData.For(level.Session);
+        dyn_data = DynamicData.For(level.Session);
 
         if (isSoftlockReloading) {
             Recorder?.Apply(level.Add);

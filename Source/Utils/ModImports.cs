@@ -9,6 +9,8 @@ public static class ModImports {
     public static bool GravityHelperInstalled;
     public static bool IsPlayerInverted => GravityHelperInstalled ? GravityHelperImport.IsPlayerInverted.Invoke() : false;
 
+    public static bool IsActorInverted(Actor actor) => GravityHelperInstalled ? GravityHelperImport.IsActorInverted.Invoke(actor) : false;
+
     public static int InvertedType;
     public static void SetActorGravity(Actor actor, bool inverted) {
         if (GravityHelperInstalled) {
@@ -47,4 +49,6 @@ internal static class GravityHelperImport {
     public static Action<Actor, int, float> SetActorGravity;
 
     public static Func<string, int> GravityTypeToInt;
+
+    public static Func<Actor, bool> IsActorInverted;
 }

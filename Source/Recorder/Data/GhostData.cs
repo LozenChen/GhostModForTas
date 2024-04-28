@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using DynamicData = MonoMod.Utils.DynamicData;
 
 namespace Celeste.Mod.GhostModForTas.Recorder.Data;
 
@@ -151,7 +152,23 @@ public class GhostData {
             SID = session.Area.GetSID();
             Mode = session.Area.Mode;
             LevelCount = new(session.Level, 1);
-            Name = ghostSettings.DefaultName;
+            if (DynamicData.For(session).TryGet(GhostNameInDynData, out string name)) {
+                Name = name;
+            } else {
+                Name = ghostSettings.DefaultName;
+            }
+        }
+    }
+
+    private const string GhostNameInDynData = "GhostModForTas:GhostName";
+
+    [Command("ghost_set_name", "Set the name of the ghost being recorded.")]
+    public static void SetGhostName(string name) {
+        if (Engine.Scene.GetSession() is { } session) {
+            DynamicData.For(session).Set(GhostNameInDynData, name);
+        }
+        if (GhostRecorder.Recorder?.Data is { } data) {
+            data.Name = name;
         }
     }
 

@@ -65,6 +65,8 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public Vector2 InfoPosition = new Vector2(280f, 20f);
 
+    public bool ShowGhostName = false;
+
     public bool ShowRecorderIcon = true;
 
     public TimeFormats TimeFormat = TimeFormats.SecondAndFrame;

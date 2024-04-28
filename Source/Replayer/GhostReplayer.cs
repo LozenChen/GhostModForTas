@@ -62,6 +62,44 @@ internal static class GhostReplayer {
             replayer.waitingFrames = -frames;
         }
     }
+
+    [Command("ghost_lock_comparer", "Specify which ghost to compare time against.")]
+    public static void LockComparerGhostCommand(string comparerName) {
+        lockedComparerName = comparerName;
+        if (Replayer is null) {
+            // in this case, let replayer.ctor invokes LockComparerGhost();
+            return;
+        }
+        LockComparerGhost();
+    }
+
+    internal static string lockedComparerName = null;
+
+    internal static void LockComparerGhost() {
+        if (Replayer is null || lockedComparerName is null) {
+            return;
+        }
+        string comparerName = lockedComparerName;
+        lockedComparerName = null;
+        if (string.IsNullOrWhiteSpace(comparerName)) {
+            foreach (Ghost ghost in Replayer.Ghosts) {
+                if (string.IsNullOrEmpty(ghost.Name)) {
+                    Replayer.ComparerGhost = ghost;
+                    Replayer.LockComparer = true;
+                    return;
+                }
+            }
+            Replayer.LockComparer = true; // user doesn't actually specify a comparer, so we let the replayer generate it on itself
+        } else {
+            foreach (Ghost ghost in Replayer.Ghosts) {
+                if (ghost.Name == comparerName) {
+                    Replayer.ComparerGhost = ghost;
+                    Replayer.LockComparer = true;
+                    return;
+                }
+            }
+        }
+    }
 }
 
 [Tracked(false)]
@@ -73,15 +111,13 @@ public class GhostReplayerEntity : Entity {
     public bool ForceSync = false;
     public string RoomName;
     public Dictionary<string, int> RevisitCount = new();
-    public readonly static Color ColorGold = new Color(1f, 1f, 0f, 1f);
-    public readonly static Color ColorNeutral = new Color(1f, 1f, 1f, 1f);
     public int waitingFrames = 0;
 
-
+    public bool LockComparer = false;
     public GhostReplayerEntity(Level level)
         : base(Vector2.Zero) {
         ForceSync = ghostSettings.ForceSync;
-        Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Global;
+        Tag = Tags.HUD | Tags.FrozenUpdate | Tags.PauseUpdate | Tags.TransitionUpdate | Tags.Global | TagsExt.SubHUD;
         Depth = 1;
 
         // Read and add all ghosts.
@@ -105,25 +141,29 @@ public class GhostReplayerEntity : Entity {
         if (Ghosts.Count == 0) {
             PostUpdate += RemoveReplayer;
             Active = false;
-        } else {
-            Ghosts.Sort(GhostComparison.Instance);
-            RoomName = level.Session.Level;
-            RevisitCount.Add(RoomName, 1);
-            ComparerGhost = Ghosts.FirstOrDefault();
-            GhostCompare.ResetCompareTime();
-            foreach (Ghost ghost in Ghosts) {
-                Logger.Log("GhostModForTas", $"Add Ghost: RunGUID = {ghost.Data.Run}, Time = {GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true)}, RoomCount = {ghost.AllRoomData.Count}, Route = {string.Join(" -> ",
-                        ghost.AllRoomData.Select(x => x.LevelCount.ToString()).ToList().Apply(
-                            list => list.Add(ghost.AllRoomData.LastOrDefault().TargetCount.ToString())
-                            )
-                        )}");
-            }
+            return;
         }
+
+        Ghosts.Sort(GhostComparison.Instance);
+        RoomName = level.Session.Level;
+        RevisitCount.Add(RoomName, 1);
+        ComparerGhost = Ghosts.FirstOrDefault();
+        GhostCompare.ResetCompareTime();
+        foreach (Ghost ghost in Ghosts) {
+            Logger.Log("GhostModForTas", $"Add Ghost: RunGUID = {ghost.Data.Run}, Time = {GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true)}, RoomCount = {ghost.AllRoomData.Count}, Route = {string.Join(" -> ",
+                    ghost.AllRoomData.Select(x => x.LevelCount.ToString()).ToList().Apply(
+                        list => list.Add(ghost.AllRoomData.LastOrDefault().TargetCount.ToString())
+                        )
+                    )}");
+        }
+
+        Add(new MultiGhost.GhostNames(this));
+        Add(new MultiGhost.GhostColors(this));
+        GhostReplayer.LockComparerGhost();
     }
 
 
     public override void Update() {
-        base.Update();
         if (!ForceSync && waitingFrames > 0) {
             waitingFrames--;
             return;
@@ -145,6 +185,7 @@ public class GhostReplayerEntity : Entity {
                 ghost.UpdateByReplayer();
             }
         }
+        base.Update();
     }
 
     public void OnLevelEnd(Level level) {
@@ -184,7 +225,10 @@ public class GhostReplayerEntity : Entity {
             // if we go room A -> B -> D, ghost go A -> C -> D, then we should get noticed that no ghost when we goto room B, and ghost compare work again when we goto room D
             // in this case (No Ghost), ghost compare will not update in room B, so in room D, we get player time = A -> D, ghost time = A -> D, so it still makes sense to compare last room time and total time
             // in another case (GhostChange), ghost compare always work, total diff works well, but last room diff becomes wrong (only in this room)
-            if (Ghosts.Where(x => !x.NotSynced).FirstOrDefault() is { } firstGhost) {
+
+            List<Ghost> list = (LockComparer && ComparerGhost is not null) ? new List<Ghost> { ComparerGhost } : Ghosts;
+
+            if (list.Where(x => !x.NotSynced).FirstOrDefault() is { } firstGhost) {
                 GhostCompare.UpdateRoomTime(level, firstGhost.LastSessionTime);
                 if (ComparerGhost != firstGhost) {
                     GhostCompare.Complaint = GhostCompare.ComplaintMode.GhostChange;
@@ -195,7 +239,10 @@ public class GhostReplayerEntity : Entity {
             }
         } else {
             bool found = false;
-            foreach (Ghost ghost in Ghosts) {
+
+            List<Ghost> list = (LockComparer && ComparerGhost is not null) ? new List<Ghost> { ComparerGhost } : Ghosts;
+
+            foreach (Ghost ghost in list) {
                 foreach (GhostData data in ghost.AllRoomData) {
                     if (data.LevelCount == new LevelCount(RoomName, RevisitCount[RoomName]) && data.TargetCount.Level == target) {
                         long time = data.GetSessionTime();
@@ -238,12 +285,6 @@ public class GhostReplayerEntity : Entity {
 
 
     public override void Render() {
-        foreach (Ghost ghost in Ghosts) {
-            ghost.Color = ColorNeutral;
-        }
-        if (ComparerGhost is not null) {
-            ComparerGhost.Color = ColorGold;
-        }
         base.Render();
     }
 

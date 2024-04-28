@@ -61,11 +61,13 @@ public class Ghost : Actor {
     public float h1;
     public float x1;
     public float y1;
+
     public float w2;
     public float h2;
     public float x2;
     public float y2;
 
+    public new Vector2 BottomCenter => Position + new Vector2(x1 + w1 / 2f, y1 + h1);
 
     public Ghost(List<GhostData> allData)
         : base(Vector2.Zero) {
