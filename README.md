@@ -48,7 +48,7 @@ Step5: Switch to PLAY mode manually, or use a StartGhostReplay command in the sa
 
 - Use "ghost_mark_level_end" to manually instruct that current level is completed. E.g. use it when you return to map after collecting cassettes (use it both when RECORD and PLAY).
 
-- Use "ghost_forward" to make GhostReplayer advance/delay some frames. Only works when ForceSync = false.
+- Use "ghost_forward [int frames]" to make GhostReplayer advance/delay some frames. Only works when ForceSync = false.
 
 ## TasCommands
 
@@ -75,6 +75,12 @@ Alias names include "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostS
 - "StartGhostRecording" and "StartGhostReplay" should be before the first frame in the tas file. Or at least, they should be put in the same position of a tas file. Otherwise, you will find that the Ghost starts running earlier/later than it should be.
 
 - When tas ends, the mode will return to PLAY or OFF mode (if it's changed by a TasCommand), depending on its original value. It will never return to RECORD mode.
+
+## Other New Features
+
+- You can use "ghost_set_name [ghost_name]" to name the ghost being recorded. Note that this command should be after level starts, but before the first room is finished. If you doesn't use this command, then the ghost will use the default name (also customizable in mod settings).
+
+- You can use "ghost_lock_comparer [ghost_name]" to force the comparer to always compare against that ghost.
 
 ## Issues
 
