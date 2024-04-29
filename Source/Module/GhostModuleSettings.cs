@@ -41,7 +41,9 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool CompareTotalTime = true;
 
-    public bool ShowCompareTime => CompareRoomTime || CompareTotalTime;
+    [YamlIgnore]
+    public bool ComparerToggler = true;
+    public bool ShowCompareTime => ComparerToggler && (CompareRoomTime || CompareTotalTime);
 
     public bool ShowGhostSprite = true;
 
@@ -124,6 +126,10 @@ public class GhostModuleSettings : EverestModuleSettings {
     [SettingName("GHOST_MOD_FOR_TAS_INFO_HUD_HOTKEY")]
     [DefaultButtonBinding2(0, Keys.LeftControl, Keys.K)]
     public ButtonBinding keyInfoHud { get; set; } = new((Buttons)0, Keys.LeftControl, Keys.K);
+
+    [SettingName("GHOST_MOD_FOR_TAS_TOGGLE_COMPARER_HOTKEY")]
+    [DefaultButtonBinding2(0, Keys.LeftControl, Keys.K)]
+    public ButtonBinding keyToggleComparer { get; set; } = new((Buttons)0, Keys.Tab);
     public bool SettingsHotkeysPressed() {
         if (Engine.Scene is not Level) {
             return false;
@@ -164,6 +170,9 @@ public class GhostModuleSettings : EverestModuleSettings {
         } else if (GhostHotkey.GhostHitboxHotkey.Pressed) {
             changed = true;
             ShowGhostHitbox = !ShowGhostHitbox;
+        }
+        if (GhostHotkey.ToggleComparerHotkey.Pressed) {
+            ComparerToggler = !ComparerToggler;
         }
 #pragma warning restore CS8524
         return changed;

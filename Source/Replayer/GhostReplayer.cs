@@ -165,6 +165,7 @@ public class GhostReplayerEntity : Entity {
         Add(colorManager = new MultiGhost.GhostColors(this));
         Add(rankingList = new MultiGhost.GhostRankingList(this));
         colorManager.HandleTransition();
+        ghostSettings.ComparerToggler = true;
     }
 
     private GhostColors colorManager;

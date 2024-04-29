@@ -22,6 +22,8 @@ public static class GhostHotkey {
 
     public static Hotkey GhostHitboxHotkey { get; set; }
 
+    public static Hotkey ToggleComparerHotkey { get; set; }
+
     public static List<Hotkey> Hotkeys = new();
 
     [Load]
@@ -42,7 +44,8 @@ public static class GhostHotkey {
         MainSwitchHotkey = BindingToHotkey(ghostSettings.keyMainSwitch);
         GhostHitboxHotkey = BindingToHotkey(ghostSettings.keyGhostHitbox);
         InfoHudHotkey = BindingToHotkey(ghostSettings.keyInfoHud);
-        Hotkeys = new List<Hotkey> { MainSwitchHotkey, GhostHitboxHotkey, InfoHudHotkey };
+        ToggleComparerHotkey = BindingToHotkey(ghostSettings.keyToggleComparer);
+        Hotkeys = new List<Hotkey> { MainSwitchHotkey, GhostHitboxHotkey, InfoHudHotkey, ToggleComparerHotkey };
     }
 
     private static void HotkeysPressed(On.Celeste.Level.orig_Render orig, Level self) {
