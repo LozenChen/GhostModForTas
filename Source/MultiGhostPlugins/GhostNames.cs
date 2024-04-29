@@ -37,26 +37,29 @@ public class GhostNames : Component {
             Vector2 pos = ModImports.IsActorInverted(ghost) ? ghost.BottomCenter : ghost.Position;
             pos.Y -= 16f;
 
-            pos -= level.Camera.Position;
-            pos *= 6f; // 1920 / 320
+            pos = level.WorldToScreenExt(pos); // supports MirrorMode, UpsideDown, CenterCamera, but doesn't support the ZoomLevel variant from ExtendedVariantMode.
 
             Vector2 size = ActiveFont.Measure(name);
+
+            float isNotUpsideDown = ModImports.UpsideDown ? 0f : 1f;
             pos = pos.Clamp(
-                10f + size.X * f_scale * 0.5f, 0f + size.Y * f_scale,
-                1910f - size.X * f_scale * 0.5f, 1080f
+                10f + size.X * f_scale * 0.5f, 0f + isNotUpsideDown * size.Y * f_scale,
+                1910f - size.X * f_scale * 0.5f, 1080f - (1f - isNotUpsideDown) * size.Y * f_scale
             );
 
             ActiveFont.DrawOutline(
                 name,
                 pos,
-                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, isNotUpsideDown),
                 Vector2.One * f_scale,
-                Color.White,
+                ghost.Color * alpha,
                 2f,
-                Color.Black
+                Color.Black * (alpha * alpha * alpha)
             );
         }
     }
 
     public static float f_scale = 0.5f;
+
+    public static float alpha = 1f;
 }

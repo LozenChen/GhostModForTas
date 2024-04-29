@@ -50,6 +50,9 @@ internal static class GhostCompare {
     private static void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
         orig(self);
 
+        if (ghostSettings.CompareStyleIsModern) {
+            return;
+        }
         if (GhostTime == 0 && Complaint == ComplaintMode.OK) {
             return;
         }
@@ -61,7 +64,7 @@ internal static class GhostCompare {
             float margin = 2 * pixelScale;
             float padding = 2 * pixelScale;
             float fontSize = 0.3f * pixelScale;
-            float alpha = 1f;
+            float alpha = ghostSettings.ComparerAlpha;
 
             long diffRoomTime = CurrentTime - GhostTime - LastCurrentTime + LastGhostTime;
             long diffTotalTime = CurrentTime - GhostTime;
@@ -116,7 +119,7 @@ internal static class GhostCompare {
 
             Rectangle bgRect = new Rectangle((int)x, (int)y, (int)(size.X + padding * 2), (int)(size.Y + padding * 2));
 
-            if (self.Entities.FindFirst<Player>() is { } player) {
+            if (self.Tracker.GetEntity<Player>() is { } player) {
                 Vector2 playerPosition = self.Camera.CameraToScreen(player.TopLeft) * pixelScale;
                 Rectangle playerRect = new Rectangle((int)playerPosition.X, (int)playerPosition.Y, (int)(8 * pixelScale), (int)(11 * pixelScale));
                 Rectangle mirrorBgRect = bgRect;
@@ -124,8 +127,12 @@ internal static class GhostCompare {
                     mirrorBgRect.X = (int)Math.Abs(x - viewWidth + size.X + padding * 2);
                 }
 
+                if (ModImports.UpsideDown) {
+                    mirrorBgRect.Y = (int)Math.Abs(y - Engine.ViewHeight + size.Y + padding * 2);
+                }
+
                 if (self.Paused || playerRect.Intersects(mirrorBgRect)) {
-                    alpha = 0.5f;
+                    alpha *= 0.5f;
                 }
             }
 

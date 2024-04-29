@@ -144,7 +144,7 @@ internal static class GhostRecorder {
 
     private static void CreateNewReplayer(Level level) {
         GhostReplayer.Replayer?.RemoveSelf();
-        level.Add(GhostReplayer.Replayer = new GhostReplayerEntity(level));
+        level.Add(new GhostReplayerEntity(level)); // the ctor already sets GhostReplayer.Replayer = this
     }
 
     [FreezeUpdate]

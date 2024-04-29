@@ -7,11 +7,16 @@ namespace Celeste.Mod.GhostModForTas.Utils;
 public static class ModImports {
 
     public static bool GravityHelperInstalled;
-    public static bool IsPlayerInverted => GravityHelperInstalled ? GravityHelperImport.IsPlayerInverted.Invoke() : false;
 
-    public static bool IsActorInverted(Actor actor) => GravityHelperInstalled ? GravityHelperImport.IsActorInverted.Invoke(actor) : false;
+    public static bool ExtendedVariantInstalled;
+    public static bool IsPlayerInverted => GravityHelperInstalled && GravityHelperImport.IsPlayerInverted.Invoke();
+
+    public static bool IsActorInverted(Actor actor) => GravityHelperInstalled && GravityHelperImport.IsActorInverted.Invoke(actor);
 
     public static int InvertedType;
+
+    public static bool UpsideDown => ExtendedVariantInstalled && (bool)ExtendedVariantImport.GetCurrentVariantValue("UpsideDown");
+
     public static void SetActorGravity(Actor actor, bool inverted) {
         if (GravityHelperInstalled) {
             GravityHelperImport.SetActorGravity.Invoke(actor, inverted ? InvertedType : 0, 1f);
@@ -38,6 +43,9 @@ public static class ModImports {
         typeof(GravityHelperImport).ModInterop();
         GravityHelperInstalled = GravityHelperImport.IsPlayerInverted is not null;
         InvertedType = GravityHelperImport.GravityTypeToInt?.Invoke("Inverted") ?? 0;
+
+        typeof(ExtendedVariantImport).ModInterop();
+        ExtendedVariantInstalled = ExtendedVariantImport.GetCurrentVariantValue is not null;
     }
 }
 
@@ -51,4 +59,9 @@ internal static class GravityHelperImport {
     public static Func<string, int> GravityTypeToInt;
 
     public static Func<Actor, bool> IsActorInverted;
+}
+
+[ModImportName("ExtendedVariantMode")]
+internal static class ExtendedVariantImport {
+    public static Func<string, object> GetCurrentVariantValue;
 }

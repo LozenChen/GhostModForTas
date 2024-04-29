@@ -78,7 +78,7 @@ Alias names include "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostS
 
 ## Other New Features
 
-- You can use "ghost_set_name [ghost_name]" to name the ghost being recorded. Note that this command should be after level starts, but before the first room is finished. If you doesn't use this command, then the ghost will use the default name (also customizable in mod settings).
+- You can use "ghost_set_name [ghost_name]" to name the ghost being recorded. Note that this command should be after level starts, but before the first room gets finished. If you doesn't use this command, then the ghost will use the default name (also customizable in mod settings).
 
 - You can use "ghost_lock_comparer [ghost_name]" to force the comparer to always compare against that ghost.
 

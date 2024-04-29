@@ -1,4 +1,5 @@
 using Celeste.Mod.GhostModForTas.Module;
+using Celeste.Mod.GhostModForTas.MultiGhost;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Microsoft.Xna.Framework;
 using Monocle;
@@ -89,7 +90,7 @@ internal static class GhostReplayer {
                     return;
                 }
             }
-            Replayer.LockComparer = true; // user doesn't actually specify a comparer, so we let the replayer generate it on itself
+            Replayer.LockComparer = true; // user doesn't actually specify a comparer, so we choose the default one
         } else {
             foreach (Ghost ghost in Replayer.Ghosts) {
                 if (ghost.Name == comparerName) {
@@ -147,8 +148,6 @@ public class GhostReplayerEntity : Entity {
         Ghosts.Sort(GhostComparison.Instance);
         RoomName = level.Session.Level;
         RevisitCount.Add(RoomName, 1);
-        ComparerGhost = Ghosts.FirstOrDefault();
-        GhostCompare.ResetCompareTime();
         foreach (Ghost ghost in Ghosts) {
             Logger.Log("GhostModForTas", $"Add Ghost: RunGUID = {ghost.Data.Run}, Time = {GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true)}, RoomCount = {ghost.AllRoomData.Count}, Route = {string.Join(" -> ",
                     ghost.AllRoomData.Select(x => x.LevelCount.ToString()).ToList().Apply(
@@ -157,11 +156,20 @@ public class GhostReplayerEntity : Entity {
                     )}");
         }
 
-        Add(new MultiGhost.GhostNames(this));
-        Add(new MultiGhost.GhostColors(this));
+        GhostReplayer.Replayer = this;
+
+        ComparerGhost = Ghosts.FirstOrDefault(); // the fastest ghost to complete the level
+        GhostCompare.ResetCompareTime();
         GhostReplayer.LockComparerGhost();
+        Add(new MultiGhost.GhostNames(this));
+        Add(colorManager = new MultiGhost.GhostColors(this));
+        Add(rankingList = new MultiGhost.GhostRankingList(this));
+        colorManager.HandleTransition();
     }
 
+    private GhostColors colorManager;
+
+    private GhostRankingList rankingList;
 
     public override void Update() {
         if (!ForceSync && waitingFrames > 0) {
@@ -264,6 +272,8 @@ public class GhostReplayerEntity : Entity {
             }
 
         }
+        colorManager.HandleTransition();
+        rankingList.HandleTransition(RoomName, target); // this should be after GhostCompare.UpdateRoomTime(), but before RoomName gets set
         RoomName = target;
     }
 
@@ -285,7 +295,9 @@ public class GhostReplayerEntity : Entity {
 
 
     public override void Render() {
-        base.Render();
+        if ((GhostModule.ModuleSettings.Mode & GhostModuleMode.Play) == GhostModuleMode.Play) {
+            base.Render();
+        }
     }
 
     public override void DebugRender(Camera camera) {

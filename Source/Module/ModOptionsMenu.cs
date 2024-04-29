@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.MultiGhost;
 using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
@@ -25,10 +26,21 @@ internal static class ModOptionsMenu {
         ghostSettings.Mode).Change(value => { ghostSettings.Mode = value; GhostReplayer.Clear(); RecordingIcon.Instance?.Update(); }));
 
         menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => { ghostSettings.ForceSync = value; GhostReplayer.Clear(); }));
-        menu.Add(new TextMenuExt.EnumerableSlider<TimeFormats>("Time Format".ToDialogText(), CreateTimeFormatOptions(), ghostSettings.TimeFormat).Change(value => ghostSettings.TimeFormat = value));
+        menu.Add(new TextMenuExt.EnumerableSlider<TimeFormats>("Time Format".ToDialogText(), CreateTimeFormatOptions(), ghostSettings.TimeFormat).Change(value => { ghostSettings.TimeFormat = value; GhostRankingList.ConfigChanged = true; }));
         menu.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
-        menu.Add(new TextMenu.OnOff("Compare Room Time".ToDialogText(), ghostSettings.CompareRoomTime).Change(value => ghostSettings.CompareRoomTime = value));
-        menu.Add(new TextMenu.OnOff("Compare Total Time".ToDialogText(), ghostSettings.CompareTotalTime).Change(value => ghostSettings.CompareTotalTime = value));
+        menu.Add(new HLine(Color.Gray, 0f));
+
+        GhostModuleSettings.CreateClearAllRecordsEntry(menu);
+
+        menu.Add(new HLine(Color.Gray, 0f));
+
+        menu.Add(new TextMenu.OnOff("Compare Room Time".ToDialogText(), ghostSettings.CompareRoomTime).Change(value => { ghostSettings.CompareRoomTime = value; GhostRankingList.ConfigChanged = true; }));
+        menu.Add(new TextMenu.OnOff("Compare Total Time".ToDialogText(), ghostSettings.CompareTotalTime).Change(value => { ghostSettings.CompareTotalTime = value; GhostRankingList.ConfigChanged = true; }));
+        menu.Add(new TextMenuExt.EnumerableSlider<bool>("Comparer Style".ToDialogText(), CreateComparerStyleOptions(), ghostSettings.CompareStyleIsModern).Change(value => ghostSettings.CompareStyleIsModern = value));
+        menu.Add(new TextMenuExt.IntSlider("Comparer Alpha".ToDialogText(), 1, 10, ghostSettings.ComparerOpacity).Change(value => { ghostSettings.ComparerOpacity = value; ghostSettings.ComparerAlpha = value / 10f; }));
+
+        menu.Add(new HLine(Color.Gray, 0f));
+
         menu.Add(new TextMenu.OnOff("Show Ghost Sprite".ToDialogText(), ghostSettings.ShowGhostSprite).Change(value => ghostSettings.ShowGhostSprite = value));
         menu.Add(new TextMenu.OnOff("Show Ghost Hitbox".ToDialogText(), ghostSettings.ShowGhostHitbox).Change(value => ghostSettings.ShowGhostHitbox = value));
         menu.Add(new TextMenu.OnOff("Show HUD Info".ToDialogText(), ghostSettings.ShowHudInfo).Change(value => { ghostSettings.ShowHudInfo = value; ghostSettings.LastManuallyConfigShowHudInfo = value; ghostSettings.ShowInfoEnabler = true; }));
@@ -40,9 +52,11 @@ internal static class ModOptionsMenu {
             GhostModule.Instance.SaveSettings();
         }));
 
+        menu.Add(new HLine(Color.Gray, 0f));
+
         menu.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => { ghostSettings.GhostSpriteMode = value; GhostReplayer.Clear(); }));
 
-
+        menu.Add(new TextMenu.OnOff("Randomize Ghost Colors".ToDialogText(), ghostSettings.RandomizeGhostColors).Change(value => ghostSettings.RandomizeGhostColors = value));
 
         TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Hitbox Color".ToDialogText(), menu, inGame, GhostModuleSettings.defaultHitboxColor);
         menu.Add(hitboxColor);
@@ -61,22 +75,43 @@ internal static class ModOptionsMenu {
         };
         menu.Add(formatText);
 
+        menu.Add(new HLine(Color.Gray, 0f));
+
+
         menu.Add(new TextMenu.OnOff("Show Ghost Name".ToDialogText(), ghostSettings.ShowGhostName).Change(value => ghostSettings.ShowGhostName = value));
 
-        Func<string> nameGetter = () => ghostSettings.DefaultName;
-        TextMenu.Item ghostDefaultName = new ButtonNameExt("Ghost Default Name".ToDialogText(), nameGetter, inGame).Pressed(inGame ? () => { }
+
+        Func<string> ghostNameGetter = () => ghostSettings.DefaultName;
+        TextMenu.Item ghostDefaultName = new ButtonNameExt("Ghost Default Name".ToDialogText(), ghostNameGetter, inGame).Pressed(inGame ? () => { }
         :
             () => {
+                OuiModOptionFileName.DefaultString = "Ghost";
                 Audio.Play("event:/ui/main/savefile_rename_start");
                 menu.SceneAs<Overworld>().Goto<OuiModOptionFileName>()
-                    .Init<OuiModOptions>(nameGetter(),
+                    .Init<OuiModOptions>(ghostNameGetter(),
                         value => ghostSettings.DefaultName = value, MaxNameLength, 1);
             });
         menu.Add(ghostDefaultName);
 
+        Func<string> playerNameGetter = () => ghostSettings.PlayerName;
+        TextMenu.Item playerName = new ButtonNameExt("Player Name".ToDialogText(), playerNameGetter, inGame).Pressed(inGame ? () => { }
+        :
+            () => {
+                OuiModOptionFileName.DefaultString = "Player";
+                Audio.Play("event:/ui/main/savefile_rename_start");
+                menu.SceneAs<Overworld>().Goto<OuiModOptionFileName>()
+                    .Init<OuiModOptions>(playerNameGetter(),
+                        value => ghostSettings.PlayerName = value, MaxNameLength, 1);
+            });
+        menu.Add(playerName);
+
+        menu.Add(new HLine(Color.Gray, 0f));
+
         menu.Add(new TextMenu.OnOff("Show Recorder Icon".ToDialogText(), ghostSettings.ShowRecorderIcon).Change(value => { ghostSettings.ShowRecorderIcon = value; RecordingIcon.Instance?.Update(); }));
         menu.Add(new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value));
-        GhostModuleSettings.CreateClearAllRecordsEntry(menu);
+
+        menu.Add(new HLine(Color.Gray, 0f));
+
         menu.Add(new TextMenu.Button(Dialog.Clean("options_keyconfig")).Pressed(() => {
             menu.Focused = false;
             KeyboardConfigUI keyboardConfig;
@@ -117,6 +152,13 @@ internal static class ModOptionsMenu {
         return new List<KeyValuePair<bool, string>> {
             new(false, "RTA"),
             new(true, "IGT")
+        };
+    }
+
+    private static IEnumerable<KeyValuePair<bool, string>> CreateComparerStyleOptions() {
+        return new List<KeyValuePair<bool, string>> {
+            new(false, "Classic".ToDialogText()),
+            new(true, "Modern".ToDialogText())
         };
     }
 
@@ -1480,4 +1522,53 @@ public class OuiModOptionFileName : Oui, OuiModOptions.ISubmenu {
         return unselectColor;
     }
 
+}
+
+
+public class HLine : TextMenu.Item {
+    public Color lineColor;
+
+    public float leftMargin;
+
+    public float rightMargin;
+
+    public string text;
+
+    public float textHorizontalAlign;
+
+    public HLine(Color color, float leftMargin = 20f, float rightMargin = 0f, string label = "", float textAlign = 0.5f) {
+        Selectable = false;
+        lineColor = color;
+        this.leftMargin = leftMargin;
+        this.rightMargin = rightMargin;
+        text = label;
+        textHorizontalAlign = textAlign;
+    }
+
+    public override float LeftWidth() {
+        return 0f;
+    }
+
+    public override float RightWidth() {
+        return 0f;
+    }
+
+    public override float Height() {
+        return 20f;
+    }
+
+    public override void Render(Vector2 position, bool highlighted) {
+        float left = Container.X - Container.Width / 2f + leftMargin;
+        float right = Container.X + Container.Width / 2f - rightMargin;
+        float y = position.Y;
+        if (text.IsNullOrEmpty()) {
+            Monocle.Draw.Line(new Vector2(left, y), new Vector2(right, y), lineColor, 4f);
+        } else {
+            float textCenter = MathHelper.Lerp(left, right, textHorizontalAlign);
+            float haldWidth = ActiveFont.Measure(text).X / 2f * 0.6f + 10f;
+            ActiveFont.DrawOutline(text, new Vector2(textCenter, y), new Vector2(0.5f, 0.5f), Vector2.One * 0.6f, Color.Gray, 2f, Color.Black);
+            Monocle.Draw.Line(new Vector2(left, y), new Vector2(textCenter - haldWidth, y), lineColor, 4f);
+            Monocle.Draw.Line(new Vector2(textCenter + haldWidth, y), new Vector2(right, y), lineColor, 4f);
+        }
+    }
 }

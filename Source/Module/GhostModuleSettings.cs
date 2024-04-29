@@ -17,9 +17,25 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public string DefaultName = "Ghost";
 
+    public string PlayerName = "Player";
+
+    public void OnLoadSettings() {
+        LastManuallyConfigShowCustomInfo = ShowCustomInfo;
+        LastManuallyConfigShowHudInfo = ShowHudInfo;
+        ShowInfoEnabler = ShowHudInfo | ShowCustomInfo;
+        ComparerAlpha = ComparerOpacity / 10f;
+    }
+
     public bool ForceSync = false;
 
     public bool IsIGT = true;
+
+    public bool CompareStyleIsModern = true;
+
+    public int ComparerOpacity = 10;
+
+    [YamlIgnore]
+    public float ComparerAlpha = 1f;
 
     public bool CompareRoomTime = true;
 
@@ -63,7 +79,11 @@ public class GhostModuleSettings : EverestModuleSettings {
     [YamlIgnore]
     public static readonly Color defaultHurtboxColor = new Color(0f, 1f, 0f, 0.2f);
 
-    public Vector2 InfoPosition = new Vector2(280f, 20f);
+    public Vector2 HudInfoPosition = new Vector2(280f, 20f);
+
+    public Vector2 RankingListPosition = new Vector2(1915f, 100f);
+
+    public bool RandomizeGhostColors = true;
 
     public bool ShowGhostName = false;
 

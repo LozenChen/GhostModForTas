@@ -50,9 +50,7 @@ public class GhostModule : EverestModule {
 
     public override void LoadSettings() {
         base.LoadSettings();
-        ghostSettings.LastManuallyConfigShowCustomInfo = ghostSettings.ShowCustomInfo;
-        ghostSettings.LastManuallyConfigShowHudInfo = ghostSettings.ShowHudInfo;
-        ghostSettings.ShowInfoEnabler = ghostSettings.ShowHudInfo | ghostSettings.ShowCustomInfo;
+        ghostSettings.OnLoadSettings();
     }
 
     public override void CreateModMenuSection(TextMenu menu, bool inGame, FMOD.Studio.EventInstance snapshot) {

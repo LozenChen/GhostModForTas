@@ -36,3 +36,4 @@ internal static class ModUtils {
         return GetModule(modName)?.GetType().Assembly;
     }
 }
+

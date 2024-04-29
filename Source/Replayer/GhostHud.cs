@@ -51,7 +51,7 @@ internal static class GhostHud {
 
     private static bool DragAndMoveHud() {
         if (infoIsDrawn && bgRect.Contains((int)MouseButtons.LastPosition.X, (int)MouseButtons.LastPosition.Y)) {
-            ghostSettings.InfoPosition += MouseButtons.Position - MouseButtons.LastPosition;
+            ghostSettings.HudInfoPosition += MouseButtons.Position - MouseButtons.LastPosition;
             GhostModule.Instance.SaveSettings();
             return true;
         }
@@ -103,11 +103,11 @@ internal static class GhostHud {
         float maxX = viewWidth - totalSize.X - margin - padding * 2;
         float maxY = viewHeight - totalSize.Y - margin - padding * 2;
         if (maxY > 0f) {
-            ghostSettings.InfoPosition = ghostSettings.InfoPosition.Clamp(margin, margin, maxX, maxY);
+            ghostSettings.HudInfoPosition = ghostSettings.HudInfoPosition.Clamp(margin, margin, maxX, maxY);
         }
 
-        float x = ghostSettings.InfoPosition.X;
-        float y = ghostSettings.InfoPosition.Y;
+        float x = ghostSettings.HudInfoPosition.X;
+        float y = ghostSettings.HudInfoPosition.Y;
 
         bgRect = new((int)x, (int)y, (int)(totalSize.X + padding * 2), (int)(totalSize.Y + padding * 2));
 
@@ -136,8 +136,8 @@ internal static class GhostHud {
             return false;
         }
 
-        Vector2 playerTopLeft = level.WorldToScreen(player.TopLeft) / Engine.Width * Engine.ViewWidth;
-        Vector2 playerBottomRight = level.WorldToScreen(player.BottomRight) / Engine.Width * Engine.ViewWidth;
+        Vector2 playerTopLeft = level.WorldToScreenExt(player.TopLeft) / Engine.Width * Engine.ViewWidth;
+        Vector2 playerBottomRight = level.WorldToScreenExt(player.BottomRight) / Engine.Width * Engine.ViewWidth;
         Rectangle playerRect = new(
             (int)Math.Min(playerTopLeft.X, playerBottomRight.X),
             (int)Math.Min(playerTopLeft.Y, playerBottomRight.Y),
