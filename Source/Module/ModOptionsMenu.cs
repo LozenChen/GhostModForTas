@@ -1616,7 +1616,7 @@ public class ButtonDeleteFileExt : TextMenu.Button {
                 return;
             }
 
-            Audio.Play(SFX.ui_main_button_select);
+            Audio.Play(SFX.ui_main_savefile_delete);
 
             DirectoryInfo ghostDir = new DirectoryInfo(PathGhosts);
             foreach (FileInfo file in ghostDir.GetFiles("*" + Recorder.Data.GhostData.OshiroPostfix)) {
@@ -1635,7 +1635,7 @@ public class ButtonDeleteFileExt : TextMenu.Button {
         Color strokeColor = (Disabled ? Color.Black : (highlighted ? HighlightedStrokeColor : StrokeColor)) * (num * num * num);
         bool flag = Container.InnerContent == TextMenu.InnerContentMode.TwoColumn && !AlwaysCenter;
         Vector2 textPosition = position + (flag ? Vector2.Zero : new Vector2(Container.Width * 0.5f, 0f)) + (highlighted ? new Vector2((float)Math.Sin(sine * 80f) * 2f, (float)Math.Sin(sine * 60f)) : Vector2.Zero);
-        Vector2 justify = (flag ? new Vector2(0f, 0.5f) : new Vector2(0.5f, 0.5f));
+        Vector2 justify = flag ? new Vector2(0f, 0.5f) : new Vector2(0.5f, 0.5f);
         ActiveFont.DrawOutline(Label, textPosition, justify, Scale, color, 2f, strokeColor);
     }
 }
