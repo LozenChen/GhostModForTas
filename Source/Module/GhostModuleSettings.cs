@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Monocle;
 using System;
-using System.IO;
 using System.Reflection;
 using TAS.EverestInterop;
 using YamlDotNet.Serialization;
@@ -93,26 +92,6 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public TimeFormats TimeFormat = TimeFormats.SecondAndFrame;
 
-    public static void CreateClearAllRecordsEntry(TextMenu textMenu) {
-        textMenu.Add(new TextMenu.Button("Clear All Records".ToDialogText()).Pressed(() => {
-            if (!Directory.Exists(PathGhosts)) {
-                Audio.Play(SFX.ui_main_button_invalid);
-                return;
-            }
-
-            Audio.Play(SFX.ui_main_button_select);
-
-            DirectoryInfo ghostDir = new DirectoryInfo(PathGhosts);
-            foreach (FileInfo file in ghostDir.GetFiles("*" + Recorder.Data.GhostData.OshiroPostfix)) {
-                file.Delete();
-            }
-
-            GhostCompare.ResetCompareTime();
-            GhostReplayer.Replayer?.RemoveSelf();
-            GhostReplayer.Replayer = null;
-        }));
-    }
-
 
     [SettingName("GHOST_MOD_FOR_TAS_MAIN_SWITCH_HOTKEY")]
     [SettingSubHeader("GHOST_MOD_FOR_TAS_HOTKEY_DESCRIPTION")]
@@ -130,13 +109,14 @@ public class GhostModuleSettings : EverestModuleSettings {
     [SettingName("GHOST_MOD_FOR_TAS_TOGGLE_COMPARER_HOTKEY")]
     [DefaultButtonBinding2(0, Keys.LeftControl, Keys.K)]
     public ButtonBinding keyToggleComparer { get; set; } = new((Buttons)0, Keys.Tab);
+
+#pragma warning disable CS8524
     public bool SettingsHotkeysPressed() {
         if (Engine.Scene is not Level) {
             return false;
         }
 
         GhostHotkey.Update(true, true);
-#pragma warning disable CS8524
         bool changed = false; // if settings need to be saved
 
         if (GhostHotkey.MainSwitchHotkey.Pressed) {
@@ -171,10 +151,9 @@ public class GhostModuleSettings : EverestModuleSettings {
             changed = true;
             ShowGhostHitbox = !ShowGhostHitbox;
         }
-        if (GhostHotkey.ToggleComparerHotkey.Pressed) {
+        if (GhostHotkey.ToggleComparerHotkey.Pressed && !Engine.Commands.Open) {
             ComparerToggler = !ComparerToggler;
         }
-#pragma warning restore CS8524
         return changed;
     }
 
@@ -192,6 +171,7 @@ public class GhostModuleSettings : EverestModuleSettings {
             GhostModuleMode.Both => "Both"
         });
     }
+#pragma warning restore CS8524
 
     [Initialize]
     private static void Initialize() {

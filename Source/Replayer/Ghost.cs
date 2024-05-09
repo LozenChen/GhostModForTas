@@ -85,6 +85,7 @@ public class Ghost : Actor {
             PlayerSpriteMode.Madeline or PlayerSpriteMode.MadelineNoBackpack or PlayerSpriteMode.Playback => Player.NormalHairColor,
             PlayerSpriteMode.Badeline or PlayerSpriteMode.MadelineAsBadeline => Player.NormalBadelineHairColor
         };
+        // Add(new VertexLight(new Vector2(0f, -8f), Color.White, 1f, 32, 64));
         FrameIndex = -1;
         IsCompleted = allData.LastOrDefault().IsCompleted ? 1 : 0;
         ModImports.AddGravityComponent(this);

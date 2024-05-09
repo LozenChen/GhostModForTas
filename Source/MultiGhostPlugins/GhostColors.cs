@@ -8,11 +8,9 @@ namespace Celeste.Mod.GhostModForTas.MultiGhost;
 public class GhostColors : Component {
 
     private GhostReplayerEntity parent;
-
-    public readonly static Color ColorGold = new Color(1f, 1f, 0f, 1f);
-    public readonly static Color ColorNeutral = new Color(1f, 1f, 1f, 1f);
     public GhostColors(GhostReplayerEntity replayer) : base(false, false) {
         parent = replayer;
+        HandleTransition();
     }
     public void HandleTransition() {
         if (ghostSettings.RandomizeGhostColors) {
@@ -30,6 +28,9 @@ public class GhostColors : Component {
             parent.ComparerGhost.Color = ColorGold;
         }
     }
+
+    public static readonly Color ColorGold = new Color(1f, 1f, 0f, 1f);
+    public static readonly Color ColorNeutral = new Color(1f, 1f, 1f, 1f);
 
     public bool Randomized = false;
     public void RandomColorMode() {

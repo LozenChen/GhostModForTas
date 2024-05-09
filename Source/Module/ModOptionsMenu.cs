@@ -11,6 +11,7 @@ using MonoMod.RuntimeDetour;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using static Celeste.TextMenu;
@@ -30,7 +31,7 @@ internal static class ModOptionsMenu {
         menu.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
         menu.Add(new HLine(Color.Gray, 0f));
 
-        GhostModuleSettings.CreateClearAllRecordsEntry(menu);
+        menu.Add(new ButtonDeleteFileExt("Clear All Records".ToDialogText(), menu));
 
         menu.Add(new HLine(Color.Gray, 0f));
 
@@ -1570,5 +1571,71 @@ public class HLine : TextMenu.Item {
             Monocle.Draw.Line(new Vector2(left, y), new Vector2(textCenter - haldWidth, y), lineColor, 4f);
             Monocle.Draw.Line(new Vector2(textCenter + haldWidth, y), new Vector2(right, y), lineColor, 4f);
         }
+    }
+}
+
+public class ButtonDeleteFileExt : TextMenu.Button {
+    public Color TextColor = Color.IndianRed;
+
+    public Color TextColorDisabled = Color.DarkSlateGray;
+
+    public Color HighlightColor = Color.Red;
+
+    public Color StrokeColor = Color.DarkBlue;
+
+    public Color HighlightedStrokeColor = Color.Yellow;
+
+    public Vector2 Scale = Vector2.One;
+
+    private float sine;
+
+    private TextMenu menu;
+
+    public override void Update() {
+        sine += Engine.DeltaTime;
+    }
+
+    public override float Height() {
+        return base.Height() * Scale.Y;
+    }
+
+    public override float LeftWidth() {
+        return base.LeftWidth() * Scale.X;
+    }
+
+    public ButtonDeleteFileExt(string label, TextMenu menu) : base(label) {
+        this.menu = menu;
+        DirectoryInfo ghostDir = new DirectoryInfo(PathGhosts);
+        Disabled = ghostDir.GetFiles().IsEmpty();
+        OnEnter = () => sine = 0f;
+        OnPressed = () => {
+            Disabled = true;
+            menu.MoveSelection(1);
+            if (!Directory.Exists(PathGhosts)) {
+                Audio.Play(SFX.ui_main_button_invalid);
+                return;
+            }
+
+            Audio.Play(SFX.ui_main_button_select);
+
+            DirectoryInfo ghostDir = new DirectoryInfo(PathGhosts);
+            foreach (FileInfo file in ghostDir.GetFiles("*" + Recorder.Data.GhostData.OshiroPostfix)) {
+                file.Delete();
+            }
+
+            GhostCompare.ResetCompareTime();
+            GhostReplayer.Replayer?.RemoveSelf();
+            GhostReplayer.Replayer = null;
+        };
+    }
+
+    public override void Render(Vector2 position, bool highlighted) {
+        float num = Container.Alpha;
+        Color color = (Disabled ? TextColorDisabled : (highlighted ? HighlightColor : TextColor)) * num;
+        Color strokeColor = (Disabled ? Color.Black : (highlighted ? HighlightedStrokeColor : StrokeColor)) * (num * num * num);
+        bool flag = Container.InnerContent == TextMenu.InnerContentMode.TwoColumn && !AlwaysCenter;
+        Vector2 textPosition = position + (flag ? Vector2.Zero : new Vector2(Container.Width * 0.5f, 0f)) + (highlighted ? new Vector2((float)Math.Sin(sine * 80f) * 2f, (float)Math.Sin(sine * 60f)) : Vector2.Zero);
+        Vector2 justify = (flag ? new Vector2(0f, 0.5f) : new Vector2(0.5f, 0.5f));
+        ActiveFont.DrawOutline(Label, textPosition, justify, Scale, color, 2f, strokeColor);
     }
 }

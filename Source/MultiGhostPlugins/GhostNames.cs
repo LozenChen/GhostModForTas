@@ -9,8 +9,6 @@ public class GhostNames : Component {
 
     private GhostReplayerEntity parent;
 
-    private Camera camera;
-
     public GhostNames(GhostReplayerEntity replayer) : base(false, true) {
         parent = replayer;
     }
@@ -23,10 +21,9 @@ public class GhostNames : Component {
             return;
         }
 
-        camera ??= level.Camera;
-
-        if (camera is null) {
-            return;
+        float alpha = base_alpha;
+        if (level.Paused) {
+            alpha *= 0.5f;
         }
 
         foreach (Ghost ghost in parent.Ghosts) {
@@ -35,6 +32,18 @@ public class GhostNames : Component {
                 continue;
             }
             Vector2 pos = ModImports.IsActorInverted(ghost) ? ghost.BottomCenter : ghost.Position;
+            DrawName(pos, name, ghost.Color);
+        }
+
+        if (level.Tracker.GetEntity<Player>() is { } player) {
+            string name2 = ghostSettings.PlayerName;
+            if (!string.IsNullOrWhiteSpace(name2)) {
+                Vector2 pos2 = ModImports.IsPlayerInverted ? player.BottomCenter : player.Position;
+                DrawName(pos2, name2, Color.White);
+            }
+        }
+
+        void DrawName(Vector2 pos, string name, Color color) {
             pos.Y -= 16f;
 
             pos = level.WorldToScreenExt(pos); // supports MirrorMode, UpsideDown, CenterCamera, but doesn't support the ZoomLevel variant from ExtendedVariantMode.
@@ -52,7 +61,7 @@ public class GhostNames : Component {
                 pos,
                 new Vector2(0.5f, isNotUpsideDown),
                 Vector2.One * f_scale,
-                ghost.Color * alpha,
+                color * alpha,
                 2f,
                 Color.Black * (alpha * alpha * alpha)
             );
@@ -61,5 +70,5 @@ public class GhostNames : Component {
 
     public static float f_scale = 0.5f;
 
-    public static float alpha = 1f;
+    public static float base_alpha = 1f;
 }

@@ -15,8 +15,6 @@ public class GhostRankingList : Component {
 
     private readonly List<Item> items;
 
-    public bool Ready = false;
-
     public static bool ConfigChanged = false;
 
     public GhostRankingList(GhostReplayerEntity replayer) : base(false, true) {
@@ -29,7 +27,6 @@ public class GhostRankingList : Component {
         foreach (Item item in items) {
             item.UpdateTransition(roomName, target);
         }
-        Ready = true;
     }
 
     public override void Render() {
@@ -75,7 +72,7 @@ public class GhostRankingList : Component {
             }
 
             if (playerRect.Intersects(mirrorBgRect)) {
-                alpha *= 0.5f;
+                alpha *= TAS.Manager.Running ? 0.5f : 0.2f;
             }
         }
 
@@ -140,7 +137,18 @@ public class GhostRankingList : Component {
 
         public float RightWidth;
 
-        public Item(GhostHolder ghost) { this.ghost = ghost; }
+        public Item(GhostHolder ghost) {
+            this.ghost = ghost;
+            Init();
+        }
+
+        public void Init() {
+            nameColor = ghost.Color;
+            name = ghost.Name;
+            NotSynced = false;
+            LastGhostTime = GhostTime = 0;
+            UpdateData();
+        }
         public void UpdateTransition(string roomName, string target) {
             nameColor = ghost.Color;
             name = ghost.Name;
@@ -171,13 +179,13 @@ public class GhostRankingList : Component {
                 }
             }
 
-            diffRoomTime = -(GhostCompare.GhostTime - GhostCompare.LastGhostTime - GhostTime + LastGhostTime);
-            diffTotalTime = -(GhostCompare.GhostTime - GhostTime);
-
             UpdateData();
         }
 
         public void UpdateData() {
+            diffRoomTime = -(GhostCompare.GhostTime - GhostCompare.LastGhostTime - GhostTime + LastGhostTime);
+            diffTotalTime = -(GhostCompare.GhostTime - GhostTime);
+
             roomTimeString = GhostCompare.FormatTime(diffRoomTime);
             roomTimeColor = AheadBehindColor(diffRoomTime);
             totalTimeString = GhostCompare.FormatTime(diffTotalTime);
