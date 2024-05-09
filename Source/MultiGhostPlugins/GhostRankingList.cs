@@ -33,7 +33,7 @@ public class GhostRankingList : Component {
     }
 
     public override void Render() {
-        if (!Ready || !ghostSettings.CompareStyleIsModern || !ghostSettings.ShowCompareTime) {
+        if (!ghostSettings.CompareStyleIsModern || !ghostSettings.ShowCompareTime) {
             return;
         }
 
