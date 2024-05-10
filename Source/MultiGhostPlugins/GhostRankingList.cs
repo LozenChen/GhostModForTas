@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
@@ -6,6 +7,7 @@ using Monocle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TAS.EverestInterop;
 
 namespace Celeste.Mod.GhostModForTas.MultiGhost;
 
@@ -41,7 +43,6 @@ public class GhostRankingList : Component {
             ConfigChanged = false;
         }
 
-        Vector2 pos = TopRight;
         float leftWidth = 0f;
         float rightWidth = 0f;
         foreach (Item item in items) {
@@ -51,7 +52,17 @@ public class GhostRankingList : Component {
         float width = leftWidth + SpacesBetween + rightWidth;
         float itemHeight = ActiveFont.Measure('Y').Y * f_scale;
 
-        pos.X -= width + Padding * 2;
+        Vector2 pos;
+        if (Alignment == Alignments.TopRight) {
+            pos = TopRight;
+            pos.X -= width + Padding * 2;
+        } else {
+            pos = TopLeft;
+            if (Settings.Instance.SpeedrunClock == SpeedrunType.File) {
+                pos.Y += 24;
+            }
+        }
+
         Vector2 size = new Vector2(width, itemHeight * items.Count);
         Rectangle bgRect = new Rectangle((int)pos.X, (int)pos.Y, (int)size.X + Padding * 2, (int)size.Y + Padding * 2);
 
@@ -76,7 +87,13 @@ public class GhostRankingList : Component {
             }
         }
 
-        Draw.Rect(bgRect, Color.Black * (0.3f * alpha));
+        if (CenterCamera.LevelZoom < 0.8f) {
+            Draw.Rect(bgRect, Color.Black * alpha); // in this case, we don't need to worry that comparer covers our level
+            Draw.HollowRect(bgRect, Color.Silver * alpha);
+        } else {
+            Draw.Rect(bgRect, Color.Black * (0.3f * alpha));
+        }
+
         pos += Vector2.One * Padding;
         foreach (Item item in items) {
             item.Render(pos, width);
@@ -85,7 +102,11 @@ public class GhostRankingList : Component {
 
     }
 
-    public static Vector2 TopRight => ghostSettings.RankingListPosition;
+    public static Vector2 TopRight = new Vector2(1922f, 100f);
+
+    public static Vector2 TopLeft = new Vector2(0f, 100f);
+
+    public static Alignments Alignment => ghostSettings.ComparerAlignment;
 
     public static int Padding = 5;
 

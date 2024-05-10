@@ -38,6 +38,7 @@ internal static class ModOptionsMenu {
         menu.Add(new TextMenu.OnOff("Compare Room Time".ToDialogText(), ghostSettings.CompareRoomTime).Change(value => { ghostSettings.CompareRoomTime = value; GhostRankingList.ConfigChanged = true; }));
         menu.Add(new TextMenu.OnOff("Compare Total Time".ToDialogText(), ghostSettings.CompareTotalTime).Change(value => { ghostSettings.CompareTotalTime = value; GhostRankingList.ConfigChanged = true; }));
         menu.Add(new TextMenuExt.EnumerableSlider<bool>("Comparer Style".ToDialogText(), CreateComparerStyleOptions(), ghostSettings.CompareStyleIsModern).Change(value => ghostSettings.CompareStyleIsModern = value));
+        menu.Add(new TextMenuExt.EnumerableSlider<Alignments>("Comparer Alignment".ToDialogText(), CreateComparerAlignmentsOptions(), ghostSettings.ComparerAlignment).Change(value => ghostSettings.ComparerAlignment = value));
         menu.Add(new TextMenuExt.IntSlider("Comparer Alpha".ToDialogText(), 1, 10, ghostSettings.ComparerOpacity).Change(value => { ghostSettings.ComparerOpacity = value; ghostSettings.ComparerAlpha = value / 10f; }));
 
         menu.Add(new HLine(Color.Gray, 0f));
@@ -163,11 +164,18 @@ internal static class ModOptionsMenu {
         };
     }
 
+    private static IEnumerable<KeyValuePair<Alignments, string>> CreateComparerAlignmentsOptions() {
+        return new List<KeyValuePair<Alignments, string>> {
+            new(Alignments.TopLeft, "TopLeft".ToDialogText()),
+            new(Alignments.TopRight, "TopRight".ToDialogText())
+        };
+    }
+
     private static IEnumerable<KeyValuePair<TimeFormats, string>> CreateTimeFormatOptions() {
         return new List<KeyValuePair<TimeFormats, string>> {
-            new(TimeFormats.SecondAndFrame, "-0.017(-1f)"),
             new(TimeFormats.SecondOnly, "-0.017s"),
-            new(TimeFormats.FrameOnly, "-1f")
+            new(TimeFormats.FrameOnly, "-1f"),
+            new(TimeFormats.SecondAndFrame, "-0.017(-1f)"),
         };
     }
     private static IEnumerable<KeyValuePair<GhostModuleMode, string>> CreateMainModeOptions() {

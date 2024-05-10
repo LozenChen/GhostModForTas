@@ -108,13 +108,22 @@ internal static class GhostCompare {
             float x;
             float y;
 
-            x = margin;
+            if (ghostSettings.ComparerAlignment == Alignments.TopLeft) {
+                x = margin;
+            } else {
+                x = 320f * pixelScale - size.X - padding * 2 + 1f;
+            }
+
             y = margin;
 
-            if (Settings.Instance.SpeedrunClock == SpeedrunType.Chapter) {
-                y += 16 * pixelScale;
-            } else if (Settings.Instance.SpeedrunClock == SpeedrunType.File) {
-                y += 20 * pixelScale;
+            if (ghostSettings.ComparerAlignment == Alignments.TopLeft) {
+                if (Settings.Instance.SpeedrunClock == SpeedrunType.Chapter) {
+                    y += 16 * pixelScale;
+                } else if (Settings.Instance.SpeedrunClock == SpeedrunType.File) {
+                    y += 20 * pixelScale;
+                }
+            } else {
+                y += 2 * pixelScale;
             }
 
             Rectangle bgRect = new Rectangle((int)x, (int)y, (int)(size.X + padding * 2), (int)(size.Y + padding * 2));
@@ -138,7 +147,7 @@ internal static class GhostCompare {
 
             Draw.SpriteBatch.Begin();
 
-            Draw.Rect(bgRect, Color.Black * 0.8f * alpha);
+            Draw.Rect(bgRect, Color.Black * (0.8f * alpha));
 
             Vector2 textPosition = new Vector2(x + padding, y + padding);
             Vector2 scale = new Vector2(fontSize);

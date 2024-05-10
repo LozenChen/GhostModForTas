@@ -31,6 +31,8 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool CompareStyleIsModern = true;
 
+    public Alignments ComparerAlignment = Alignments.TopRight;
+
     public int ComparerOpacity = 10;
 
     [YamlIgnore]
@@ -81,8 +83,6 @@ public class GhostModuleSettings : EverestModuleSettings {
     public static readonly Color defaultHurtboxColor = new Color(0f, 1f, 0f, 0.2f);
 
     public Vector2 HudInfoPosition = new Vector2(280f, 20f);
-
-    public Vector2 RankingListPosition = new Vector2(1915f, 100f);
 
     public bool RandomizeGhostColors = true;
 
@@ -211,3 +211,5 @@ public enum GhostModuleMode {
 }
 
 public enum TimeFormats { SecondAndFrame, SecondOnly, FrameOnly };
+
+public enum Alignments { TopLeft, TopRight };
