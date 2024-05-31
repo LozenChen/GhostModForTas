@@ -84,4 +84,6 @@ Alias names include "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostS
 
 ## Issues
 
+- The "Mode Switch" hotkey and CelesteTAS's "Lock Camera" hotkey have same default values (LeftControl + H).
+
 - There may be some incompatibility with savestates. Please let me know.

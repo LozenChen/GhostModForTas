@@ -81,7 +81,7 @@ internal static class GhostHud {
 
         string text = stringBuilder.ToString().Trim();
 
-        string title = ghost.Name + " " + GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true) + (ghostSettings.IsIGT ? "" : "(RTA)") + (ghost.IsCompleted > 0 ? "" : "Not Completed".ToDialogText());
+        string title = GhostFileTitleGetter(ghost);
         Color titleColor = ghost.IsCompleted > 0 ? Color.Yellow : Color.SlateGray;
 
         int viewWidth = Engine.ViewWidth;
@@ -146,5 +146,25 @@ internal static class GhostHud {
         );
 
         return playerRect.Intersects(bgRect);
+    }
+
+    public static string GhostFileTitleGetter(Ghost ghost) {
+        return ghost.Name + " " + GhostCompare.FormatTime(ghost.AllRoomData.LastOrDefault().GetSessionTime(), true) + (ghostSettings.IsIGT ? "" : "(RTA)") + (ghost.IsCompleted > 0 ? "" : "Not Completed".ToDialogText());
+    }
+
+    public static string GhostFileTitleGetter(Recorder.Data.GhostData data) {
+        StringBuilder sb = new();
+        sb.Append(data.Name).Append(" | ").Append(data.SID).Append(", ");
+        if (data.SID.StartsWith("Celeste/") || data.Mode != AreaMode.Normal) {
+            sb.Append(data.Mode switch { AreaMode.Normal => "A-Side, ", AreaMode.BSide => "B-Side, ", AreaMode.CSide => "C-Side, ", _ => "" });
+        }
+        sb.Append(GhostCompare.FormatTime(data.GetSessionTime(), true));
+        if (!ghostSettings.IsIGT) {
+            sb.Append("(RTA)");
+        }
+        if (!data.IsCompleted) {
+            sb.Append("Not Completed".ToDialogText());
+        }
+        return sb.ToString();
     }
 }

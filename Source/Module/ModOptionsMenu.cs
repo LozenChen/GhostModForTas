@@ -107,6 +107,23 @@ internal static class ModOptionsMenu {
             });
         menu.Add(playerName);
 
+        if (inGame) {
+            SubHeaderExt remindText2 = new("Rename Remind".ToDialogText()) {
+                TextColor = Color.Gray,
+                HeightExtra = 0f
+            };
+            menu.Add(remindText2);
+        }
+        menu.Add(new HLine(Color.Gray, 0f));
+
+        TextMenu.Item fileEditor = new ButtonNameExt("Open Ghost File Editor".ToDialogText(), null, inGame).Pressed(inGame ? () => { }
+        :
+        () => {
+            Audio.Play("event:/ui/main/savefile_rename_start");
+            menu.SceneAs<Overworld>().Goto<GhostFileEditorContainer>();
+        });
+        menu.Add(fileEditor);
+
         menu.Add(new HLine(Color.Gray, 0f));
 
         menu.Add(new TextMenu.OnOff("Show Recorder Icon".ToDialogText(), ghostSettings.ShowRecorderIcon).Change(value => { ghostSettings.ShowRecorderIcon = value; RecordingIcon.Instance?.Update(); }));
@@ -148,7 +165,7 @@ internal static class ModOptionsMenu {
     private static readonly MethodInfo CreateKeyboardConfigUi = typeof(EverestModule).GetMethodInfo("CreateKeyboardConfigUI");
     private static readonly MethodInfo CreateButtonConfigUI = typeof(EverestModule).GetMethodInfo("CreateButtonConfigUI");
     internal static string ToTASDialogText(this string input) => Dialog.Clean("TAS_" + input.Replace(" ", "_"));
-    private const int MaxNameLength = 42;
+    internal const int MaxNameLength = 42;
 
     private static IEnumerable<KeyValuePair<bool, string>> CreateRTA_IGTOptions() {
         return new List<KeyValuePair<bool, string>> {
@@ -490,7 +507,11 @@ public class ButtonNameExt : TextMenu.Button, IItemExt {
         bool flag = Container.InnerContent == TextMenu.InnerContentMode.TwoColumn && !AlwaysCenter;
         Vector2 textPosition = position + (flag ? Vector2.Zero : new Vector2(Container.Width * 0.5f, 0f));
         Vector2 justify = flag ? new Vector2(0f, 0.5f) : new Vector2(0.5f, 0.5f);
-        ActiveFont.DrawOutline(Prefix + $": \"{NameGetter()}\"", textPosition, justify, Scale, color, 2f, strokeColor);
+        if (NameGetter is not null) {
+            ActiveFont.DrawOutline(Prefix + $": \"{NameGetter()}\"", textPosition, justify, Scale, color, 2f, strokeColor);
+        } else {
+            ActiveFont.DrawOutline(Prefix, textPosition, justify, Scale, color, 2f, strokeColor);
+        }
     }
 }
 public class OuiModOptionStringHexColor : Oui, OuiModOptions.ISubmenu {
@@ -1597,8 +1618,6 @@ public class ButtonDeleteFileExt : TextMenu.Button {
 
     private float sine;
 
-    private TextMenu menu;
-
     public override void Update() {
         sine += Engine.DeltaTime;
     }
@@ -1612,7 +1631,6 @@ public class ButtonDeleteFileExt : TextMenu.Button {
     }
 
     public ButtonDeleteFileExt(string label, TextMenu menu) : base(label) {
-        this.menu = menu;
         DirectoryInfo ghostDir = new DirectoryInfo(PathGhosts);
         Disabled = ghostDir.GetFiles().IsEmpty();
         OnEnter = () => sine = 0f;

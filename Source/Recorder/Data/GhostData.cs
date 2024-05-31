@@ -103,6 +103,38 @@ public class GhostData {
         return ghosts;
     }
 
+    internal class GhostFileEditorHelper {
+        private static string[] GetAllGhostFilePaths()
+        => Directory.GetFiles(
+            PathGhosts,
+            "*" + OshiroPostfix
+        );
+
+        public static Dictionary<Guid, List<GhostData>> GetGhostFileInfo() {
+            Dictionary<Guid, List<GhostData>> dict = new();
+
+            string[] filePaths = GetAllGhostFilePaths();
+            Dictionary<Guid, List<GhostData>> dictionary = new();
+            for (int i = 0; i < filePaths.Length; i++) {
+                GhostData ghostData = new GhostData(filePaths[i]).Read();
+                if (ghostData?.Run is null) {
+                    continue;
+                }
+                if (dictionary.TryGetValue(ghostData.Run, out List<GhostData> list)) {
+                    list.Add(ghostData);
+                } else {
+                    dictionary.Add(ghostData.Run, new List<GhostData>() { ghostData });
+                }
+            }
+
+            foreach (Guid guid in dictionary.Keys) {
+                dict[guid] = dictionary[guid].OrderBy(x => x.RTASessionTime).ToList();
+            }
+
+            return dict;
+        }
+    }
+
     public string SID;
     public AreaMode Mode;
     public LevelCount LevelCount;
@@ -201,6 +233,7 @@ public class GhostData {
         }
     }
 
+
     public GhostData Read(BinaryReader reader) {
         if (reader.ReadInt16() != 0x0ade) {
             return null; // Endianness mismatch.
@@ -265,6 +298,12 @@ public class GhostData {
         }
 
         return this;
+    }
+
+    public void DeleteFromMemory() {
+        if (FilePath != null && File.Exists(FilePath)) {
+            File.Delete(FilePath);
+        }
     }
 
     public void Write() {
