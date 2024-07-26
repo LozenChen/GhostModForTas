@@ -53,8 +53,9 @@ public class GhostData {
             GetGhostFilePrefix(session) + "*" + OshiroPostfix
         );
 
+    private static bool Match_level => ghostSettings.REPLAYER_CHECK_STARTING_WITH_SAME_ROOM; // if we should check the starting room is same
     public static List<Replayer.Ghost> FindAllGhosts(Session session) {
-        string[] filePaths = GetAllGhostFilePaths_NoLevel(session);
+        string[] filePaths = Match_level ? GetAllGhostFilePaths(session) : GetAllGhostFilePaths_NoLevel(session);
         Dictionary<Guid, List<GhostData>> dictionary = new();
         List<Replayer.Ghost> ghosts = new();
         for (int i = 0; i < filePaths.Length; i++) {
@@ -72,32 +73,40 @@ public class GhostData {
             Logger.Log("GhostModForTas", "No Ghost in this Level!");
         }
         foreach (Guid guid in dictionary.Keys) {
-            LevelCount lc = new LevelCount(session.Level, 1);
-            GhostData[] ghostDatas = dictionary[guid].OrderBy(x => x.RTASessionTime).ToArray();
-            List<GhostData> sortedGhostData = new();
+            if (Match_level) {
+                GhostData[] ghostDatas = dictionary[guid].OrderBy(x => x.RTASessionTime).ToArray();
+                List<GhostData> sortedGhostData = new();
+                // ghostDatas.ForEach(x => Logger.Log("GhostModForTas", $"Try Read GhostData {guid}: {x.LevelCount}"));
 
-            // ghostDatas.ForEach(x => Logger.Log("GhostModForTas", $"Try Read GhostData {guid}: {x.LevelCount}"));
+                int head = 0;
+                int tail = ghostDatas.Length;
 
-            int head = 0;
-            int tail = ghostDatas.Length;
+                LevelCount lc = new LevelCount(session.Level, 1);
 
-            bool found;
-            do {
-                found = false;
-                for (int i = head; i < tail; i++) {
-                    if (ghostDatas[i].LevelCount == lc) {
-                        sortedGhostData.Add(ghostDatas[i]);
-                        lc = ghostDatas[i].TargetCount;
-                        head = i + 1;
-                        found = true;
-                        break;
+                bool found;
+                do {
+                    found = false;
+                    for (int i = head; i < tail; i++) {
+                        if (ghostDatas[i].LevelCount == lc) {
+                            sortedGhostData.Add(ghostDatas[i]);
+                            lc = ghostDatas[i].TargetCount;
+                            head = i + 1;
+                            found = true;
+                            break;
+                        }
                     }
-                }
-            } while (found);
+                } while (found);
 
-            if (sortedGhostData.Count > 0) {
-                ghosts.Add(new Replayer.Ghost(sortedGhostData));
+                if (sortedGhostData.Count > 0) {
+                    ghosts.Add(new Replayer.Ghost(sortedGhostData));
+                }
+            } else {
+                List<GhostData> sortedGhostData = dictionary[guid].OrderBy(x => x.RTASessionTime).ToList();
+                if (sortedGhostData.Count > 0) {
+                    ghosts.Add(new Replayer.Ghost(sortedGhostData));
+                }
             }
+
         }
 
         return ghosts;

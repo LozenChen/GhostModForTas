@@ -24,9 +24,19 @@ internal static class ModOptionsMenu {
 
     public static void CreateMenu(EverestModule everestModule, TextMenu menu, bool inGame, bool inPauseMenu = false) {
         menu.Add(new TextMenuExt.EnumerableSlider<GhostModuleMode>("Mode".ToDialogText(), CreateMainModeOptions(),
-        ghostSettings.Mode).Change(value => { ghostSettings.Mode = value; GhostReplayer.Clear(); RecordingIcon.Instance?.Update(); }));
+        ghostSettings.Mode).Change(value => {
+            if (GhostRecorder.origMode.HasValue) {
+                GhostRecorder.StopRecordingCommand();
+            }
+            ghostSettings.Mode = value;
+            if (ghostSettings.Mode == GhostModuleMode.Record && Engine.Scene is Level level && (GhostRecorder.Recorder is null || GhostRecorder.Recorder.Scene != level)) {
+                level.OnEndOfFrame += GhostRecorder.CreateNewRecorderOnEndOfFrame; // in case we pressed the hotkey accidentally
+            }
+            GhostReplayer.Clear(false);
+            RecordingIcon.Instance?.Update();
+        }));
 
-        menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => { ghostSettings.ForceSync = value; GhostReplayer.Clear(); }));
+        menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => { ghostSettings.ForceSync = value; GhostReplayer.Clear(true); }));
         menu.Add(new TextMenuExt.EnumerableSlider<TimeFormats>("Time Format".ToDialogText(), CreateTimeFormatOptions(), ghostSettings.TimeFormat).Change(value => { ghostSettings.TimeFormat = value; GhostRankingList.ConfigChanged = true; }));
         menu.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
         menu.Add(new HLine(Color.Gray, 0f));
@@ -56,7 +66,7 @@ internal static class ModOptionsMenu {
 
         menu.Add(new HLine(Color.Gray, 0f));
 
-        menu.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => { ghostSettings.GhostSpriteMode = value; GhostReplayer.Clear(); }));
+        menu.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => { ghostSettings.GhostSpriteMode = value; GhostReplayer.Clear(true); }));
 
         menu.Add(new TextMenu.OnOff("Randomize Ghost Colors".ToDialogText(), ghostSettings.RandomizeGhostColors).Change(value => ghostSettings.RandomizeGhostColors = value));
 

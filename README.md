@@ -10,15 +10,13 @@ https://gamebanana.com/mods/500759
 
 ## How to use
 
-Step1: Switch to RECORD mode manually, or use a StartGhostRecording command before the first frame in the tas file.
+Step1: Switch to RECORD mode manually, or use a StartGhostRecording command in Studio to start your record. If you succeed, you will find a Recording icon in the bottom-right of the screen.
 
-Step2: RESTART chapter or use a CONSOLE LOAD command to start your run to record. If you succeed, you will find a Recording icon in the bottom-right of the screen.
+Step2: Whenever you finishes a room, a Ghost file will be written to storage.
 
-Step3: Whenever you finishes a room, a Ghost file will be written to storage.
+Step3: Wait until your tas finishes, or use a StopGhostRecording command, to stop recording. Note that if the last recording room is not finished, then it will be dropped.
 
-Step4: Wait until your tas finishes, or use a StopGhostRecording command, to stop recording. Note that if the last recording room is not finished, then it will be dropped.
-
-Step5: Switch to PLAY mode manually, or use a StartGhostReplay command in the same position where the StartGhostRecording command was, and enter the same level, to play your records ("Ghosts").
+Step4: Switch to PLAY mode manually and restart chapter / re-run the tas, or use a StartGhostReplay command in tas file, to play your records ("Ghosts").
 
 ## Force Sync
 
@@ -37,6 +35,16 @@ Step5: Switch to PLAY mode manually, or use a StartGhostReplay command in the sa
 ## Ghost Compare Time
 
 - If you change the route (e.g. enter a room that the ghost doesn't enter, and vice versa), then the comparing time system will refuse to show the comparison.
+
+## Modes
+
+- You have 4 ways to switch modes: in mod menu, using hotkeys, using console commands, and using tas commands.
+
+- If you start the chapter while not in PLAY mode, then ghosts will not be loaded. Note that loading ghosts takes much time, so even if you switch to PLAY mode later using the first three ways, ghosts will still be unloaded. Unless you use a tas command.
+
+- But once the ghosts are loaded, they will persist even if you are no longer in PLAY mode (they just become invisible), and will be shown again when you switch back to PLAY mode.
+
+- You can start recording using any of the 4 ways.
 
 ## Hotkeys
 

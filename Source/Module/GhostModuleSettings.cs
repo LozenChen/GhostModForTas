@@ -14,10 +14,11 @@ namespace Celeste.Mod.GhostModForTas.Module;
 public class GhostModuleSettings : EverestModuleSettings {
     public GhostModuleMode Mode = GhostModuleMode.Off; // we don't provide BOTH mode in menu, as i think we don't actually need it in normal tas making 
 
+    public bool REPLAYER_CHECK_STARTING_WITH_SAME_ROOM = false;
+
     public string DefaultName = "Ghost";
 
     public string PlayerName = "Player";
-
     public void OnLoadSettings() {
         LastManuallyConfigShowCustomInfo = ShowCustomInfo;
         LastManuallyConfigShowHudInfo = ShowHudInfo;
@@ -130,6 +131,9 @@ public class GhostModuleSettings : EverestModuleSettings {
                     GhostModuleMode.Play => GhostModuleMode.Off, // yeah, i think that we don't even actually need BOTH mode
                     GhostModuleMode.Both => GhostModuleMode.Off
                 };
+                if (Mode == GhostModuleMode.Record && Engine.Scene is Level level && (GhostRecorder.Recorder is null || GhostRecorder.Recorder.Scene != level)) {
+                    level.OnEndOfFrame += GhostRecorder.CreateNewRecorderOnEndOfFrame; // in case we pressed the hotkey accidentally
+                }
             }
             UpdateStateText();
         } else if (GhostHotkey.InfoHudHotkey.Pressed) {
@@ -180,8 +184,11 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     [Monocle.Command("ghost_record", "[GhostModForTas] Switch to RECORD mode")]
     public static void SwtichToRecordConsoleCommand() {
+        if (Engine.Scene is Level level && (!ghostSettings.Mode.HasFlag(GhostModuleMode.Record) || GhostRecorder.Recorder is null || GhostRecorder.Recorder.Scene != level)) {
+            GhostRecorder.CreateNewRecorder(level);
+        }
         ghostSettings.Mode = GhostModuleMode.Record;
-        GhostReplayer.Clear();
+        GhostReplayer.Clear(false);
         RecordingIcon.Instance?.Update();
         ghostSettings.UpdateStateText();
     }
@@ -196,7 +203,7 @@ public class GhostModuleSettings : EverestModuleSettings {
     [Monocle.Command("ghost_off", "[GhostModForTas] Switch to OFF mode")]
     public static void SwtichToOffConsoleCommand() {
         ghostSettings.Mode = GhostModuleMode.Off;
-        GhostReplayer.Clear();
+        GhostReplayer.Clear(false);
         RecordingIcon.Instance?.Update();
         ghostSettings.UpdateStateText();
     }

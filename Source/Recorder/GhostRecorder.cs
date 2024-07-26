@@ -115,7 +115,9 @@ internal static class GhostRecorder {
         }
 
         // recorder
-        if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
+        if (!ghostSettings.Mode.Has(GhostModuleMode.Record)) {
+            Recorder?.RemoveSelf();
+        } else if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
             CreateNewRecorder(level);
         }
         Step(level);
@@ -124,9 +126,7 @@ internal static class GhostRecorder {
         }
 
         // replayer
-        if (!ghostSettings.Mode.Has(GhostModuleMode.Play)) {
-            GhostReplayer.Replayer?.RemoveSelf();
-        } else {
+        if (ghostSettings.Mode.Has(GhostModuleMode.Play)) {
             if (LoadLevelDetector.IsStartingLevel(level, isFromLoader)) {
                 CreateNewReplayer(level);
             } else if (!isFromLoader && level.Tracker.GetEntity<GhostReplayerEntity>() is { } replayer) {
@@ -136,10 +136,18 @@ internal static class GhostRecorder {
         }
     }
 
-    private static void CreateNewRecorder(Level level) {
+    internal static void CreateNewRecorder(Level level) {
         Recorder?.RemoveSelf();
         CachedEntitiesForParse.Clear();
         level.Add(Recorder = new GhostRecorderEntity(level.Session));
+    }
+
+    internal static void CreateNewRecorderOnEndOfFrame() {
+        if (ghostSettings.Mode.HasFlag(GhostModuleMode.Record) && Engine.Scene is Level level && (GhostRecorder.Recorder is null || GhostRecorder.Recorder.Scene != level)) {
+            Recorder?.RemoveSelf();
+            CachedEntitiesForParse.Clear();
+            level.Add(Recorder = new GhostRecorderEntity(level.Session));
+        }
     }
 
     private static void CreateNewReplayer(Level level) {
@@ -228,7 +236,7 @@ internal static class GhostRecorder {
     [TasCommand("StartGhostRecording", AliasNames = new[] { "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost", "RecordingGhost", "GhostRecordMode", "RecordGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StartRecordingCommand() {
         origMode ??= ghostSettings.Mode;
-        if (!ghostSettings.Mode.HasFlag(GhostModuleMode.Record) && Engine.Scene is Level level && (Recorder is null || Recorder.Scene != level)) {
+        if (Engine.Scene is Level level && (Recorder is null || Recorder.Scene != level)) {
             CreateNewRecorder(level);
         }
         ghostSettings.Mode = GhostModuleMode.Record;
@@ -238,7 +246,7 @@ internal static class GhostRecorder {
     [TasCommand("StartGhostReplay", AliasNames = new[] { "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost", "GhostPlay", "GhostReplay", "GhostStartPlay", "GhostStartPlaying", "GhostStartReplay", "GhostStartReplaying", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StartGhostReplayCommand() {
         origMode ??= ghostSettings.Mode;
-        if (!ghostSettings.Mode.HasFlag(GhostModuleMode.Play) && Engine.Scene is Level level && (GhostReplayer.Replayer is null || GhostReplayer.Replayer.Scene != level)) {
+        if (Engine.Scene is Level level && (GhostReplayer.Replayer is null || GhostReplayer.Replayer.Scene != level)) {
             CreateNewReplayer(level);
         }
         ghostSettings.Mode = GhostModuleMode.Play;
@@ -297,6 +305,7 @@ public class GhostRecorderEntity : Entity {
         RevisitCount = new();
         Data = new GhostData(session);
         lastFrameHudInfo = "";
+        Logger.Log("GhostModForTas", "Recorder added");
     }
 
     public void WriteData() {
@@ -320,6 +329,7 @@ public class GhostRecorderEntity : Entity {
     public override void Removed(Scene scene) {
         base.Removed(scene);
         GhostRecorder.Recorder = null;
+        Logger.Log("GhostModForTas", "Recorder removed");
     }
 
     public void RecordData() {

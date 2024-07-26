@@ -30,9 +30,15 @@ internal static class GhostReplayer {
     }
     */
 
-    public static void Clear() {
-        Replayer?.RemoveSelf();
-        Replayer = null;
+    public static void Clear(bool completely = false) {
+        if (completely) {
+            Replayer?.RemoveSelf();
+            Replayer = null;
+        } else {
+            if (Replayer is not null) {
+                Replayer.Visible = false;
+            }
+        }
         GhostCompare.ResetCompareTime();
     }
 
@@ -292,6 +298,7 @@ public class GhostReplayerEntity : Entity {
         Ghosts.ForEach(ghost => ghost.RemoveSelf());
         Ghosts.Clear();
         ComparerGhost = null;
+        Logger.Log("GhostModForTas", "Replayer removed");
     }
 
 
