@@ -66,7 +66,7 @@ Alias names include "StartGhostReplaying", "StartGhostPlaying", "StartReplayingG
 
 If ghosts already exist, this command will not try to find new ghosts.
 
-- You can use ***"GhostReload"*** to forces the game to drop all ghosts and load ghosts again.
+- You can use ***"GhostReload"*** to force the game to drop all ghosts and load ghosts again.
 
 Alias names include "GhostReplayReload", "ReloadGhostReplay" and "ReloadGhost".
 
