@@ -253,6 +253,16 @@ internal static class GhostRecorder {
         ghostSettings.UpdateStateText();
     }
 
+    [TasCommand("GhostReload", AliasNames = new[] { "GhostReplayReload", "ReloadGhostReplay", "ReloadGhost" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    public static void GhostReplayReloadCommand() {
+        origMode ??= ghostSettings.Mode;
+        if (Engine.Scene is Level level) {
+            CreateNewReplayer(level); // forces the game to re-create a replayer. so if there are new ghosts, the replayer will find them
+        }
+        ghostSettings.Mode = GhostModuleMode.Play;
+        ghostSettings.UpdateStateText();
+    }
+
     [TasCommand("StopGhostReplay", AliasNames = new[] { "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostStopReplay", "GhostStopPlay", "StopGhostReplaying", "StopGhostPlaying", "StopReplayingGhost", "StopPlayingGhost", "GhostStopReplaying", "GhostStopPlaying" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StopReplayCommand() {
         if (ghostSettings.Mode.HasFlag(GhostModuleMode.Play) && origMode.HasValue) {
