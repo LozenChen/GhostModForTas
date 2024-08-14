@@ -1,0 +1,70 @@
+# NOTES:
+# The # Symbol at the start of a line counts as a Comment. To include in dialog, use a \#
+# The . Symbol will cause a pause unless escaped with \. (ex: Mr. Oshiro has a pause, Mr\. Oshiro does not)
+# Newlines automatically create a Page Break, unless there is an {n} command on the previous line
+# Commands: Anything inside of curly braces {...} is a command and should not be translated.
+
+# Inline Text Commands:
+# {~}wavy text{/~}
+# {!}impact text{/!}
+# {>> x}changes speed at which characters are displayed{>>}
+# {# 000000}this text is black{#} (uses HEX color values)
+# {+MENU_BEGIN} inserts the dialog from the MENU_BEGIN value (in English, "CLIMB")
+# {n} creates a newline, without a page break
+# {0.5} creates a 0.5 second pause
+# {big}this text is large{/big}
+
+# Gameplay Control Commands (should never change)
+# {trigger x} this triggers an in-game event
+# {anchor} controls the visual position of the textbox in-game
+
+# Ghost Module Options
+GHOST_MOD_FOR_TAS_TITLE= 				                GhostModForTas
+GHOST_MOD_FOR_TAS_MODE= 				                Mode
+GHOST_MOD_FOR_TAS_MODE_OFF= 			                OFF
+GHOST_MOD_FOR_TAS_MODE_RECORD= 		                    RECORD
+GHOST_MOD_FOR_TAS_MODE_PLAY= 			                PLAY
+GHOST_MOD_FOR_TAS_MODE_BOTH=		                    BOTH
+GHOST_MOD_FOR_TAS_FORCE_SYNC=                           Force Sync
+GHOST_MOD_FOR_TAS_COMPARE_ROOM_TIME=                    Compare Room Time
+GHOST_MOD_FOR_TAS_COMPARE_TOTAL_TIME=                   Compare Total Time
+GHOST_MOD_FOR_TAS_SHOW_GHOST_SPRITE=                    Show Ghost Entity
+GHOST_MOD_FOR_TAS_SHOW_GHOST_HITBOX=                    Show Ghost Hitbox
+GHOST_MOD_FOR_TAS_SHOW_HUD_INFO=                        Use Info HUD
+GHOST_MOD_FOR_TAS_SHOW_CUSTOM_INFO=                     Use Custom Info
+GHOST_MOD_FOR_TAS_SHOW_IN_PAUSE_MENU=                   Show in Pause Menu
+GHOST_MOD_FOR_TAS_CLEAR_ALL_RECORDS= 	                Clear All Records
+GHOST_MOD_FOR_TAS_GHOST_SPRITE_MODE=                    Ghost Sprite
+GHOST_MOD_FOR_TAS_GHOST_MODULE_MENU=                    GhostModForTas
+GHOST_MOD_FOR_TAS_GHOST_TITLE=                          GhostModForTas
+GHOST_MOD_FOR_TAS_HITBOX_COLOR=                         Ghost Hitbox Color
+GHOST_MOD_FOR_TAS_HURTBOX_COLOR=                        Ghost Hurtbox Color
+GHOST_MOD_FOR_TAS_MAIN_SWITCH_HOTKEY=                   Mode Switch
+GHOST_MOD_FOR_TAS_HOTKEY_DESCRIPTION=                   Binding multiple keys to a control will cause those keys to act as a keycombo
+GHOST_MOD_FOR_TAS_INFO_HUD_HOTKEY=                      Ghost Info HUD
+GHOST_MOD_FOR_TAS_HITBOX_HOTKEY=                        Ghost Hitbox
+GHOST_MOD_FOR_TAS_COLOR_CUSTOMIZATION_REMIND=           Custom colors can only be edited in the menu of the title screen
+GHOST_MOD_FOR_TAS_COLOR_CUSTOMIZATION_COLOR_FORMAT=     Color format: ARGB, e.g. Red: #FFFF0000.
+GHOST_MOD_FOR_TAS_RESET_TO_DEFAULT=                     RESET
+GHOST_MOD_FOR_TAS_TIMER_MODE=                           Timer Mode
+GHOST_MOD_FOR_TAS_NOT_COMPLETED=                        (Not Completed)
+GHOST_MOD_FOR_TAS_SHOW_RECORDER_ICON=                   Show Recording Icon
+GHOST_MOD_FOR_TAS_TIME_FORMAT=                          Time Format
+GHOST_MOD_FOR_TAS_GHOST_DEFAULT_NAME=                   Ghost Default Name
+GHOST_MOD_FOR_TAS_SHOW_GHOST_NAME=                      Show Ghost Name
+GHOST_MOD_FOR_TAS_MODERN=                               Modern
+GHOST_MOD_FOR_TAS_CLASSIC=                              Classic
+GHOST_MOD_FOR_TAS_COMPARER_STYLE=                       Comparer Style
+GHOST_MOD_FOR_TAS_COMPARER_ALPHA=                       Comparer Opacity
+GHOST_MOD_FOR_TAS_PLAYER_NAME=                          Player Name
+GHOST_MOD_FOR_TAS_RANDOMIZE_GHOST_COLORS=               Randomize Ghost Colors
+GHOST_MOD_FOR_TAS_TOGGLE_COMPARER_HOTKEY=               Toggle Comparer
+GHOST_MOD_FOR_TAS_COMPARER_ALIGNMENT=                   Comparer Alignment
+GHOST_MOD_FOR_TAS_TOPLEFT=                              Top Left
+GHOST_MOD_FOR_TAS_TOPRIGHT=                             Top Right
+GHOST_MOD_FOR_TAS_OPEN_GHOST_FILE_EDITOR=               Open Ghost File Editor
+GHOST_MOD_FOR_TAS_GHOST_FILE_EDITOR=                    Ghost File Editor
+GHOST_MOD_FOR_TAS_NO_GHOST_FILES=                       NO GHOST FILE
+GHOST_MOD_FOR_TAS_RENAME=                               Rename
+GHOST_MOD_FOR_TAS_DELETE=                               {}    Delete
+GHOST_MOD_FOR_TAS_RENAME_REMIND=                        Names and Ghost files can only be edited in the menu of the title screen

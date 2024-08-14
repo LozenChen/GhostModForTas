@@ -29,18 +29,17 @@ public static class GhostHotkey {
     [Load]
     public static void Load() {
         On.Celeste.Level.Render += HotkeysPressed;
-        IL.Celeste.Mod.ModuleSettingsKeyboardConfigUI.Reset += ModReload;
     }
 
     [Unload]
     public static void Unload() {
         On.Celeste.Level.Render -= HotkeysPressed;
-        IL.Celeste.Mod.ModuleSettingsKeyboardConfigUI.Reset -= ModReload;
     }
 
 
     [Initialize]
     public static void HotkeyInitialize() {
+        typeof(ModuleSettingsKeyboardConfigUI).GetMethod("Reset").IlHook(ModReload);
         MainSwitchHotkey = BindingToHotkey(ghostSettings.keyMainSwitch);
         GhostHitboxHotkey = BindingToHotkey(ghostSettings.keyGhostHitbox);
         InfoHudHotkey = BindingToHotkey(ghostSettings.keyInfoHud);
