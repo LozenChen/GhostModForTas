@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Input;
 using Monocle;
 using System;
 using System.Reflection;
-using TAS.EverestInterop;
 using YamlDotNet.Serialization;
 
 namespace Celeste.Mod.GhostModForTas.Module;
@@ -96,19 +95,19 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     [SettingName("GHOST_MOD_FOR_TAS_MAIN_SWITCH_HOTKEY")]
     [SettingSubHeader("GHOST_MOD_FOR_TAS_HOTKEY_DESCRIPTION")]
-    [DefaultButtonBinding2(0, Keys.LeftControl, Keys.H)]
+    [DefaultButtonBinding(new Buttons[] { }, new Keys[] { Keys.LeftControl, Keys.H })]
     public ButtonBinding keyMainSwitch { get; set; } = new((Buttons)0, Keys.LeftControl, Keys.H);
 
     [SettingName("GHOST_MOD_FOR_TAS_HITBOX_HOTKEY")]
-    [DefaultButtonBinding2(0, Keys.LeftControl, Keys.J)]
+    [DefaultButtonBinding(new Buttons[] { }, new Keys[] { Keys.LeftControl, Keys.J })]
     public ButtonBinding keyGhostHitbox { get; set; } = new((Buttons)0, Keys.LeftControl, Keys.J);
 
     [SettingName("GHOST_MOD_FOR_TAS_INFO_HUD_HOTKEY")]
-    [DefaultButtonBinding2(0, Keys.LeftControl, Keys.K)]
+    [DefaultButtonBinding(new Buttons[] { }, new Keys[] { Keys.LeftControl, Keys.K })]
     public ButtonBinding keyInfoHud { get; set; } = new((Buttons)0, Keys.LeftControl, Keys.K);
 
     [SettingName("GHOST_MOD_FOR_TAS_TOGGLE_COMPARER_HOTKEY")]
-    [DefaultButtonBinding2(0, Keys.LeftControl, Keys.K)]
+    [DefaultButtonBinding(0, Keys.Tab)]
     public ButtonBinding keyToggleComparer { get; set; } = new((Buttons)0, Keys.Tab);
 
 #pragma warning disable CS8524

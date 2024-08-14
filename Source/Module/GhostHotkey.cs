@@ -8,6 +8,7 @@ using MonoMod.Cil;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using XNAKeys = Microsoft.Xna.Framework.Input.Keys;
 using TAS.EverestInterop;
 
 using Hotkey = TAS.EverestInterop.Hotkeys.Hotkey;
@@ -39,7 +40,6 @@ public static class GhostHotkey {
 
     [Initialize]
     public static void HotkeyInitialize() {
-        typeof(ModuleSettingsKeyboardConfigUI).GetMethod("Reset").IlHook(ModReload);
         MainSwitchHotkey = BindingToHotkey(ghostSettings.keyMainSwitch);
         GhostHitboxHotkey = BindingToHotkey(ghostSettings.keyGhostHitbox);
         InfoHudHotkey = BindingToHotkey(ghostSettings.keyInfoHud);
@@ -62,40 +62,6 @@ public static class GhostHotkey {
 
     private static Hotkey BindingToHotkey(ButtonBinding binding, bool held = false) {
         return new(binding.Keys, binding.Buttons, true, held);
-    }
-
-    private static IEnumerable<PropertyInfo> bindingProperties;
-
-    private static FieldInfo bindingFieldInfo;
-
-    private static void ModReload(ILContext il) {
-        bindingProperties = typeof(GhostModuleSettings)
-            .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-            .Where(info => info.PropertyType == typeof(ButtonBinding) &&
-                           info.GetCustomAttribute<DefaultButtonBinding2Attribute>() is { } extraDefaultKeyAttribute &&
-                           extraDefaultKeyAttribute.ExtraKey != Keys.None);
-
-        ILCursor ilCursor = new(il);
-        if (ilCursor.TryGotoNext(
-                MoveType.After,
-                ins => ins.OpCode == OpCodes.Callvirt && ins.Operand.ToString().Contains("<Microsoft.Xna.Framework.Input.Keys>::Add(T)")
-            )) {
-            ilCursor.Emit(OpCodes.Ldloc_1).EmitDelegate(AddExtraDefaultKey);
-        }
-    }
-
-    private static void AddExtraDefaultKey(object bindingEntry) {
-        if (bindingFieldInfo == null) {
-            bindingFieldInfo = bindingEntry.GetType().GetFieldInfo("Binding");
-        }
-
-        if (bindingFieldInfo?.GetValue(bindingEntry) is not ButtonBinding binding) {
-            return;
-        }
-
-        if (bindingProperties.FirstOrDefault(info => info.GetValue(ghostSettings) == binding) is { } propertyInfo) {
-            binding.Keys.Add(propertyInfo.GetCustomAttribute<DefaultButtonBinding2Attribute>().ExtraKey);
-        }
     }
 }
 
