@@ -1,15 +1,7 @@
-using Celeste.Mod.GhostModForTas.Utils;
-
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using Mono.Cecil.Cil;
 using Monocle;
-using MonoMod.Cil;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using XNAKeys = Microsoft.Xna.Framework.Input.Keys;
-using TAS.EverestInterop;
 
 using Hotkey = TAS.EverestInterop.Hotkeys.Hotkey;
 
