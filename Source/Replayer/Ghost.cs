@@ -47,6 +47,8 @@ public class Ghost : Actor {
     public string CustomInfo => Frame.CustomInfo;
 
     public string Name => Data.Name;
+
+    public bool CanMoveToNextFrame => !(Done || NotSynced || FrameIndex < 0);
     public bool InFreezeFrame => Frame.IsFreezeFrame;
 
     public int IsCompleted = 0;
@@ -108,10 +110,10 @@ public class Ghost : Actor {
             return;
         }
         FrameIndex++;
-
         if (FrameIndex < 0) { // how
             return;
         }
+
         if (FrameIndex >= Data.Frames.Count) {
             GotoNextRoom();
             if (Done) {

@@ -193,7 +193,12 @@ public class GhostReplayerEntity : Entity {
                 do {
                     ghost.UpdateByReplayer();
                 }
-                while (ghost.InFreezeFrame);
+                // while (ghost.InFreezeFrame);
+                while (ghost.InFreezeFrame && ghost.CanMoveToNextFrame);
+                // if ghost is not synced but in freeze frame, then it'will never update coz it's not synced
+                // so it's always in freeze frame, leading to an endless loop
+                // (e.g. if ghost load a new level and is in freeze frame)
+                // thx @socksygen
             }
         } else {
             foreach (Ghost ghost in Ghosts) {

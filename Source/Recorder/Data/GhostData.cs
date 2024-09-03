@@ -333,7 +333,7 @@ public class GhostData {
         using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8)) {
             Write(writer);
         }
-        Logger.Log("GhostModForTas", $"Write: SID = {SID}, Level = {LevelCount}, Target = {TargetCount}, RunGUID = {Run}");
+        Logger.Log("GhostModForTas", $"Write: SID = {SID}, Level = {LevelCount}, NextLevel = {TargetCount}, RunGUID = {Run}");
     }
 
     public void Write(BinaryWriter writer) {
