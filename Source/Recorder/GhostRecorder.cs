@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.ModInterop;
 using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Replayer;
@@ -13,7 +14,6 @@ using System.Linq;
 using System.Text;
 using TAS;
 using TAS.EverestInterop.InfoHUD;
-using TAS.Input.Commands;
 using TAS.Module;
 
 namespace Celeste.Mod.GhostModForTas.Recorder;
@@ -210,15 +210,6 @@ internal static class GhostRecorder {
         }
     }
 
-    [TasCommand("StopGhostRecording", AliasNames = new[] { "GhostStopRecord", "StopGhostRecord", "GhostStopRecording" }, ExecuteTiming = ExecuteTiming.Runtime)]
-    public static void StopRecordingCommand() {
-        if (ghostSettings.Mode.HasFlag(GhostModuleMode.Record) && origMode.HasValue) {
-            ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // recording is stopped anyway
-            origMode = null;
-            ghostSettings.UpdateStateText();
-        }
-        // the recorder will remove itself when it finds that RECORD mode is gone
-    }
 
     [TasDisableRun]
     private static void OnTasDisableRun() {
@@ -233,7 +224,15 @@ internal static class GhostRecorder {
     }
 
 
-    [TasCommand("StartGhostRecording", AliasNames = new[] { "GhostStartRecord", "StartGhostRecord", "GhostStartRecording", "GhostRecord", "GhostRecording", "RecordGhost", "RecordingGhost", "GhostRecordMode", "RecordGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
+    public static void StopRecordingCommand() {
+        if (ghostSettings.Mode.HasFlag(GhostModuleMode.Record) && origMode.HasValue) {
+            ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // recording is stopped anyway
+            origMode = null;
+            ghostSettings.UpdateStateText();
+        }
+        // the recorder will remove itself when it finds that RECORD mode is gone
+    }
+
     public static void StartRecordingCommand() {
         origMode ??= ghostSettings.Mode;
         if (Engine.Scene is Level level && (Recorder is null || Recorder.Scene != level)) {
@@ -243,7 +242,6 @@ internal static class GhostRecorder {
         ghostSettings.UpdateStateText();
     }
 
-    [TasCommand("StartGhostReplay", AliasNames = new[] { "StartGhostReplaying", "StartGhostPlaying", "StartReplayingGhost", "StartPlayingGhost", "StartGhostPlay", "StartReplayGhost", "StartPlayGhost", "GhostPlay", "GhostReplay", "GhostStartPlay", "GhostStartPlaying", "GhostStartReplay", "GhostStartReplaying", "ReplayGhost", "PlayGhost", "GhostPlayMode", "PlayGhostMode", "GhostReplayMode", "ReplayGhostMode" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StartGhostReplayCommand() {
         origMode ??= ghostSettings.Mode;
         if (Engine.Scene is Level level && (GhostReplayer.Replayer is null || GhostReplayer.Replayer.Scene != level)) {
@@ -253,7 +251,6 @@ internal static class GhostRecorder {
         ghostSettings.UpdateStateText();
     }
 
-    [TasCommand("GhostReload", AliasNames = new[] { "GhostReplayReload", "ReloadGhostReplay", "ReloadGhost" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void GhostReplayReloadCommand() {
         origMode ??= ghostSettings.Mode;
         if (Engine.Scene is Level level) {
@@ -263,7 +260,6 @@ internal static class GhostRecorder {
         ghostSettings.UpdateStateText();
     }
 
-    [TasCommand("StopGhostReplay", AliasNames = new[] { "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostStopReplay", "GhostStopPlay", "StopGhostReplaying", "StopGhostPlaying", "StopReplayingGhost", "StopPlayingGhost", "GhostStopReplaying", "GhostStopPlaying" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void StopReplayCommand() {
         if (ghostSettings.Mode.HasFlag(GhostModuleMode.Play) && origMode.HasValue) {
             ghostSettings.Mode = origMode.Value & GhostModuleMode.Record; // replaying is stopped anyway

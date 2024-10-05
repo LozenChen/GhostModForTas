@@ -1,7 +1,7 @@
+using Celeste.Mod.GhostModForTas.ModInterop;
 using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Replayer;
-using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Monocle;
 using System;

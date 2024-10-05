@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.ModInterop;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monocle;

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using TAS.Input.Commands;
 
 namespace Celeste.Mod.GhostModForTas.Utils.Attributes;
 
@@ -61,17 +60,9 @@ internal static class AttributeUtils {
     }
 #endif
 
-
+    [Obsolete]
     public static void CollectAndSendTasCommand() {
-        IEnumerable<MethodInfo> localMethodInfos = typeof(AttributeUtils).Assembly.GetTypesSafe().SelectMany(type => type
-            .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
-            .Where(info => info.GetCustomAttributes<TasCommandAttribute>().IsNotEmpty());
-        foreach (MethodInfo methodInfo in localMethodInfos) {
-            IEnumerable<TasCommandAttribute> tasCommandAttributes = methodInfo.GetCustomAttributes<TasCommandAttribute>();
-            foreach (TasCommandAttribute tasCommandAttribute in tasCommandAttributes) {
-                TasCommandAttribute.MethodInfos[tasCommandAttribute] = methodInfo;
-            }
-        }
+        // latest celeste tas collect these on its own
     }
 
     [Initialize]

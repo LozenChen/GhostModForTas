@@ -78,6 +78,8 @@ Alias names include "StopGhostPlay", "StopReplayGhost", "StopPlayGhost", "GhostS
 
 - When tas ends, the mode will return to PLAY or OFF mode (if it's changed by a TasCommand), depending on its original value. It will never return to RECORD mode.
 
+- Now you can see these commands in Studio with auto-complete, they all start with "Ghost_".
+
 ## Force Sync
 
 - If Force Sync is ON, then the ghost will sync with you when you go to next room. The Ghost will be waiting for you if she is faster, or will catch up if she is slower.

@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.ModInterop;
 using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Utils;

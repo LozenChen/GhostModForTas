@@ -205,46 +205,46 @@ internal static class GhostMod_HookLoadLevel {
             if (attr.Before) {
                 switch (method.GetParameters().Length) {
                     case 0: {
-                            LoadLevel_Before_Parameter0 += (LoadLevelHandler_Parameter0)method.CreateDelegate(typeof(LoadLevelHandler_Parameter0));
-                            break;
-                        }
+                        LoadLevel_Before_Parameter0 += (LoadLevelHandler_Parameter0)method.CreateDelegate(typeof(LoadLevelHandler_Parameter0));
+                        break;
+                    }
                     case 1: {
-                            LoadLevel_Before_Parameter1 += (LoadLevelHandler_Parameter1)method.CreateDelegate(typeof(LoadLevelHandler_Parameter1));
-                            break;
-                        }
+                        LoadLevel_Before_Parameter1 += (LoadLevelHandler_Parameter1)method.CreateDelegate(typeof(LoadLevelHandler_Parameter1));
+                        break;
+                    }
                     case 2: {
-                            LoadLevel_Before_Parameter2 += (LoadLevelHandler_Parameter2)method.CreateDelegate(typeof(LoadLevelHandler_Parameter2));
-                            break;
-                        }
+                        LoadLevel_Before_Parameter2 += (LoadLevelHandler_Parameter2)method.CreateDelegate(typeof(LoadLevelHandler_Parameter2));
+                        break;
+                    }
                     case 3: {
-                            LoadLevel_Before += (LoadLevelHandler)method.CreateDelegate(typeof(LoadLevelHandler));
-                            break;
-                        }
+                        LoadLevel_Before += (LoadLevelHandler)method.CreateDelegate(typeof(LoadLevelHandler));
+                        break;
+                    }
                     default: {
-                            throw new Exception();
-                        }
+                        throw new Exception();
+                    }
                 }
             } else {
                 switch (method.GetParameters().Length) {
                     case 0: {
-                            LoadLevel_Parameter0 += (LoadLevelHandler_Parameter0)method.CreateDelegate(typeof(LoadLevelHandler_Parameter0));
-                            break;
-                        }
+                        LoadLevel_Parameter0 += (LoadLevelHandler_Parameter0)method.CreateDelegate(typeof(LoadLevelHandler_Parameter0));
+                        break;
+                    }
                     case 1: {
-                            LoadLevel_Parameter1 += (LoadLevelHandler_Parameter1)method.CreateDelegate(typeof(LoadLevelHandler_Parameter1));
-                            break;
-                        }
+                        LoadLevel_Parameter1 += (LoadLevelHandler_Parameter1)method.CreateDelegate(typeof(LoadLevelHandler_Parameter1));
+                        break;
+                    }
                     case 2: {
-                            LoadLevel_Parameter2 += (LoadLevelHandler_Parameter2)method.CreateDelegate(typeof(LoadLevelHandler_Parameter2));
-                            break;
-                        }
+                        LoadLevel_Parameter2 += (LoadLevelHandler_Parameter2)method.CreateDelegate(typeof(LoadLevelHandler_Parameter2));
+                        break;
+                    }
                     case 3: {
-                            LoadLevel += (LoadLevelHandler)method.CreateDelegate(typeof(LoadLevelHandler));
-                            break;
-                        }
+                        LoadLevel += (LoadLevelHandler)method.CreateDelegate(typeof(LoadLevelHandler));
+                        break;
+                    }
                     default: {
-                            throw new Exception();
-                        }
+                        throw new Exception();
+                    }
                 }
             }
         }

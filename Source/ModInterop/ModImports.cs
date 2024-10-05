@@ -2,7 +2,7 @@ using Celeste.Mod.GravityHelper.Components;
 using MonoMod.ModInterop;
 using System;
 
-namespace Celeste.Mod.GhostModForTas.Utils;
+namespace Celeste.Mod.GhostModForTas.ModInterop;
 
 public static class ModImports {
 

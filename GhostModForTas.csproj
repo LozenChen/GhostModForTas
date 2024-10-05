@@ -33,9 +33,14 @@
     <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="$(CelestePrefix)\Celeste.dll" Publicize="true" />
+    <Reference Include="Celeste">
+        <HintPath>..\..\Celeste.dll</HintPath>
+    </Reference>
     <Reference Include="CelesteTAS-EverestInterop">
-      <HintPath>lib-stripped\CelesteTAS-EverestInterop.dll</HintPath>
+      <HintPath>lib-stripped\bin\CelesteTAS-EverestInterop.dll</HintPath>
+    </Reference>
+    <Reference Include="StudioCommunication">
+        <HintPath>lib-stripped\bin\StudioCommunication.dll</HintPath>
     </Reference>
     <Reference Include="FNA">
       <HintPath>lib-stripped\FNA.dll</HintPath>
@@ -55,18 +60,14 @@
     <Reference Include="SpeedrunTool">
       <HintPath>lib-stripped\SpeedrunTool.dll</HintPath>
     </Reference>
-    <Reference Include="StudioCommunication">
-      <HintPath>lib-stripped\StudioCommunication.dll</HintPath>
-    </Reference>
   </ItemGroup>
     <PropertyGroup>
         <PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>
     </PropertyGroup>
     <ItemGroup>
         <Publicize Include="Celeste" IncludeCompilerGeneratedMembers="false" />
-        <Publicize Include="CelesteTAS-EverestInterop:TAS.Utils.AttributeUtils.MethodInfos" />
         <Publicize Include="CelesteTAS-EverestInterop:TAS.EverestInterop.InfoHUD.InfoHud.WriteTasInput" />
-        <Publicize Include="CelesteTAS-EverestInterop:TAS.Input.Commands.TasCommandAttribute.MethodInfos" />
+        <Publicize Include="CelesteTAS-EverestInterop:TAS.Entities.Toast" />
         <DoNotPublicize Include="Celeste:Monocle.Scene.OnEndOfFrame" />
         <DoNotPublicize Include="Celeste:Monocle.Entity.PostUpdate" />
         <DoNotPublicize Include="Celeste:Celeste.Mod.TextInput.OnInput" />

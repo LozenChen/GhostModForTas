@@ -1,5 +1,5 @@
+using Celeste.Mod.GhostModForTas.ModInterop;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
-using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Monocle;

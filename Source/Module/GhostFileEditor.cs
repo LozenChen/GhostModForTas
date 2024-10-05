@@ -100,28 +100,28 @@ public class GhostFileEditor : TextMenu {
         public void OnPress() {
             switch (Parent.LeftRightIndex) {
                 case 0: {
-                        OuiModOptionFileName.DefaultString = ghostName;
-                        Audio.Play("event:/ui/main/savefile_rename_start");
-                        Parent.SceneAs<Overworld>().Goto<OuiModOptionFileName>()
-                            .Init<GhostFileEditorContainer>(ghostName,
-                                value => delayedNameChange = value, confirm => {
-                                    if (confirm) {
-                                        SetName(delayedNameChange);
-                                    };
-                                    delayedNameChange = null;
-                                },
-                                ModOptionsMenu.MaxNameLength, 1);
-                        break;
-                    }
+                    OuiModOptionFileName.DefaultString = ghostName;
+                    Audio.Play("event:/ui/main/savefile_rename_start");
+                    Parent.SceneAs<Overworld>().Goto<OuiModOptionFileName>()
+                        .Init<GhostFileEditorContainer>(ghostName,
+                            value => delayedNameChange = value, confirm => {
+                                if (confirm) {
+                                    SetName(delayedNameChange);
+                                };
+                                delayedNameChange = null;
+                            },
+                            ModOptionsMenu.MaxNameLength, 1);
+                    break;
+                }
                 case 1: {
-                        Audio.Play(SFX.ui_main_savefile_delete);
-                        Delete();
-                        break;
-                    }
+                    Audio.Play(SFX.ui_main_savefile_delete);
+                    Delete();
+                    break;
+                }
                 default: {
-                        Audio.Play(SFX.ui_main_button_invalid);
-                        break;
-                    }
+                    Audio.Play(SFX.ui_main_button_invalid);
+                    break;
+                }
             }
         }
 

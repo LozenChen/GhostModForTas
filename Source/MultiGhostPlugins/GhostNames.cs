@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.ModInterop;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
