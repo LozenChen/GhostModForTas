@@ -72,7 +72,7 @@ If ghosts already exist, this command will not try to find new ghosts.
 
 - You don't have to remember their names, as you can see these commands in Studio with auto-complete, they all start with "Ghost_".
 
-- See [TasCommandExport](ModInterop/TasCommandExport.cs) for more information.
+- See [TasCommandExport](Source/ModInterop/TasCommandExport.cs) for more information.
 
 ## Force Sync
 
