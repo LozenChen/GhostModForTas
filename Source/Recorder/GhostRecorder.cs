@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using TAS;
 using TAS.EverestInterop.InfoHUD;
@@ -185,14 +186,35 @@ internal static class GhostRecorder {
             }
         });
 
-        typeof(Level).GetNestedType("<TransitionRoutine>d__29", System.Reflection.BindingFlags.NonPublic).GetMethodInfo("MoveNext").IlHook(il => {
-            ILCursor cursor = new ILCursor(il);
-            if (cursor.TryGotoNext(ins => ins.MatchCall<TimeSpan>("get_TotalSeconds"), ins => ins.MatchLdcR8(5))) {
-                cursor.Index += 10;
-                cursor.EmitDelegate(EscapeFromAntiSoftlock);
+        if (typeof(Level).GetNestedType(TransitionRoutine_CompilerGeneratedName, BindingFlags.NonPublic) is { } transitionRoutine) {
+            transitionRoutine.GetMethodInfo("MoveNext").IlHook(il => {
+                ILCursor cursor = new ILCursor(il);
+                if (cursor.TryGotoNext(ins => ins.MatchCall<TimeSpan>("get_TotalSeconds"), ins => ins.MatchLdcR8(5))) {
+                    cursor.Index += 10;
+                    cursor.EmitDelegate(EscapeFromAntiSoftlock);
+                }
+            });
+        } else {
+            Type routine = typeof(Level).GetNestedTypes(BindingFlags.NonPublic).
+                First(x => x.Name.StartsWith("<TransitionRoutine>d__") &&
+                            x.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(y => y.Name.StartsWith("<lightingStart>")).IsEmpty()
+                );
+            if (routine is not null) {
+                Logger.Log(LogLevel.Error, "GhostModForTas", $"Can't find Level.{TransitionRoutine_CompilerGeneratedName}, use fallback {routine.Name} instead");
+                routine.GetMethodInfo("MoveNext").IlHook(il => {
+                    ILCursor cursor = new ILCursor(il);
+                    if (cursor.TryGotoNext(ins => ins.MatchCall<TimeSpan>("get_TotalSeconds"), ins => ins.MatchLdcR8(5))) {
+                        cursor.Index += 10;
+                        cursor.EmitDelegate(EscapeFromAntiSoftlock);
+                    }
+                });
+            } else {
+                Logger.Log(LogLevel.Error, "GhostModForTas", $"Can't find Level.{TransitionRoutine_CompilerGeneratedName}, and can't find a fallback!");
             }
-        });
+        }
     }
+
+    private const string TransitionRoutine_CompilerGeneratedName = "<TransitionRoutine>d__30"; // may change if everest patch level again
 
     private static void IncreaseRTATimer() {
         RTASessionTime += 170000L;

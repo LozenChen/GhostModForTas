@@ -39,7 +39,7 @@ internal static class AttributeUtils {
                     methodInfo.Invoke(null, Parameterless);
                 }
                 catch {
-                    Celeste.Commands.Log($"AttributeUtils Invoke {debugDict[methodInfo]}.{methodInfo} failed");
+                    Logger.Log(LogLevel.Debug, "GhostModForTas", $"AttributeUtils Invoke {debugDict[methodInfo]}.{methodInfo} failed");
                 }
             }
         }
