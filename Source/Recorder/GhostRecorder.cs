@@ -201,6 +201,8 @@ internal static class GhostRecorder {
                 );
             if (routine is not null) {
                 Logger.Log(LogLevel.Error, "GhostModForTas", $"Can't find Level.{TransitionRoutine_CompilerGeneratedName}, use fallback {routine.Name} instead");
+                // https://discord.com/channels/403698615446536203/1257712832972193792/1299678971851702374
+
                 routine.GetMethodInfo("MoveNext").IlHook(il => {
                     ILCursor cursor = new ILCursor(il);
                     if (cursor.TryGotoNext(ins => ins.MatchCall<TimeSpan>("get_TotalSeconds"), ins => ins.MatchLdcR8(5))) {
@@ -209,12 +211,12 @@ internal static class GhostRecorder {
                     }
                 });
             } else {
-                Logger.Log(LogLevel.Error, "GhostModForTas", $"Can't find Level.{TransitionRoutine_CompilerGeneratedName}, and can't find a fallback!");
+                throw new Exception($"[GhostModForTas] {nameof(GhostRecorder)}.{nameof(Initialize)}(): Can't find Level.{TransitionRoutine_CompilerGeneratedName}, and can't find a fallback!");
             }
         }
     }
 
-    private const string TransitionRoutine_CompilerGeneratedName = "<TransitionRoutine>d__30"; // may change if everest patch level again
+    private const string TransitionRoutine_CompilerGeneratedName = "<TransitionRoutine>d__30"; // need Everest 1.5072, may change if everest patch level again
 
     private static void IncreaseRTATimer() {
         RTASessionTime += 170000L;
@@ -326,6 +328,8 @@ public class GhostRecorderEntity : Entity {
 
     public static string HudInfo;
 
+    public static bool updateHair = true; // some OoO issue
+
     public GhostRecorderEntity(Session session)
         : base() {
         Depth = -10000000;
@@ -395,15 +399,15 @@ public class GhostRecorderEntity : Entity {
                 HurtboxHeight = player.hurtbox.height,
                 HurtboxLeft = player.hurtbox.Position.X,
                 HurtboxTop = player.hurtbox.Position.Y,
-                //HudInfo = ghostSettings.ShowHudInfo ? lastFrameHudInfo : "",
+                // HudInfo = ghostSettings.ShowHudInfo ? lastFrameHudInfo : "",
                 // by OoO, Entities Update -> LoadLevel (which happens in Scene.OnEndOfFrame, in Scene.AfterUpdate) -> TAS Update hud info
                 // so we can't get an accurate readtime hud info here
-                //CustomInfo = ghostSettings.ShowCustomInfo ? GhostRecorder.ParseTemplate() : "",
+                // CustomInfo = ghostSettings.ShowCustomInfo ? GhostRecorder.ParseTemplate() : "",
 
                 HudInfo = lastFrameHudInfo,
                 CustomInfo = GhostRecorder.ParseTemplate(),
 
-                UpdateHair = !GhostRecorder.IsFreezeFrame && level.updateHair,
+                UpdateHair = !GhostRecorder.IsFreezeFrame && updateHair,
                 Rotation = player.Sprite.Rotation,
                 Scale = player.Sprite.Scale,
                 Color = player.Sprite.Color,
@@ -417,6 +421,7 @@ public class GhostRecorderEntity : Entity {
                 IsInverted = ModImports.IsPlayerInverted,
             }
         };
+        updateHair = level.updateHair;
 
         Data.Frames.Add(LastFrameData);
     }

@@ -81,8 +81,9 @@ public class Ghost : Actor {
         Depth = 1;
         SpriteMode = ghostSettings.GhostSpriteMode;
         Sprite = new PlayerSprite(SpriteMode);
-        Add(Hair = new PlayerHair(Sprite));
+        Add(Hair = new PlayerHair(Sprite)); // level won't call Hair.AfterUpdate if the ghost itself is inactive, so we manually do this
         Add(Sprite); // add it later so it renders above hair
+        Sprite.Active = false;
         Hair.Color = OrigHairColor = SpriteMode switch {
             PlayerSpriteMode.Madeline or PlayerSpriteMode.MadelineNoBackpack or PlayerSpriteMode.Playback => Player.NormalHairColor,
             PlayerSpriteMode.Badeline or PlayerSpriteMode.MadelineAsBadeline => Player.NormalBadelineHairColor
@@ -122,10 +123,14 @@ public class Ghost : Actor {
         }
         Visible &= Frame.HasPlayer;
         ModImports.SetActorGravity(this, Frame.IsInverted);
+        base.Update();
         UpdateSprite();
         UpdateHair();
         UpdateHitbox();
-        base.Update();
+
+        if (Frame.UpdateHair) {
+            Hair.AfterUpdate();
+        }
     }
 
     public void GotoNextRoom() {
@@ -195,7 +200,7 @@ public class Ghost : Actor {
             (OrigHairColor.B * Color.B) / 255,
             (OrigHairColor.A * Color.A) / 255
         );
- */
+        */
         Hair.Color = new Color(
             (Frame.HairColor.R * Color.R) / 255,
             (Frame.HairColor.G * Color.G) / 255,
@@ -239,9 +244,6 @@ public class Ghost : Actor {
         } catch {
             // Play likes to fail randomly as the ID doesn't exist in an underlying dict.
             // Let's ignore this for now.
-        }
-        if (Frame.UpdateHair) {
-            Hair.AfterUpdate();
         }
     }
 
