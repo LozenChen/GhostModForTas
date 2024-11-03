@@ -1,9 +1,14 @@
 using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
+using System.Collections.Generic;
 using StudioCommunication;
 using System.IO;
 using TAS.Input;
+using System.Linq;
+using Microsoft.Xna.Framework.Input;
+using System;
+using StudioCommunication.Util;
 
 namespace Celeste.Mod.GhostModForTas.ModInterop;
 
@@ -133,5 +138,28 @@ internal static class TasCommandExport {
         public string Insert => $"Ghost_LockComparer{CommandInfo.Separator}[0;GhostName]";
 
         public bool HasArguments => true;
+
+        public int GetHash(string[] args, string filePath, int fileLine) {
+            int hash = args[..Math.Max(0, args.Length - 1)].Aggregate(17, (int current, string arg) => 31 * current + 17 * arg.GetStableHashCode());
+            if (GhostReplayer.Replayer?.Ghosts is List<Ghost> ghosts && ghosts.IsNotEmpty()){
+                hash = ghosts.Select(x => x.Name).Distinct().Aggregate(hash, (current, arg) => 31 * current + 17 * arg.GetStableHashCode());
+            }
+            return hash;
+        }
+
+        public IEnumerator<CommandAutoCompleteEntry> GetAutoCompleteEntries(string[] args, string filePath, int fileLine) {
+            if (args.Length != 1) {
+                yield break;
+            }
+            while (GhostReplayer.Replayer?.Ghosts.IsNullOrEmpty() ?? true) {
+                yield break;
+            }
+
+            List<string> nameList = GhostReplayer.Replayer!.Ghosts.Select(x => x.Name).Distinct().ToList();
+
+            foreach (string name in nameList) {
+                yield return new CommandAutoCompleteEntry { Name = name };
+            }
+        }
     }
 }
