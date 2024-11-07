@@ -9,6 +9,7 @@ using Monocle;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -207,6 +208,10 @@ internal static class GhostModMenu {
                 keyboardConfig = new ModuleSettingsKeyboardConfigUI(everestModule);
             }
 
+            keyboardConfig.OnClose = () => {
+                subMenu.SafeLeave();
+            };
+
             Engine.Scene.Add(keyboardConfig);
             Engine.Scene.OnEndOfFrame += () => Engine.Scene.Entities.UpdateLists();
         }));
@@ -219,6 +224,10 @@ internal static class GhostModMenu {
             } else {
                 buttonConfig = new ModuleSettingsButtonConfigUI(everestModule);
             }
+
+            buttonConfig.OnClose = () => {
+                subMenu.SafeLeave();
+            };
 
             Engine.Scene.Add(buttonConfig);
             Engine.Scene.OnEndOfFrame += () => Engine.Scene.Entities.UpdateLists();

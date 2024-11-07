@@ -409,12 +409,7 @@ public class OptionSubMenuExt : TextMenu.Item {
                 }
 
                 if (!Input.MenuConfirm.Pressed && (Input.MenuCancel.Pressed || Input.ESC.Pressed || Input.Pause.Pressed)) {
-                    MenuIndex = 0;
-                    Current?.OnLeave?.Invoke();
-                    Focused = false;
-                    Audio.Play("event:/ui/main/button_back");
-                    Container.AutoScroll = containerAutoScroll;
-                    Container.Focused = true;
+                    SafeLeave();
                 }
             }
         } else {
@@ -451,6 +446,15 @@ public class OptionSubMenuExt : TextMenu.Item {
                 Container.Position.Y = 540f;
             }
         }
+    }
+
+    public void SafeLeave() {
+        MenuIndex = 0;
+        Current?.OnLeave?.Invoke();
+        Focused = false;
+        Audio.Play("event:/ui/main/button_back");
+        Container.AutoScroll = containerAutoScroll;
+        Container.Focused = true;
     }
 
     public override void Render(Vector2 position, bool highlighted) {
