@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
@@ -9,15 +10,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Celeste.Mod.GhostModForTas.Module;
+namespace Celeste.Mod.GhostModForTas.GhostEditor;
 
 public class GhostFileEditorContainer : Oui, OuiModOptions.ISubmenu {
 
     public Dictionary<Guid, List<GhostData>> Dictionary = new();
 
     public GhostFileEditor Editor;
-
-    public float ease;
 
     public void Init() {
         if (Dictionary.IsNullOrEmpty()) {
@@ -110,7 +109,7 @@ public class GhostFileEditor : TextMenu {
                                 };
                                 delayedNameChange = null;
                             },
-                            ModOptionsMenu.MaxNameLength, 1);
+                            GhostModMenu.MaxNameLength, 1);
                     break;
                 }
                 case 1: {

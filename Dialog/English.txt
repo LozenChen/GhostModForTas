@@ -68,3 +68,4 @@ GHOST_MOD_FOR_TAS_NO_GHOST_FILES=                       NO GHOST FILE
 GHOST_MOD_FOR_TAS_RENAME=                               Rename
 GHOST_MOD_FOR_TAS_DELETE=                               {}    Delete
 GHOST_MOD_FOR_TAS_RENAME_REMIND=                        Names and Ghost files can only be edited in the menu of the title screen
+GHOST_MOD_FOR_TAS_SHOW_IN_MOD_OPTIONS=                  Show in Mod Options Menu

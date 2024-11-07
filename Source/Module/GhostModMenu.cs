@@ -20,7 +20,7 @@ using static TAS.EverestInterop.Hitboxes.HitboxColor;
 
 namespace Celeste.Mod.GhostModForTas.Module;
 
-internal static class ModOptionsMenu {
+internal static class GhostModMenu {
 
     public static void CreateMenu(EverestModule everestModule, TextMenu menu, bool inGame, bool inPauseMenu = false) {
         menu.Add(new TextMenuExt.EnumerableSlider<GhostModuleMode>("Mode".ToDialogText(), CreateMainModeOptions(),
@@ -35,6 +35,15 @@ internal static class ModOptionsMenu {
             GhostReplayer.Clear(false);
             RecordingIcon.Instance?.Update();
         }));
+
+        TextMenu.Item showInPauseMenu = new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value);
+        TextMenu.Item foldInModOptionsMenu = new TextMenu.OnOff("Show In Mod Options".ToDialogText(), ghostSettings.ShowInModOptionsMenu).Change(value => ghostSettings.ShowInModOptionsMenu = value);
+
+        if (!inPauseMenu && !ghostSettings.ShowInModOptionsMenu) {
+            menu.Add(showInPauseMenu);
+            menu.Add(foldInModOptionsMenu);
+            return;
+        }
 
         menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => { ghostSettings.ForceSync = value; GhostReplayer.Clear(true); }));
         menu.Add(new TextMenuExt.EnumerableSlider<TimeFormats>("Time Format".ToDialogText(), CreateTimeFormatOptions(), ghostSettings.TimeFormat).Change(value => { ghostSettings.TimeFormat = value; GhostRankingList.ConfigChanged = true; }));
@@ -130,14 +139,18 @@ internal static class ModOptionsMenu {
         :
         () => {
             Audio.Play("event:/ui/main/savefile_rename_start");
-            menu.SceneAs<Overworld>().Goto<GhostFileEditorContainer>();
+            menu.SceneAs<Overworld>().Goto<GhostEditor.GhostFileEditorContainer>();
         });
         menu.Add(fileEditor);
 
         menu.Add(new HLine(Color.Gray, 0f));
 
         menu.Add(new TextMenu.OnOff("Show Recorder Icon".ToDialogText(), ghostSettings.ShowRecorderIcon).Change(value => { ghostSettings.ShowRecorderIcon = value; RecordingIcon.Instance?.Update(); }));
-        menu.Add(new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value));
+        menu.Add(showInPauseMenu);
+
+        if (!inPauseMenu) {
+            menu.Add(foldInModOptionsMenu);
+        }
 
         menu.Add(new HLine(Color.Gray, 0f));
 
@@ -298,7 +311,7 @@ internal static class HookPauseMenu {
         level.Paused = true;
         TextMenu menu = new TextMenu();
         menu.Add(new HeaderExt("Ghost Title".ToDialogText(), Color.Silver, Color.Black));
-        ModOptionsMenu.CreateMenu(GhostModule.Instance, menu, true, true);
+        GhostModMenu.CreateMenu(GhostModule.Instance, menu, true, true);
 
         menu.OnESC = menu.OnCancel = () => {
             Audio.Play("event:/ui/main/button_back");

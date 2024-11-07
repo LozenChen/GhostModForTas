@@ -55,6 +55,6 @@ public class GhostModule : EverestModule {
 
     public override void CreateModMenuSection(TextMenu menu, bool inGame, FMOD.Studio.EventInstance snapshot) {
         CreateModMenuSectionHeader(menu, inGame, snapshot);
-        ModOptionsMenu.CreateMenu(this, menu, inGame, false);
+        GhostModMenu.CreateMenu(this, menu, inGame, false);
     }
 }

@@ -1,14 +1,13 @@
 using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
-using System.Collections.Generic;
 using StudioCommunication;
-using System.IO;
-using TAS.Input;
-using System.Linq;
-using Microsoft.Xna.Framework.Input;
-using System;
 using StudioCommunication.Util;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using TAS.Input;
 
 namespace Celeste.Mod.GhostModForTas.ModInterop;
 
@@ -141,7 +140,7 @@ internal static class TasCommandExport {
 
         public int GetHash(string[] args, string filePath, int fileLine) {
             int hash = args[..Math.Max(0, args.Length - 1)].Aggregate(17, (int current, string arg) => 31 * current + 17 * arg.GetStableHashCode());
-            if (GhostReplayer.Replayer?.Ghosts is List<Ghost> ghosts && ghosts.IsNotEmpty()){
+            if (GhostReplayer.Replayer?.Ghosts is List<Ghost> ghosts && ghosts.IsNotEmpty()) {
                 hash = ghosts.Select(x => x.Name).Distinct().Aggregate(hash, (current, arg) => 31 * current + 17 * arg.GetStableHashCode());
             }
             return hash;

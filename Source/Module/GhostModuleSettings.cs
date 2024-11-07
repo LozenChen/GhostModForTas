@@ -71,6 +71,8 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public bool ShowInPauseMenu = true;
 
+    public bool ShowInModOptionsMenu = false;
+
 
     public Color HitboxColor = defaultHitboxColor;
 
