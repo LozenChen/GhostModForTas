@@ -1,13 +1,11 @@
+using Celeste.Mod.GhostModForTas.GhostEditor;
 using Celeste.Mod.GhostModForTas.MultiGhost;
 using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
 using Celeste.Mod.UI;
 using Microsoft.Xna.Framework;
-using Mono.Cecil.Cil;
 using Monocle;
-using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,6 +20,11 @@ namespace Celeste.Mod.GhostModForTas.Module;
 
 internal static class GhostModMenu {
 
+
+    private static readonly MethodInfo CreateKeyboardConfigUi = typeof(EverestModule).GetMethodInfo("CreateKeyboardConfigUI");
+    private static readonly MethodInfo CreateButtonConfigUI = typeof(EverestModule).GetMethodInfo("CreateButtonConfigUI");
+    internal static string ToTASDialogText(this string input) => Dialog.Clean("TAS_" + input.Replace(" ", "_"));
+    internal const int MaxNameLength = 42;
     public static void CreateMenu(EverestModule everestModule, TextMenu menu, bool inGame, bool inPauseMenu = false) {
         menu.Add(new TextMenuExt.EnumerableSlider<GhostModuleMode>("Mode".ToDialogText(), CreateMainModeOptions(),
         ghostSettings.Mode).Change(value => {
@@ -36,126 +39,167 @@ internal static class GhostModMenu {
             RecordingIcon.Instance?.Update();
         }));
 
-        TextMenu.Item showInPauseMenu = new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value);
-        TextMenu.Item foldInModOptionsMenu = new TextMenu.OnOff("Show In Mod Options".ToDialogText(), ghostSettings.ShowInModOptionsMenu).Change(value => ghostSettings.ShowInModOptionsMenu = value);
-
-        if (!inPauseMenu && !ghostSettings.ShowInModOptionsMenu) {
-            menu.Add(showInPauseMenu);
-            menu.Add(foldInModOptionsMenu);
-            return;
+        if (!ghostSettings.ShowInPauseMenu) {
+            // yeah in this case there will have two buttons in total to recover show in pause menu
+            menu.Add(new HLine(Color.Gray, 0f));
+            menu.Add(new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value));
         }
-
+        menu.Add(new HLine(Color.Gray, 0f));
         menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => { ghostSettings.ForceSync = value; GhostReplayer.Clear(true); }));
-        menu.Add(new TextMenuExt.EnumerableSlider<TimeFormats>("Time Format".ToDialogText(), CreateTimeFormatOptions(), ghostSettings.TimeFormat).Change(value => { ghostSettings.TimeFormat = value; GhostRankingList.ConfigChanged = true; }));
-        menu.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
-        menu.Add(new HLine(Color.Gray, 0f));
-
-        menu.Add(new ButtonDeleteFileExt("Clear All Records".ToDialogText(), menu));
-
-        menu.Add(new HLine(Color.Gray, 0f));
-
         menu.Add(new TextMenu.OnOff("Compare Room Time".ToDialogText(), ghostSettings.CompareRoomTime).Change(value => { ghostSettings.CompareRoomTime = value; GhostRankingList.ConfigChanged = true; }));
         menu.Add(new TextMenu.OnOff("Compare Total Time".ToDialogText(), ghostSettings.CompareTotalTime).Change(value => { ghostSettings.CompareTotalTime = value; GhostRankingList.ConfigChanged = true; }));
-        menu.Add(new TextMenuExt.EnumerableSlider<bool>("Comparer Style".ToDialogText(), CreateComparerStyleOptions(), ghostSettings.CompareStyleIsModern).Change(value => ghostSettings.CompareStyleIsModern = value));
-        menu.Add(new TextMenuExt.EnumerableSlider<Alignments>("Comparer Alignment".ToDialogText(), CreateComparerAlignmentsOptions(), ghostSettings.ComparerAlignment).Change(value => ghostSettings.ComparerAlignment = value));
-        menu.Add(new TextMenuExt.IntSlider("Comparer Alpha".ToDialogText(), 1, 10, ghostSettings.ComparerOpacity).Change(value => { ghostSettings.ComparerOpacity = value; ghostSettings.ComparerAlpha = value / 10f; }));
-
-        menu.Add(new HLine(Color.Gray, 0f));
-
-        menu.Add(new TextMenu.OnOff("Show Ghost Sprite".ToDialogText(), ghostSettings.ShowGhostSprite).Change(value => ghostSettings.ShowGhostSprite = value));
         menu.Add(new TextMenu.OnOff("Show Ghost Hitbox".ToDialogText(), ghostSettings.ShowGhostHitbox).Change(value => ghostSettings.ShowGhostHitbox = value));
         menu.Add(new TextMenu.OnOff("Show HUD Info".ToDialogText(), ghostSettings.ShowHudInfo).Change(value => { ghostSettings.ShowHudInfo = value; ghostSettings.LastManuallyConfigShowHudInfo = value; ghostSettings.ShowInfoEnabler = true; }));
-        menu.Add(new TextMenu.OnOff("Show Custom Info".ToDialogText(), ghostSettings.ShowCustomInfo).Change(value => { ghostSettings.ShowCustomInfo = value; ghostSettings.LastManuallyConfigShowCustomInfo = value; ghostSettings.ShowInfoEnabler = true; }));
-        menu.Add(new TextMenu.Button("Info Copy Custom Template".ToTASDialogText()).Pressed(() =>
+
+
+        OptionSubMenuExt subMenus = new OptionSubMenuExt("More Options".ToDialogText());
+        if (inPauseMenu) {
+            subMenus.GhostModMinimumLeftWidth = 800f;
+        }
+        subMenus.OnLeave += () => subMenus.MenuIndex = 0;
+        subMenus.Add("SubMenu Finished".ToDialogText(), new List<TextMenu.Item>());
+        subMenus.Add("SubMenu 1".ToDialogText(), Create_Page_FormatAndInfo());
+        subMenus.Add("SubMenu 2".ToDialogText(), Create_Page_InfoStyle());
+        subMenus.Add("SubMenu 3".ToDialogText(), Create_Page_Customization(menu, inGame));
+        subMenus.Add("SubMenu 4".ToDialogText(), Create_Page_KeyConfig(menu, subMenus, everestModule, inPauseMenu));
+
+        menu.Add(subMenus);
+
+        menu.Add(new HLine(Color.Gray, 0f));
+        menu.Add(new ButtonDeleteFileExt("Clear All Records".ToDialogText(), menu));
+
+        TextMenu.Item fileEditor = new ButtonNameExt("Open Ghost File Editor".ToDialogText(), null, false).Pressed(inGame ?
+            () => {
+                Audio.Play("event:/ui/main/savefile_rename_start");
+                OuiCommand.GotoOuiGhostFileEditor();
+            }
+        :
+            () => {
+                Audio.Play("event:/ui/main/savefile_rename_start");
+                menu.SceneAs<Overworld>().Goto<GhostEditor.GhostFileEditorContainer>();
+            }
+        );
+
+        if (inGame) {
+            TextMenuExt.EaseInSubHeaderExt descriptionText = new("Ghost File Editor InGame".ToDialogText(), false, menu) {
+                TextColor = Color.Red,
+                HeightExtra = 0f
+            };
+            menu.Add(descriptionText);
+            fileEditor.OnEnter += () => descriptionText.FadeVisible = true;
+            fileEditor.OnLeave += () => descriptionText.FadeVisible = false;
+        }
+
+        menu.Add(fileEditor);
+    }
+
+    internal static List<TextMenu.Item> Create_Page_FormatAndInfo() {
+        List<TextMenu.Item> page = new List<TextMenu.Item>();
+        page.Add(new HLine(Color.Gray, 0f));
+        page.Add(new TextMenuExt.EnumerableSlider<TimeFormats>("Time Format".ToDialogText(), CreateTimeFormatOptions(), ghostSettings.TimeFormat).Change(value => { ghostSettings.TimeFormat = value; GhostRankingList.ConfigChanged = true; }));
+        page.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
+
+        page.Add(new HLine(Color.Gray, 0f));
+
+        page.Add(new TextMenu.OnOff("Show Ghost Sprite".ToDialogText(), ghostSettings.ShowGhostSprite).Change(value => ghostSettings.ShowGhostSprite = value));
+        page.Add(new TextMenu.OnOff("Show Custom Info".ToDialogText(), ghostSettings.ShowCustomInfo).Change(value => { ghostSettings.ShowCustomInfo = value; ghostSettings.LastManuallyConfigShowCustomInfo = value; ghostSettings.ShowInfoEnabler = true; }));
+        page.Add(new TextMenu.Button("Info Copy Custom Template".ToTASDialogText()).Pressed(() =>
                 TextInput.SetClipboardText(string.IsNullOrEmpty(ghostSettings.CustomInfoTemplate) ? "\0" : ghostSettings.CustomInfoTemplate)));
-        menu.Add(new TextMenu.Button("Info Set Custom Template".ToTASDialogText()).Pressed(() => {
+        page.Add(new TextMenu.Button("Info Set Custom Template".ToTASDialogText()).Pressed(() => {
             ghostSettings.CustomInfoTemplate = TextInput.GetClipboardText() ?? string.Empty;
             GhostModule.Instance.SaveSettings();
         }));
+        return page;
+    }
 
-        menu.Add(new HLine(Color.Gray, 0f));
 
-        menu.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => { ghostSettings.GhostSpriteMode = value; GhostReplayer.Clear(true); }));
+    internal static List<TextMenu.Item> Create_Page_InfoStyle() {
+        List<TextMenu.Item> page = new List<TextMenu.Item>();
 
-        menu.Add(new TextMenu.OnOff("Randomize Ghost Colors".ToDialogText(), ghostSettings.RandomizeGhostColors).Change(value => ghostSettings.RandomizeGhostColors = value));
+        page.Add(new HLine(Color.Gray, 0f));
+        page.Add(new TextMenuExt.EnumerableSlider<bool>("Comparer Style".ToDialogText(), CreateComparerStyleOptions(), ghostSettings.CompareStyleIsModern).Change(value => ghostSettings.CompareStyleIsModern = value));
+        page.Add(new TextMenuExt.EnumerableSlider<Alignments>("Comparer Alignment".ToDialogText(), CreateComparerAlignmentsOptions(), ghostSettings.ComparerAlignment).Change(value => ghostSettings.ComparerAlignment = value));
+        page.Add(new TextMenuExt.IntSlider("Comparer Alpha".ToDialogText(), 1, 10, ghostSettings.ComparerOpacity).Change(value => { ghostSettings.ComparerOpacity = value; ghostSettings.ComparerAlpha = value / 10f; }));
+
+        page.Add(new HLine(Color.Gray, 0f));
+
+        page.Add(new TextMenu.OnOff("Show Recorder Icon".ToDialogText(), ghostSettings.ShowRecorderIcon).Change(value => { ghostSettings.ShowRecorderIcon = value; RecordingIcon.Instance?.Update(); }));
+        //if (ghostSettings.ShowInPauseMenu) {
+        page.Add(new HLine(Color.Gray, 0f));
+        page.Add(new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value));
+        //}
+        return page;
+    }
+
+    internal static List<TextMenu.Item> Create_Page_Customization(TextMenu menu, bool inGame) {
+        List<TextMenu.Item> page = new List<TextMenu.Item>();
+        page.Add(new HLine(Color.Gray, 0f));
+        page.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => { ghostSettings.GhostSpriteMode = value; GhostReplayer.Clear(true); }));
+
+        page.Add(new TextMenu.OnOff("Randomize Ghost Colors".ToDialogText(), ghostSettings.RandomizeGhostColors).Change(value => ghostSettings.RandomizeGhostColors = value));
 
         TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Hitbox Color".ToDialogText(), menu, inGame, GhostModuleSettings.defaultHitboxColor);
-        menu.Add(hitboxColor);
+        page.Add(hitboxColor);
         TextMenu.Item hurtboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HurtboxColor, value => ghostSettings.HurtboxColor = value, "Hurtbox Color".ToDialogText(), menu, inGame, GhostModuleSettings.defaultHurtboxColor);
-        menu.Add(hurtboxColor);
+        page.Add(hurtboxColor);
         if (inGame) {
             SubHeaderExt remindText = new("Color Customization Remind".ToDialogText()) {
                 TextColor = Color.Gray,
                 HeightExtra = 0f
             };
-            menu.Add(remindText);
+            page.Add(remindText);
         }
         SubHeaderExt formatText = new("Color Customization Color Format".ToDialogText()) {
             TextColor = Color.Gray,
             HeightExtra = 0f
         };
-        menu.Add(formatText);
+        page.Add(formatText);
 
-        menu.Add(new HLine(Color.Gray, 0f));
+        page.Add(new HLine(Color.Gray, 0f));
 
 
-        menu.Add(new TextMenu.OnOff("Show Ghost Name".ToDialogText(), ghostSettings.ShowGhostName).Change(value => ghostSettings.ShowGhostName = value));
+        page.Add(new TextMenu.OnOff("Show Ghost Name".ToDialogText(), ghostSettings.ShowGhostName).Change(value => ghostSettings.ShowGhostName = value));
 
 
         Func<string> ghostNameGetter = () => ghostSettings.DefaultName;
         TextMenu.Item ghostDefaultName = new ButtonNameExt("Ghost Default Name".ToDialogText(), ghostNameGetter, inGame).Pressed(inGame ? () => { }
-        :
-            () => {
-                OuiModOptionFileName.DefaultString = "Ghost";
-                Audio.Play("event:/ui/main/savefile_rename_start");
-                menu.SceneAs<Overworld>().Goto<OuiModOptionFileName>()
-                    .Init<OuiModOptions>(ghostNameGetter(),
-                        value => ghostSettings.DefaultName = value, MaxNameLength, 1);
-            });
-        menu.Add(ghostDefaultName);
+        : () => {
+            OuiModOptionFileName.DefaultString = "Ghost";
+            Audio.Play("event:/ui/main/savefile_rename_start");
+            menu.SceneAs<Overworld>().Goto<OuiModOptionFileName>()
+                .Init<OuiModOptions>(ghostNameGetter(),
+                    value => ghostSettings.DefaultName = value, MaxNameLength, 1);
+        }
+        );
+        page.Add(ghostDefaultName);
 
         Func<string> playerNameGetter = () => ghostSettings.PlayerName;
         TextMenu.Item playerName = new ButtonNameExt("Player Name".ToDialogText(), playerNameGetter, inGame).Pressed(inGame ? () => { }
-        :
-            () => {
-                OuiModOptionFileName.DefaultString = "Player";
-                Audio.Play("event:/ui/main/savefile_rename_start");
-                menu.SceneAs<Overworld>().Goto<OuiModOptionFileName>()
-                    .Init<OuiModOptions>(playerNameGetter(),
-                        value => ghostSettings.PlayerName = value, MaxNameLength, 1);
-            });
-        menu.Add(playerName);
+        : () => {
+            OuiModOptionFileName.DefaultString = "Player";
+            Audio.Play("event:/ui/main/savefile_rename_start");
+            menu.SceneAs<Overworld>().Goto<OuiModOptionFileName>()
+                .Init<OuiModOptions>(playerNameGetter(),
+                    value => ghostSettings.PlayerName = value, MaxNameLength, 1);
+        });
+        page.Add(playerName);
 
         if (inGame) {
             SubHeaderExt remindText2 = new("Rename Remind".ToDialogText()) {
                 TextColor = Color.Gray,
                 HeightExtra = 0f
             };
-            menu.Add(remindText2);
+            page.Add(remindText2);
         }
-        menu.Add(new HLine(Color.Gray, 0f));
+        return page;
+    }
 
-        TextMenu.Item fileEditor = new ButtonNameExt("Open Ghost File Editor".ToDialogText(), null, inGame).Pressed(inGame ? () => { }
-        :
-        () => {
-            Audio.Play("event:/ui/main/savefile_rename_start");
-            menu.SceneAs<Overworld>().Goto<GhostEditor.GhostFileEditorContainer>();
-        });
-        menu.Add(fileEditor);
+    internal static List<TextMenu.Item> Create_Page_KeyConfig(TextMenu menu, OptionSubMenuExt subMenu, EverestModule everestModule, bool inPauseMenu) {
+        List<TextMenu.Item> page = new List<TextMenu.Item>();
 
-        menu.Add(new HLine(Color.Gray, 0f));
-
-        menu.Add(new TextMenu.OnOff("Show Recorder Icon".ToDialogText(), ghostSettings.ShowRecorderIcon).Change(value => { ghostSettings.ShowRecorderIcon = value; RecordingIcon.Instance?.Update(); }));
-        menu.Add(showInPauseMenu);
-
-        if (!inPauseMenu) {
-            menu.Add(foldInModOptionsMenu);
-        }
-
-        menu.Add(new HLine(Color.Gray, 0f));
-
-        menu.Add(new TextMenu.Button(Dialog.Clean("options_keyconfig")).Pressed(() => {
-            menu.Focused = false;
+        page.Add(new HLine(Color.Gray, 0f));
+        page.Add(new TextMenu.Button(Dialog.Clean("options_keyconfig")).Pressed(() => {
+            subMenu.Focused = false;
             KeyboardConfigUI keyboardConfig;
             if (CreateKeyboardConfigUi != null) {
                 keyboardConfig = (KeyboardConfigUI)CreateKeyboardConfigUi.Invoke(everestModule, new object[] { menu });
@@ -163,14 +207,12 @@ internal static class GhostModMenu {
                 keyboardConfig = new ModuleSettingsKeyboardConfigUI(everestModule);
             }
 
-            keyboardConfig.OnClose = () => { menu.Focused = true; };
-
             Engine.Scene.Add(keyboardConfig);
             Engine.Scene.OnEndOfFrame += () => Engine.Scene.Entities.UpdateLists();
         }));
 
-        menu.Add(new TextMenu.Button(Dialog.Clean("options_btnconfig")).Pressed(() => {
-            menu.Focused = false;
+        page.Add(new TextMenu.Button(Dialog.Clean("options_btnconfig")).Pressed(() => {
+            subMenu.Focused = false;
             ButtonConfigUI buttonConfig;
             if (CreateButtonConfigUI != null) {
                 buttonConfig = (ButtonConfigUI)CreateButtonConfigUI.Invoke(everestModule, new object[] { menu });
@@ -178,17 +220,12 @@ internal static class GhostModMenu {
                 buttonConfig = new ModuleSettingsButtonConfigUI(everestModule);
             }
 
-            buttonConfig.OnClose = () => { menu.Focused = true; };
-
             Engine.Scene.Add(buttonConfig);
             Engine.Scene.OnEndOfFrame += () => Engine.Scene.Entities.UpdateLists();
         }));
-    }
 
-    private static readonly MethodInfo CreateKeyboardConfigUi = typeof(EverestModule).GetMethodInfo("CreateKeyboardConfigUI");
-    private static readonly MethodInfo CreateButtonConfigUI = typeof(EverestModule).GetMethodInfo("CreateButtonConfigUI");
-    internal static string ToTASDialogText(this string input) => Dialog.Clean("TAS_" + input.Replace(" ", "_"));
-    internal const int MaxNameLength = 42;
+        return page;
+    }
 
     private static IEnumerable<KeyValuePair<bool, string>> CreateRTA_IGTOptions() {
         return new List<KeyValuePair<bool, string>> {
@@ -271,23 +308,7 @@ internal static class HookPauseMenu {
 
     [Initialize]
     private static void Initialize() {
-        using (new DetourContext() { Before = new List<string>() { "*" } }) {
-            typeof(Level).GetMethodInfo("Pause").IlHook(il => {
-                ILCursor cursor = new ILCursor(il);
-                if (cursor.TryGotoNext(ins => ins.MatchCall(typeof(Everest.Events.Level), "CreatePauseMenuButtons"))) {
-                    cursor.Index++;
-                    cursor.Emit(OpCodes.Ldarg_0);
-                    cursor.Emit(OpCodes.Ldloc_0);
-                    cursor.Emit(OpCodes.Ldarg_2);
-                    cursor.EmitDelegate(TryAddButton);
-                }
-            });
-        }
-        // idk, if using Everest.Events.Level.OnCreatePauseMenuButtons, first i will encounter CS0229, after resolving this i find that my function adds to this event but nothing happens
-        // so i go back to ilhook
-        // previously i just hook into Celeste.Mod.Everest/Events/Level::CreatePauseMenuButtons
-        // but it conflicts with XaphanHelper's on hook on Level.Pause (i.e. my hook just disappear), i've checked that mod's code and found no issue
-        // even if i tell the publicizer not to publicize Everest.Events.Level.OnCreatePauseMenuButtons, it does not work, unless i don't publicize Celeste
+        Everest.Events.Level.OnCreatePauseMenuButtons += TryAddButton;
     }
 
 
@@ -314,6 +335,9 @@ internal static class HookPauseMenu {
         GhostModMenu.CreateMenu(GhostModule.Instance, menu, true, true);
 
         menu.OnESC = menu.OnCancel = () => {
+            if (menu?.Current is OptionSubMenuExt subMenu && subMenu.Visible && subMenu.MenuIndex != 0) {
+                return;
+            }
             Audio.Play("event:/ui/main/button_back");
             GhostModule.Instance.SaveSettings();
             level.Pause(returnIndex, false);
