@@ -7,6 +7,7 @@ using Monocle;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MonoMod.Utils;
+using StudioCommunication.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -314,7 +315,7 @@ internal static class GhostRecorder {
 
     public static Dictionary<string, List<Entity>> CachedEntitiesForParse = new();
     public static string ParseTemplate() {
-        return TAS.EverestInterop.InfoHUD.InfoCustom.ParseTemplate(ghostSettings.CustomInfoTemplate, CelesteTasSettings.Instance.CustomInfoDecimals, CachedEntitiesForParse, false);
+        return string.Join('\n', TAS.InfoHUD.InfoCustom.ParseTemplate(StringExtensions.SplitLines(ghostSettings.CustomInfoTemplate), CelesteTasSettings.Instance.CustomInfoDecimals));
     }
 }
 
@@ -463,7 +464,7 @@ public class GhostRecorderEntity : Entity {
         }
         if (isFreezeFrame) {
             GameInfo.Update();
-        } else if (Manager.UltraFastForwarding) {
+        } else if (Manager.FastForwarding) {
             GameInfo.Update(!level.wasPaused);
         }
         lastFrameHudInfo = GetHudInfo();

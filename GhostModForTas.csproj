@@ -37,10 +37,11 @@
         <HintPath>..\..\Celeste.dll</HintPath>
     </Reference>
     <Reference Include="CelesteTAS-EverestInterop">
-      <HintPath>lib-stripped\bin\CelesteTAS-EverestInterop.dll</HintPath>
+        <HintPath>..\CelesteTAS-EverestInterop\bin\CelesteTAS-EverestInterop.dll</HintPath>
+        <Private>False</Private>
     </Reference>
     <Reference Include="StudioCommunication">
-        <HintPath>lib-stripped\bin\StudioCommunication.dll</HintPath>
+        <HintPath>..\CelesteTAS-EverestInterop\bin\StudioCommunication.dll</HintPath>
     </Reference>
     <Reference Include="FNA">
       <HintPath>lib-stripped\FNA.dll</HintPath>
