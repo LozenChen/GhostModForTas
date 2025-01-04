@@ -1,9 +1,11 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Monocle;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Hotkey = TAS.EverestInterop.Hotkeys.Hotkey;
+using Hotkey = Celeste.Mod.GhostModForTas.Module.Hotkeys_BASE.Hotkey_BASE;
 
 namespace Celeste.Mod.GhostModForTas.Module;
 
@@ -47,6 +49,7 @@ public static class GhostHotkey {
     }
 
     public static void Update(bool updateKey, bool updateButton) {
+        Hotkeys_BASE.UpdateMeta();
         foreach (Hotkey hotkey in Hotkeys) {
             hotkey.Update(updateKey, updateButton);
         }
@@ -59,135 +62,92 @@ public static class GhostHotkey {
 
 
 
+// taken from CelesteTAS
+public static class Hotkeys_BASE {
 
-[Tracked(false)]
-public class GhostHotkeyWatcher : Message {
+    private static KeyboardState kbState;
+    private static GamePadState padState;
 
-    public static GhostHotkeyWatcher Instance;
-    public static float lifetime = 3f;
+    internal static void UpdateMeta() {
+        kbState = Keyboard.GetState();
+        padState = GetGamePadState();
 
-    public float lifetimer = 0f;
-    public GhostHotkeyWatcher() : base("", new Vector2(10f, 1060f)) {
-        this.Depth = -20000;
-        base.Tag |= Tags.Global;
     }
-
-    public static bool AddIfNecessary() {
-        if (Engine.Scene is not Level level) {
-            return false;
-        }
-        if (Instance is null || !level.Entities.Contains(Instance)) {
-            Instance = new();
-            level.Add(Instance);
-        }
-        return true;
-    }
-
-
-    private void RefreshImpl(string text) {
-        RestoreAlpha(this.text.Equals(text));
-        this.text = text;
-        lifetimer = lifetime;
-        Active = true;
-        Visible = true;
-    }
-
-    public static void Refresh(string text) {
-        if (AddIfNecessary()) {
-            Instance.RefreshImpl(text);
-        }
-    }
-
-    private void RestoreAlpha(bool sameText) {
-        if (sameText) {
-            FallAndRise = true;
-        } else {
-            alpha = 1f;
-        }
-    }
-
-    private bool FallAndRise = false;
-    public override void Update() {
-        if (FallAndRise) {
-            alpha -= 0.1f;
-            if (alpha < 0f) {
-                alpha = 1f;
-                FallAndRise = false;
-            }
-        } else {
-            if (lifetimer / lifetime < 0.1f) {
-                alpha = 10 * lifetimer / lifetime;
-            }
-            lifetimer -= Engine.RawDeltaTime;
-            if (lifetimer < 0f) {
-                lifetimer = 0f;
-                Active = Visible = false;
+    private static GamePadState GetGamePadState() {
+        GamePadState currentState = MInput.GamePads[0].CurrentState;
+        for (int i = 0; i < 4; i++) {
+            currentState = GamePad.GetState((PlayerIndex)i);
+            if (currentState.IsConnected) {
+                break;
             }
         }
 
-        base.Update();
+        return currentState;
     }
 
-    public override void Render() {
-        float scale = 0.6f;
-        Vector2 Size = FontSize.Measure(text) * scale;
-        Monocle.Draw.Rect(Position - 0.5f * Size.Y * Vector2.UnitY - 10f * Vector2.UnitX, Size.X + 20f, Size.Y + 10f, Color.Black * alpha * 0.5f);
-        Font.Draw(BaseSize, text, Position, new Vector2(0f, 0.5f), Vector2.One * scale, Color.White * alpha, 0f, Color.Transparent, 1f, Color.Black);
-    }
+    public class Hotkey_BASE {
+        public readonly List<Buttons> Buttons;
+        private readonly bool held;
+        private readonly bool keyCombo;
+        public readonly List<Keys> Keys;
+        private DateTime lastPressedTime;
+        public bool OverrideCheck;
 
-}
+        public Hotkey_BASE(List<Keys> keys, List<Buttons> buttons, bool keyCombo, bool held) {
+            Keys = keys;
+            Buttons = buttons;
+            this.keyCombo = keyCombo;
+            this.held = held;
+        }
 
-[Tracked(false)]
-public class Message : Entity {
-    internal static readonly Language english = Dialog.Languages["english"];
+        public bool Check { get; private set; }
+        public bool LastCheck { get; private set; }
+        public bool Pressed => !LastCheck && Check;
 
-    internal static readonly PixelFont Font = Fonts.Get(english.FontFace);
+        // note: dont check DoublePressed on render, since unstable DoublePressed response during frame drops
+        public bool DoublePressed { get; private set; }
+        public bool Released => LastCheck && !Check;
 
-    internal static readonly float BaseSize = english.FontFaceSize;
+        public void Update(bool updateKey = true, bool updateButton = true) {
+            LastCheck = Check;
+            bool keyCheck;
+            bool buttonCheck;
 
-    public static readonly PixelFontSize FontSize = Font.Get(BaseSize);
+            if (OverrideCheck) {
+                keyCheck = buttonCheck = true;
+                if (!held) {
+                    OverrideCheck = false;
+                }
+            } else {
+                keyCheck = updateKey && IsKeyDown();
+                buttonCheck = updateButton && IsButtonDown();
+            }
 
-    public string text;
+            Check = keyCheck || buttonCheck;
 
-    public float alpha;
+            if (Pressed) {
+                DateTime pressedTime = DateTime.Now;
+                DoublePressed = pressedTime.Subtract(lastPressedTime).TotalMilliseconds < 200;
+                lastPressedTime = DoublePressed ? default : pressedTime;
+            } else {
+                DoublePressed = false;
+            }
+        }
 
-    public Message(string text, Vector2 Position) : base(Position) {
-        base.Tag = Tags.HUD;
-        this.text = text;
-        alpha = 1f;
-    }
-    public override void Update() {
-        base.Update();
-    }
+        private bool IsKeyDown() {
+            if (Keys == null || Keys.Count == 0 || kbState == default) {
+                return false;
+            }
 
-    public override void Render() {
-        RenderAtCenter(Position);
-    }
+            return keyCombo ? Keys.All(kbState.IsKeyDown) : Keys.Any(kbState.IsKeyDown);
+        }
 
-    public void RenderAtTopLeft(Vector2 Position) {
-        Font.Draw(BaseSize, text, Position, new Vector2(0f, 0f), Vector2.One * 0.6f, Color.White * alpha, 0f, Color.Transparent, 1f, Color.Black);
-    }
+        private bool IsButtonDown() {
+            if (Buttons == null || Buttons.Count == 0 || padState == default) {
+                return false;
+            }
 
-    public void RenderAtCenter(Vector2 Position) {
-        Font.Draw(BaseSize, text, Position, new Vector2(0.5f, 0.5f), Vector2.One * 0.5f, Color.White * alpha, 0f, Color.Transparent, 1f, Color.Black);
-    }
-
-    public static void RenderMessage(string str, Vector2 Position, Vector2 scale) {
-        RenderMessage(str, Position, Vector2.One * 0.5f, scale);
-    }
-
-    public static void RenderMessage(string str, Vector2 Position, Vector2 justify, Vector2 scale) {
-        Font.DrawOutline(BaseSize, str, Position, justify, scale, Color.White, 2f, Color.Black);
-    }
-    public static void RenderMessage(string str, Vector2 Position, Vector2 justify, Vector2 scale, float stroke) {
-        Font.DrawOutline(BaseSize, str, Position, justify, scale, Color.White, stroke, Color.Black);
-    }
-
-    public static void RenderMessage(string str, Vector2 Position, Vector2 justify, Vector2 scale, float stroke, Color colorInside, Color colorOutline) {
-        Font.DrawOutline(BaseSize, str, Position, justify, scale, colorInside, stroke, colorOutline);
-    }
-
-    public static void RenderMessageJetBrainsMono(string str, Vector2 Position, Vector2 justify, Vector2 scale, float stroke, Color colorInside, Color colorOutline) {
-        TAS.EverestInterop.InfoHUD.JetBrainsMonoFont.DrawOutline(str, Position, justify, scale, colorInside, stroke, colorOutline);
+            return keyCombo ? Buttons.All(padState.IsButtonDown) : Buttons.Any(padState.IsButtonDown);
+        }
     }
 }
