@@ -48,10 +48,9 @@ internal static class GhostHud {
         orig(self);
         DrawInfo(self);
     }
-
     private static bool DragAndMoveHud() {
-        if (infoIsDrawn && bgRect.Contains((int)MouseButtons.LastPosition.X, (int)MouseButtons.LastPosition.Y)) {
-            ghostSettings.HudInfoPosition += MouseButtons.Position - MouseButtons.LastPosition;
+        if (infoIsDrawn && bgRect.Contains((int)ModInterop.TasImports.LastPosition.X, (int)ModInterop.TasImports.LastPosition.Y)) {
+            ghostSettings.HudInfoPosition += ModInterop.TasImports.PositionDelta;
             GhostModule.Instance.SaveSettings();
             return true;
         }

@@ -7,7 +7,6 @@ using Monocle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TAS.EverestInterop;
 
 namespace Celeste.Mod.GhostModForTas.MultiGhost;
 
@@ -87,7 +86,7 @@ public class GhostRankingList : Component {
             }
         }
 
-        if (CenterCamera.LevelZoom < 0.8f) {
+        if (ModInterop.TasImports.ZoomLevel < 0.8f) {
             Draw.Rect(bgRect, Color.Black * alpha); // in this case, we don't need to worry that comparer covers our level
             Draw.HollowRect(bgRect, Color.Silver * alpha);
         } else {
