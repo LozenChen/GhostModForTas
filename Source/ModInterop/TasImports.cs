@@ -3,6 +3,7 @@ using TAS.EverestInterop;
 
 namespace Celeste.Mod.GhostModForTas.ModInterop;
 
+
 internal static class TasImports {
     internal static Vector2 MousePosition => MouseInput.Position;
 
