@@ -38,7 +38,7 @@ internal static class TasCommandExport {
     [TasCommand("Ghost_SetName", MetaDataProvider = typeof(SetNameMeta), ExecuteTiming = ExecuteTiming.Runtime)]
     public static void GhostSetNameWrapper(CommandLine commandLine, int studioLine, string filePath, int fileLine) {
         if (commandLine.Arguments.IsEmpty()) {
-            AbortTas("Need to specify arguments for \"Ghost_SetName\" command");
+            TasImports.AbortTas("Need to specify arguments for \"Ghost_SetName\" command");
             return;
         }
         Recorder.Data.GhostData.SetGhostName(commandLine.Arguments[0]);
@@ -47,7 +47,7 @@ internal static class TasCommandExport {
     [TasCommand("Ghost_LockComparer", MetaDataProvider = typeof(LockComparerMeta), ExecuteTiming = ExecuteTiming.Runtime)]
     public static void GhostLockComparer(CommandLine commandLine, int studioLine, string filePath, int fileLine) {
         if (commandLine.Arguments.IsEmpty()) {
-            AbortTas("Need to specify arguments for \"Ghost_LockComparer\" command");
+            TasImports.AbortTas("Need to specify arguments for \"Ghost_LockComparer\" command");
             return;
         }
         GhostReplayer.LockComparerGhostCommand(commandLine.Arguments[0]);
@@ -62,14 +62,14 @@ internal static class TasCommandExport {
     public static void GhostReplayForward(CommandLine commandLine, int studioLine, string filePath, int fileLine) {
         string errorText = $"{Path.GetFileName(filePath)} line {fileLine}\n";
         if (GhostReplayer.Replayer is not { } replayer || replayer.ForceSync) {
-            WarnTas($"{errorText}Ghost_ReplayForward command can't run when ForceSync is ON.");
+            TasImports.WarnTas($"{errorText}Ghost_ReplayForward command can't run when ForceSync is ON.");
             return;
         }
         string[] args = commandLine.Arguments;
         if (args.IsEmpty()) {
-            AbortTas($"{errorText}Ghost_ReplayForward command no frame given");
+            TasImports.AbortTas($"{errorText}Ghost_ReplayForward command no frame given");
         } else if (!int.TryParse(args[0], out int frame)) {
-            AbortTas($"{errorText}Ghost_ReplayForward command's frame is not an integer");
+            TasImports.AbortTas($"{errorText}Ghost_ReplayForward command's frame is not an integer");
         } else {
             GhostReplayer.GhostReplayForward(frame);
         }
@@ -78,15 +78,6 @@ internal static class TasCommandExport {
     [TasCommand("Ghost_Reload", MetaDataProvider = typeof(ReloadMeta), Aliases = new[] { "GhostReload", "GhostReplayReload", "ReloadGhostReplay", "ReloadGhost" }, ExecuteTiming = ExecuteTiming.Runtime)]
     public static void GhostReplayReloadCommandWrapper(CommandLine commandLine, int studioLine, string filePath, int fileLine) {
         GhostRecorder.GhostReplayReloadCommand();
-    }
-
-
-    private static void AbortTas(string message) {
-        TAS.GlobalVariables.AbortTas(message);
-    }
-
-    private static void WarnTas(string message) {
-        TAS.Entities.Toast.Show(message, 2f);
     }
 
 

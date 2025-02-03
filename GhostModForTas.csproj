@@ -69,6 +69,8 @@
         <Publicize Include="Celeste" IncludeCompilerGeneratedMembers="false" />
         <Publicize Include="CelesteTAS-EverestInterop:TAS.EverestInterop.InfoHUD.InfoHud.WriteTasInput" />
         <Publicize Include="CelesteTAS-EverestInterop:TAS.Entities.Toast" />
+        <Publicize Include="CelesteTAS-EverestInterop:TAS.EverestInterop.MouseInput" />
+        <Publicize Include="CelesteTAS-EverestInterop:TAS.Gameplay.CenterCamera" />
         <DoNotPublicize Include="Celeste:Monocle.Scene.OnEndOfFrame" />
         <DoNotPublicize Include="Celeste:Monocle.Entity.PostUpdate" />
         <DoNotPublicize Include="Celeste:Celeste.Mod.TextInput.OnInput" />
