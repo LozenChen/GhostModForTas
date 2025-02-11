@@ -319,6 +319,12 @@ internal static class HookPauseMenu {
         Everest.Events.Level.OnCreatePauseMenuButtons += TryAddButton;
     }
 
+    [Unload]
+
+    private static void Unload() {
+        Everest.Events.Level.OnCreatePauseMenuButtons -= TryAddButton;
+    }
+
 
     private static void TryAddButton(Level level, TextMenu menu, bool minimal) {
         if (minimal || !ghostSettings.ShowInPauseMenu) {
