@@ -9,6 +9,7 @@ public static class ModImports {
     public static bool GravityHelperInstalled;
 
     public static bool ExtendedVariantInstalled;
+
     public static bool IsPlayerInverted => GravityHelperInstalled && GravityHelperImport.IsPlayerInverted.Invoke();
 
     public static bool IsActorInverted(Actor actor) => GravityHelperInstalled && GravityHelperImport.IsActorInverted.Invoke(actor);
@@ -65,3 +66,5 @@ internal static class GravityHelperImport {
 internal static class ExtendedVariantImport {
     public static Func<string, object> GetCurrentVariantValue;
 }
+
+

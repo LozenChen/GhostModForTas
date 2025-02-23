@@ -59,7 +59,7 @@
       <HintPath>lib-stripped\MonoMod.RuntimeDetour.dll</HintPath>
     </Reference>
     <Reference Include="SpeedrunTool">
-      <HintPath>lib-stripped\SpeedrunTool.dll</HintPath>
+      <HintPath>..\SpeedrunTool\SpeedrunTool.dll</HintPath>
     </Reference>
   </ItemGroup>
     <PropertyGroup>

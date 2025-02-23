@@ -314,7 +314,7 @@ internal static class HookPauseMenu {
 
     private static TextMenu.Item itemInPauseMenu;
 
-    [Initialize]
+    [Initialize] // use init instead of load, so our event is after ExtendedVariants'
     private static void Initialize() {
         Everest.Events.Level.OnCreatePauseMenuButtons += TryAddButton;
     }
