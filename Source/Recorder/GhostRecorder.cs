@@ -217,7 +217,7 @@ internal static class GhostRecorder {
         }
     }
 
-    private const string TransitionRoutine_CompilerGeneratedName = "<TransitionRoutine>d__30"; // need Everest 1.5072, may change if everest patch level again
+    private const string TransitionRoutine_CompilerGeneratedName = "<TransitionRoutine>d__35"; // need Everest 1.5326, may change if everest patch level again
 
     private static void IncreaseRTATimer() {
         RTASessionTime += 170000L;

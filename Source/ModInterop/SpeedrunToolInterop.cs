@@ -1,6 +1,5 @@
 using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Replayer;
-using Celeste.Mod.SpeedrunTool.SaveLoad;
 using MonoMod.ModInterop;
 using MonoMod.Utils;
 using System;
@@ -17,7 +16,7 @@ internal static class SpeedrunToolInterop {
     [Initialize]
     public static void Initialize() {
         typeof(SpeedrunToolImport).ModInterop();
-        SpeedrunToolInstalled = SpeedrunToolImport.RegisterSaveLoadAction is not null;
+        SpeedrunToolInstalled = SpeedrunToolImport.DeepClone is not null;
         AddSaveLoadAction();
     }
 
@@ -33,7 +32,7 @@ internal static class SpeedrunToolInterop {
 
         action = SpeedrunToolImport.RegisterSaveLoadAction(
             (savedValues, _) => {
-                savedValues[typeof(SpeedrunToolInterop)] = new Dictionary<string, object> {
+                savedValues[typeof(SpeedrunToolInterop)] = (Dictionary<string, object>) SpeedrunToolImport.DeepClone(new Dictionary<string, object> {
                     { "ghostTime", GhostCompare.GhostTime },
                     { "lastGhostTime", GhostCompare.LastGhostTime },
                     { "currentTime", GhostCompare.CurrentTime },
@@ -41,10 +40,11 @@ internal static class SpeedrunToolInterop {
                     { "recorder", GhostRecorder.Recorder},
                     { "replayer", GhostReplayer.Replayer},
                     { "data", GhostRecorder.dyn_data}
-                }.DeepCloneShared();
+                });
             },
             (savedValues, _) => {
-                Dictionary<string, object> clonedValues = savedValues.DeepCloneShared()[typeof(SpeedrunToolInterop)];
+                Dictionary<string, object> clonedValues =
+                    ((Dictionary<Type,Dictionary<string, object>>)SpeedrunToolImport.DeepClone(savedValues))[typeof(SpeedrunToolInterop)];
                 GhostCompare.GhostTime = (long)clonedValues["ghostTime"];
                 GhostCompare.LastGhostTime = (long)clonedValues["lastGhostTime"];
                 GhostCompare.CurrentTime = (long)clonedValues["currentTime"];
@@ -72,4 +72,6 @@ internal static class SpeedrunToolImport {
     public static Func<Type, string[], object> RegisterStaticTypes;
 
     public static Action<object> Unregister;
+
+    public static Func<object, object> DeepClone;
 }
