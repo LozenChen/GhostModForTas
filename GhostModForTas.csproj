@@ -58,9 +58,6 @@
     <Reference Include="MonoMod.RuntimeDetour">
       <HintPath>lib-stripped\MonoMod.RuntimeDetour.dll</HintPath>
     </Reference>
-    <Reference Include="SpeedrunTool">
-      <HintPath>..\SpeedrunTool\SpeedrunTool.dll</HintPath>
-    </Reference>
   </ItemGroup>
     <PropertyGroup>
         <PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>

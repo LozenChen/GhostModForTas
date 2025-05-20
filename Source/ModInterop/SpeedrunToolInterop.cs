@@ -32,7 +32,7 @@ internal static class SpeedrunToolInterop {
 
         action = SpeedrunToolImport.RegisterSaveLoadAction(
             (savedValues, _) => {
-                savedValues[typeof(SpeedrunToolInterop)] = (Dictionary<string, object>) SpeedrunToolImport.DeepClone(new Dictionary<string, object> {
+                savedValues[typeof(SpeedrunToolInterop)] = DeepCloneShared(new Dictionary<string, object> {
                     { "ghostTime", GhostCompare.GhostTime },
                     { "lastGhostTime", GhostCompare.LastGhostTime },
                     { "currentTime", GhostCompare.CurrentTime },
@@ -44,7 +44,7 @@ internal static class SpeedrunToolInterop {
             },
             (savedValues, _) => {
                 Dictionary<string, object> clonedValues =
-                    ((Dictionary<Type,Dictionary<string, object>>)SpeedrunToolImport.DeepClone(savedValues))[typeof(SpeedrunToolInterop)];
+                    DeepCloneShared(savedValues)[typeof(SpeedrunToolInterop)];
                 GhostCompare.GhostTime = (long)clonedValues["ghostTime"];
                 GhostCompare.LastGhostTime = (long)clonedValues["lastGhostTime"];
                 GhostCompare.CurrentTime = (long)clonedValues["currentTime"];
@@ -61,6 +61,10 @@ internal static class SpeedrunToolInterop {
         if (SpeedrunToolInstalled) {
             SpeedrunToolImport.Unregister(action);
         }
+    }
+
+    internal static T DeepCloneShared<T>(T obj) {
+        return (T)SpeedrunToolImport.DeepClone(obj);
     }
 }
 
