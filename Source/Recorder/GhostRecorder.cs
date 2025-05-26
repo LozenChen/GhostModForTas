@@ -236,7 +236,7 @@ internal static class GhostRecorder {
     }
 
 
-    [TasDisableRun]
+    [DisableRun]
     private static void OnTasDisableRun() {
         if (origMode.HasValue) {
             ghostSettings.Mode = origMode.Value & GhostModuleMode.Play; // recording is stopped anyway, but if originally replaying, then ok

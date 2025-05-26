@@ -60,11 +60,6 @@ internal static class AttributeUtils {
     }
 #endif
 
-    [Obsolete]
-    public static void CollectAndSendTasCommand() {
-        // latest celeste tas collect these on its own
-    }
-
     [Initialize]
     public static void HookEngineFreeze() {
         typeof(Monocle.Engine).GetMethodInfo("Update").IlHook(ILEngineFreeze);
@@ -116,9 +111,6 @@ internal class LoadAttribute : Attribute { }
 internal class UnloadAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
-internal class LoadContentAttribute : Attribute { }
-
-[AttributeUsage(AttributeTargets.Method)]
 internal class InitializeAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
@@ -129,15 +121,6 @@ internal class SkippingCutsceneUpdateAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class UnpauseUpdateAttribute : Attribute { }
-
-[AttributeUsage(AttributeTargets.Method)]
-internal class TasDisableRunAttribute : Attribute { }
-
-[AttributeUsage(AttributeTargets.Method)]
-internal class TasEnableRunAttribute : Attribute { }
-
-[AttributeUsage(AttributeTargets.Method)]
-internal class ReloadAttribute : Attribute { }
 
 [AttributeUsage(AttributeTargets.Method)]
 // it allows 0 - 3 parameters, so you can't collect/invoke it using attribute utils functions. we put it here just to make it global

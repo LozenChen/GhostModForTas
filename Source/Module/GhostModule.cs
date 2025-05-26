@@ -13,14 +13,10 @@ public class GhostModule : EverestModule {
         Instance = this;
         AttributeUtils.CollectMethods<LoadAttribute>();
         AttributeUtils.CollectMethods<UnloadAttribute>();
-        AttributeUtils.CollectMethods<LoadContentAttribute>();
         AttributeUtils.CollectMethods<InitializeAttribute>();
         AttributeUtils.CollectMethods<FreezeUpdateAttribute>();
         AttributeUtils.CollectMethods<SkippingCutsceneUpdateAttribute>();
         AttributeUtils.CollectMethods<UnpauseUpdateAttribute>();
-        AttributeUtils.CollectMethods<TasDisableRunAttribute>();
-        AttributeUtils.CollectMethods<TasEnableRunAttribute>();
-        AttributeUtils.CollectMethods<ReloadAttribute>();
     }
 
 

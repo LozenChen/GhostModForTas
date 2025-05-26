@@ -22,7 +22,7 @@ Step4: Switch to `PLAY` mode manually and restart chapter / re-run the tas, or u
 
 ## Modes
 
-- You have 4 ways to switch modes: in mod menu, using hotkeys, using console commands, and using tas commands.
+- You have 4 ways to switch modes: in mod menu, using hotkeys, using tas commands, and using console commands.
 
 ### Record Mode
 
@@ -39,14 +39,6 @@ Step4: Switch to `PLAY` mode manually and restart chapter / re-run the tas, or u
 ## Hotkeys
 
 - You can use hotkeys to switch modes. It's configurable in the in-game menu.
-
-## ConsoleCommands
-
-- You can use "ghost_off", "ghost_record", "ghost_play" to switch modes in console.
-
-- Use "ghost_mark_level_end" to manually instruct that current level is completed. E.g. use it when you return to map after collecting cassettes (use it both when RECORD and PLAY).
-
-- Use "ghost_forward [int frames]" to make GhostReplayer advance/delay some frames. Only works when `ForceSync` = false.
 
 ## TasCommands
 
@@ -74,6 +66,14 @@ If ghosts already exist, this command will not try to find new ghosts.
 
 - See [TasCommandExport](Source/ModInterop/TasCommandExport.cs) for more information.
 
+## ConsoleCommands
+
+- You can use `ghost_off`, `ghost_record`, `ghost_play` to switch modes in console.
+
+- Use `ghost_mark_level_end` to manually instruct that current level is completed. E.g. use it when you return to map after collecting cassettes (use it both when RECORD and PLAY).
+
+- Use `ghost_forward [int frames]` to make GhostReplayer advance/delay some frames. Only works when `ForceSync` = false.
+
 ## Force Sync
 
 - If `Force Sync` is ON, then the ghost will sync with you when you go to next room. The Ghost will be waiting for you if she is faster, or will catch up if she is slower.
@@ -100,6 +100,6 @@ If ghosts already exist, this command will not try to find new ghosts.
 
 ## Issues
 
-- The "Mode Switch" hotkey and CelesteTAS's "Lock Camera" hotkey have same default values (LeftControl + H).
+- The `Mode Switch` hotkey and CelesteTAS's `Lock Camera` hotkey have same default values (LeftControl + H).
 
 - There may be some incompatibility with savestates. Please let me know.
