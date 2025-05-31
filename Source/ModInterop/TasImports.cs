@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
-using TAS.EverestInterop;
-using System;
 using MonoMod.ModInterop;
+using System;
+using TAS.EverestInterop;
 
 namespace Celeste.Mod.GhostModForTas.ModInterop;
 
@@ -20,7 +20,7 @@ internal static class TasImports {
     internal static void AbortTas(string message) {
         TAS.GlobalVariables.AbortTas(message);
     }
-    
+
     [Initialize]
     private static void Initialize() {
         typeof(__CelesteTasImports).ModInterop();

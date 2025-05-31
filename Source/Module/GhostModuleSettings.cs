@@ -69,7 +69,7 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public PlayerSpriteMode GhostSpriteMode = PlayerSpriteMode.Madeline;
 
-    public enum ShowInPauseMenuModes { Always, WhenNotInTas, Never}
+    public enum ShowInPauseMenuModes { Always, WhenNotInTas, Never }
 
     public ShowInPauseMenuModes ShowInPauseMenuMode = ShowInPauseMenuModes.WhenNotInTas;
 
