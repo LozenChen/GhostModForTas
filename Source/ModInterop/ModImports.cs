@@ -1,6 +1,7 @@
 using Celeste.Mod.GravityHelper.Components;
 using MonoMod.ModInterop;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Celeste.Mod.GhostModForTas.ModInterop;
 
@@ -30,6 +31,7 @@ public static class ModImports {
         }
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private static Monocle.Component CreateGravityComponent() {
         GravityComponent component = new GravityComponent();
         component.UpdatePosition = (_) => { };
