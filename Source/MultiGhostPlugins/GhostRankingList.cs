@@ -82,7 +82,7 @@ public class GhostRankingList : Component {
             }
 
             if (playerRect.Intersects(mirrorBgRect)) {
-                alpha *= TAS.Manager.Running ? 0.5f : 0.2f;
+                alpha *= ModInterop.TasImports.Manager_Running ? 0.5f : 0.2f;
             }
         }
 

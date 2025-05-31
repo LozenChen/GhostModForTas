@@ -60,19 +60,20 @@ internal static class TasCommandExport {
 
     [TasCommand("Ghost_ReplayForward", MetaDataProvider = typeof(ReplayForwardMeta), ExecuteTiming = ExecuteTiming.Runtime)]
     public static void GhostReplayForward(CommandLine commandLine, int studioLine, string filePath, int fileLine) {
-        string errorText = $"{Path.GetFileName(filePath)} line {fileLine}\n";
         if (GhostReplayer.Replayer is not { } replayer || replayer.ForceSync) {
-            TasImports.WarnTas($"{errorText}Ghost_ReplayForward command can't run when ForceSync is ON.");
+            TasImports.AbortTas($"{CreateErrorText()}Ghost_ReplayForward command can't run when ForceSync is ON.");
             return;
         }
         string[] args = commandLine.Arguments;
         if (args.IsEmpty()) {
-            TasImports.AbortTas($"{errorText}Ghost_ReplayForward command no frame given");
+            TasImports.AbortTas($"{CreateErrorText()}Ghost_ReplayForward command no frame given");
         } else if (!int.TryParse(args[0], out int frame)) {
-            TasImports.AbortTas($"{errorText}Ghost_ReplayForward command's frame is not an integer");
+            TasImports.AbortTas($"{CreateErrorText()}Ghost_ReplayForward command's frame is not an integer");
         } else {
             GhostReplayer.GhostReplayForward(frame);
         }
+
+        string CreateErrorText() => $"{Path.GetFileName(filePath)} line {fileLine}\n";
     }
 
     [TasCommand("Ghost_Reload", MetaDataProvider = typeof(ReloadMeta), Aliases = new[] { "GhostReload", "GhostReplayReload", "ReloadGhostReplay", "ReloadGhost" }, ExecuteTiming = ExecuteTiming.Runtime)]

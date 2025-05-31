@@ -39,10 +39,11 @@ internal static class GhostModMenu {
             RecordingIcon.Instance?.Update();
         }));
 
-        if (!ghostSettings.ShowInPauseMenu) {
+        if (ghostSettings.ShowInPauseMenuMode == GhostModuleSettings.ShowInPauseMenuModes.Never) {
             // yeah in this case there will have two buttons in total to recover show in pause menu
             menu.Add(new HLine(Color.Gray, 0f));
-            menu.Add(new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value));
+            menu.Add(new TextMenuExt.EnumerableSlider<GhostModuleSettings.ShowInPauseMenuModes>("Show in Pause Menu".ToDialogText(), CreateShowInPauseModeOptions(),
+                ghostSettings.ShowInPauseMenuMode).Change(value => ghostSettings.ShowInPauseMenuMode = value));
         }
         menu.Add(new HLine(Color.Gray, 0f));
         menu.Add(new TextMenu.OnOff("Force Sync".ToDialogText(), ghostSettings.ForceSync).Change(value => { ghostSettings.ForceSync = value; GhostReplayer.Clear(true); }));
@@ -126,8 +127,8 @@ internal static class GhostModMenu {
         page.Add(new TextMenu.OnOff("Show Recorder Icon".ToDialogText(), ghostSettings.ShowRecorderIcon).Change(value => { ghostSettings.ShowRecorderIcon = value; RecordingIcon.Instance?.Update(); }));
         //if (ghostSettings.ShowInPauseMenu) {
         page.Add(new HLine(Color.Gray, 0f));
-        page.Add(new TextMenu.OnOff("Show in Pause Menu".ToDialogText(), ghostSettings.ShowInPauseMenu).Change(value => ghostSettings.ShowInPauseMenu = value));
-        //}
+        page.Add(new TextMenuExt.EnumerableSlider<GhostModuleSettings.ShowInPauseMenuModes>("Show in Pause Menu".ToDialogText(), CreateShowInPauseModeOptions(),
+                 ghostSettings.ShowInPauseMenuMode).Change(value => ghostSettings.ShowInPauseMenuMode = value));
         return page;
     }
 
@@ -263,6 +264,13 @@ internal static class GhostModMenu {
             new(TimeFormats.SecondAndFrame, "-0.017(-1f)"),
         };
     }
+    private static IEnumerable<KeyValuePair<GhostModuleSettings.ShowInPauseMenuModes, string>> CreateShowInPauseModeOptions() {
+        return new List<KeyValuePair<GhostModuleSettings.ShowInPauseMenuModes, string>> {
+            new(GhostModuleSettings.ShowInPauseMenuModes.Always, "Always".ToDialogText()),
+            new(GhostModuleSettings.ShowInPauseMenuModes.WhenNotInTas, "When Not In Tas".ToDialogText()),
+            new(GhostModuleSettings.ShowInPauseMenuModes.Never, "Never".ToDialogText()),
+        };
+    }
     private static IEnumerable<KeyValuePair<GhostModuleMode, string>> CreateMainModeOptions() {
         return new List<KeyValuePair<GhostModuleMode, string>> {
             new(GhostModuleMode.Off, "Mode Off".ToDialogText()),
@@ -327,9 +335,15 @@ internal static class HookPauseMenu {
 
 
     private static void TryAddButton(Level level, TextMenu menu, bool minimal) {
-        if (minimal || !ghostSettings.ShowInPauseMenu) {
+        if (minimal) {
             return;
         }
+
+        if (ModInterop.TasImports.Manager_Running && ghostSettings.ShowInPauseMenuMode == GhostModuleSettings.ShowInPauseMenuModes.WhenNotInTas
+            || ghostSettings.ShowInPauseMenuMode == GhostModuleSettings.ShowInPauseMenuModes.Never) {
+            return;
+        }
+
         // yeah we are after extended variant
 
         int optionsIndex = menu.Items.FindIndex(item =>

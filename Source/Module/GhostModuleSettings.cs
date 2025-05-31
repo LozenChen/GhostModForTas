@@ -69,8 +69,9 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public PlayerSpriteMode GhostSpriteMode = PlayerSpriteMode.Madeline;
 
-    public bool ShowInPauseMenu = true;
+    public enum ShowInPauseMenuModes { Always, WhenNotInTas, Never}
 
+    public ShowInPauseMenuModes ShowInPauseMenuMode = ShowInPauseMenuModes.WhenNotInTas;
 
     public Color HitboxColor = defaultHitboxColor;
 

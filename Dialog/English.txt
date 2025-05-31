@@ -75,3 +75,6 @@ GHOST_MOD_FOR_TAS_SUBMENU_2=                            Page 2
 GHOST_MOD_FOR_TAS_SUBMENU_3=                            Page 3
 GHOST_MOD_FOR_TAS_SUBMENU_4=                            Page 4
 GHOST_MOD_FOR_TAS_GHOST_FILE_EDITOR_INGAME=             Your current progress in game will be lost!
+GHOST_MOD_FOR_TAS_ALWAYS=                               Always
+GHOST_MOD_FOR_TAS_WHEN_NOT_IN_TAS=                      When not in TAS
+GHOST_MOD_FOR_TAS_NEVER=                                Never
