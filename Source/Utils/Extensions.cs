@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Celeste.Mod.GhostModForTas.Utils;
 
@@ -514,9 +515,48 @@ internal static class LevelExtensions {
 }
 
 internal static class ColorExtensions {
+
+    private static readonly Regex HexChar = new Regex("^[0-9a-f]*$", RegexOptions.IgnoreCase);
     public static Color SetAlpha(this Color color, float alpha) {
         float beta = (3 - alpha) * alpha * 0.5f;
         return new Color((int)((float)color.R * beta), (int)((float)color.G * beta), (int)((float)color.B * beta), (int)((float)color.A * alpha));
+    }
+
+    public static string ColorToHex(this Color color) {
+        return $"#{color.A.ToString("X").PadLeft(2, '0')}{color.R.ToString("X").PadLeft(2, '0')}{color.G.ToString("X").PadLeft(2, '0')}{color.B.ToString("X").PadLeft(2, '0')}";
+    }
+
+    public static Color HexToColor(this string hex, Color defaultColor) {
+        if (string.IsNullOrWhiteSpace(hex)) {
+            return defaultColor;
+        }
+
+        hex = hex.Replace("#", "");
+        if (!HexChar.IsMatch(hex)) {
+            return defaultColor;
+        }
+
+        if (hex.Length > 8) {
+            hex = hex.Substring(0, 8);
+        }
+
+        if (hex.Length == 3 || hex.Length == 4) {
+            hex = (from c in hex.ToCharArray()
+                   select $"{c}{c}").Aggregate((string s, string s1) => s + s1);
+        }
+
+        hex = hex.PadLeft(8, 'F');
+        try {
+            long num = Convert.ToInt64(hex, 16);
+            Color result = default(Color);
+            result.A = (byte)(num >> 24);
+            result.R = (byte)(num >> 16);
+            result.G = (byte)(num >> 8);
+            result.B = (byte)num;
+            return result;
+        } catch (FormatException) {
+            return defaultColor;
+        }
     }
 }
 

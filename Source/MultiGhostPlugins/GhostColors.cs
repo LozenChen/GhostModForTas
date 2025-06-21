@@ -22,15 +22,12 @@ public class GhostColors : Component {
 
     public void ClassicMode() {
         foreach (Ghost ghost in parent.Ghosts) {
-            ghost.Color = ColorNeutral;
+            ghost.Color = ghostSettings.GhostSpriteColor;
         }
         if (parent.ComparerGhost is not null) {
-            parent.ComparerGhost.Color = ColorGold;
+            parent.ComparerGhost.Color = ghostSettings.ComparerGhostSpriteColor;
         }
     }
-
-    public static readonly Color ColorGold = new Color(1f, 1f, 0f, 1f);
-    public static readonly Color ColorNeutral = new Color(1f, 1f, 1f, 1f);
 
     public bool Randomized = false;
     public void RandomColorMode() {

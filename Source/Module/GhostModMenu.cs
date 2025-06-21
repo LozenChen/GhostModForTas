@@ -14,7 +14,6 @@ using System.Linq;
 using System.Reflection;
 using static Celeste.TextMenu;
 using static Celeste.TextMenuExt;
-using static TAS.EverestInterop.Hitboxes.HitboxColor;
 
 namespace Celeste.Mod.GhostModForTas.Module;
 
@@ -137,7 +136,21 @@ internal static class GhostModMenu {
         page.Add(new HLine(Color.Gray, 0f));
         page.Add(EnumerableSliderExt<PlayerSpriteMode>.Create("Ghost Sprite Mode".ToDialogText(), CreatePlayerSpriteModeOptions(), ghostSettings.GhostSpriteMode).Change(value => { ghostSettings.GhostSpriteMode = value; GhostReplayer.Clear(true); }));
 
-        page.Add(new TextMenu.OnOff("Randomize Ghost Colors".ToDialogText(), ghostSettings.RandomizeGhostColors).Change(value => ghostSettings.RandomizeGhostColors = value));
+        ButtonColorExt ghostColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.GhostSpriteColor, value => ghostSettings.GhostSpriteColor = value, "Ghost Sprite Color".ToDialogText(), menu, inGame, GhostModuleSettings.defaultGhostSpriteColor);
+        ButtonColorExt comparerGhostColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.ComparerGhostSpriteColor, value => ghostSettings.ComparerGhostSpriteColor = value, "Comparer Ghost Sprite Color".ToDialogText(), menu, inGame, GhostModuleSettings.defaultComparerGhostSpriteColor);
+        ghostColor.SetDisabled(ghostSettings.RandomizeGhostColors);
+        comparerGhostColor.SetDisabled(ghostSettings.RandomizeGhostColors);
+
+        page.Add(new TextMenu.OnOff("Randomize Ghost Colors".ToDialogText(), ghostSettings.RandomizeGhostColors).
+            Change(value => {
+                ghostSettings.RandomizeGhostColors = value;
+                ghostColor.SetDisabled(value);
+                comparerGhostColor.SetDisabled(value);
+            })
+        );
+
+        page.Add(ghostColor);
+        page.Add(comparerGhostColor);
 
         TextMenu.Item hitboxColor = ColorCustomization.CreateChangeColorItem(() => ghostSettings.HitboxColor, value => ghostSettings.HitboxColor = value, "Hitbox Color".ToDialogText(), menu, inGame, GhostModuleSettings.defaultHitboxColor);
         page.Add(hitboxColor);
@@ -457,16 +470,16 @@ internal class EnumerableSliderExt<T> : TextMenuExt.EnumerableSlider<T> {
 }
 
 internal static class ColorCustomization {
-    public static TextMenu.Item CreateChangeColorItem(Func<Color> getter, Action<Color> setter, string name, TextMenu textMenu, bool inGame, Color defaultValue) {
-        TextMenu.Item item = new ButtonColorExt(name, getter, inGame).Pressed(inGame ? () => { }
-        :
-            () => {
-                OuiModOptionStringHexColor.DefaultString = ColorToHex(defaultValue);
-                Audio.Play("event:/ui/main/savefile_rename_start");
-                textMenu.SceneAs<Overworld>().Goto<OuiModOptionStringHexColor>()
-                    .Init<OuiModOptions>(ColorToHex(getter()),
-                        value => setter(HexToColor(value, getter())), 9);
-            });
+    public static ButtonColorExt CreateChangeColorItem(Func<Color> getter, Action<Color> setter, string name, TextMenu textMenu, bool inGame, Color defaultValue) {
+        ButtonColorExt item = new ButtonColorExt(name, getter, inGame);
+        item.OnPressed = inGame ? () => { }
+        : () => {
+            OuiModOptionStringHexColor.DefaultString = defaultValue.ColorToHex();
+            Audio.Play("event:/ui/main/savefile_rename_start");
+            textMenu.SceneAs<Overworld>().Goto<OuiModOptionStringHexColor>()
+                .Init<OuiModOptions>(getter().ColorToHex(),
+                    value => setter(value.HexToColor(getter())), 9);
+        };
         return item;
     }
 }
@@ -504,6 +517,10 @@ public class ButtonColorExt : TextMenu.Button, IItemExt {
         return base.LeftWidth() * Scale.X;
     }
 
+    public void SetDisabled(bool value) {
+        Disabled = InGame || value;
+    }
+
 #pragma warning disable CS8625
     public ButtonColorExt(string label, Func<Color> cubecolorGetter, bool inGame = false)
 #pragma warning restore CS8625
@@ -511,14 +528,18 @@ public class ButtonColorExt : TextMenu.Button, IItemExt {
         CubeColorGetter = cubecolorGetter;
         Icon = "";
         name = label;
-        InGame = inGame;
+        Disabled = InGame = inGame;
     }
 
     public override void Render(Vector2 position, bool highlighted) {
-        Label = name + $": {ColorToHex(CubeColorGetter())}";
+        Label = name + $": {CubeColorGetter().ColorToHex()}";
         position += Offset;
         float num = Container.Alpha * Alpha;
-        Color color = (InGame ? (highlighted ? TextColorHighlightDisabled : TextColorDisabled) : (highlighted ? Container.HighlightColor : TextColor)) * num;
+        Color color = (
+                Disabled
+                    ? (highlighted ? TextColorHighlightDisabled : TextColorDisabled)
+                    : (highlighted ? Container.HighlightColor : TextColor)
+            ) * num;
         Color strokeColor = Color.Black * (num * num * num);
         bool flag = Container.InnerContent == TextMenu.InnerContentMode.TwoColumn && !AlwaysCenter;
         Vector2 textPosition = position + (flag ? Vector2.Zero : new Vector2(Container.Width * 0.5f, 0f));
@@ -554,8 +575,6 @@ public class ButtonNameExt : TextMenu.Button, IItemExt {
 
     public Vector2 Scale { get; set; } = Vector2.One;
 
-    public bool InGame;
-
     public override float Height() {
         return base.Height() * Scale.Y;
     }
@@ -571,13 +590,13 @@ public class ButtonNameExt : TextMenu.Button, IItemExt {
         NameGetter = nameGetter;
         Icon = "";
         Prefix = label;
-        InGame = inGame;
+        Disabled = inGame;
     }
 
     public override void Render(Vector2 position, bool highlighted) {
         position += Offset;
         float num = Container.Alpha * Alpha;
-        Color color = (InGame ? (highlighted ? TextColorHighlightDisabled : TextColorDisabled) : (highlighted ? Container.HighlightColor : TextColor)) * num;
+        Color color = (Disabled ? (highlighted ? TextColorHighlightDisabled : TextColorDisabled) : (highlighted ? Container.HighlightColor : TextColor)) * num;
         Color strokeColor = Color.Black * (num * num * num);
         bool flag = Container.InnerContent == TextMenu.InnerContentMode.TwoColumn && !AlwaysCenter;
         Vector2 textPosition = position + (flag ? Vector2.Zero : new Vector2(Container.Width * 0.5f, 0f));

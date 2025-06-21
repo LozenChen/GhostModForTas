@@ -1,8 +1,8 @@
 - Name: GhostModForTas
-  Version: 1.2.15
-  DLL: bin/Release/net7.0/GhostModForTas.dll
+  Version: 1.2.16
+  DLL: bin/Release/net8.0/GhostModForTas.dll
   Dependencies:
     - Name: Everest
-      Version: 1.5034
+      Version: 1.5577
     - Name: CelesteTAS
       Version: 3.45.0

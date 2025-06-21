@@ -73,6 +73,8 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public ShowInPauseMenuModes ShowInPauseMenuMode = ShowInPauseMenuModes.WhenNotInTas;
 
+    public Vector2 HudInfoPosition = new Vector2(280f, 20f);
+
     public Color HitboxColor = defaultHitboxColor;
 
     [YamlIgnore]
@@ -83,9 +85,17 @@ public class GhostModuleSettings : EverestModuleSettings {
     [YamlIgnore]
     public static readonly Color defaultHurtboxColor = new Color(0f, 1f, 0f, 0.2f);
 
-    public Vector2 HudInfoPosition = new Vector2(280f, 20f);
-
     public bool RandomizeGhostColors = true;
+
+    public Color GhostSpriteColor = defaultGhostSpriteColor;
+
+    [YamlIgnore]
+    public static readonly Color defaultGhostSpriteColor = new Color(1f, 1f, 1f, 1f);
+
+    public Color ComparerGhostSpriteColor = defaultComparerGhostSpriteColor;
+
+    [YamlIgnore]
+    public static readonly Color defaultComparerGhostSpriteColor = new Color(1f, 1f, 0f, 1f);
 
     public bool ShowGhostName = false;
 
