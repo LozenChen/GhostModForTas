@@ -4,7 +4,7 @@ using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Monocle;
 
-namespace Celeste.Mod.GhostModForTas.MultiGhost;
+namespace Celeste.Mod.GhostModForTas.Plugin;
 
 public class GhostNames : Component {
 

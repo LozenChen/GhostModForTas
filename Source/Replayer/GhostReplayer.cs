@@ -1,5 +1,5 @@
 using Celeste.Mod.GhostModForTas.Module;
-using Celeste.Mod.GhostModForTas.MultiGhost;
+using Celeste.Mod.GhostModForTas.Plugin;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Microsoft.Xna.Framework;
 using Monocle;
@@ -167,9 +167,9 @@ public class GhostReplayerEntity : Entity {
         ComparerGhost = Ghosts.FirstOrDefault(); // the fastest ghost to complete the level
         GhostCompare.ResetCompareTime();
         GhostReplayer.LockComparerGhost();
-        Add(new MultiGhost.GhostNames(this));
-        Add(colorManager = new MultiGhost.GhostColors(this));
-        Add(rankingList = new MultiGhost.GhostRankingList(this));
+        Add(new Plugin.GhostNames(this));
+        Add(colorManager = new Plugin.GhostColors(this));
+        Add(rankingList = new Plugin.GhostRankingList(this));
         colorManager.HandleTransition();
         ghostSettings.ComparerToggler = true;
     }

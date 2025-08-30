@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Celeste.Mod.GhostModForTas.MultiGhost;
+namespace Celeste.Mod.GhostModForTas.Plugin;
 
 public class GhostRankingList : Component {
 

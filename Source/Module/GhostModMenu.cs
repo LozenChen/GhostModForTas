@@ -1,5 +1,5 @@
 using Celeste.Mod.GhostModForTas.GhostEditor;
-using Celeste.Mod.GhostModForTas.MultiGhost;
+using Celeste.Mod.GhostModForTas.Plugin;
 using Celeste.Mod.GhostModForTas.Recorder;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
