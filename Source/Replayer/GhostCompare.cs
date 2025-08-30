@@ -174,17 +174,41 @@ internal static class GhostCompare {
         }
     }
 
-    internal static string FormatTime(long time, bool ignorePlus = false, TimeFormats? format = null) {
+    internal static string FormatTime(long time, bool ignorePlus = false, string? format = null) {
         string sign = time > 0 ? (ignorePlus ? "" : "+") : time < 0 ? "-" : " ";
         string sign2 = sign == " " ? "" : sign;
         time = Math.Abs(time);
-        TimeSpan timeSpan = TimeSpan.FromTicks(time);
-        return (format ?? ghostSettings.TimeFormat) switch {
-            TimeFormats.SecondAndFrame => $"{sign}{timeSpan.VeryShortGameplayFormat()}({sign2}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)}f)",
-            TimeFormats.SecondOnly => $"{sign}{timeSpan.VeryShortGameplayFormat()}{(timeSpan.TotalMinutes >= 1.0 ? "" : "s")}",
-            TimeFormats.FrameOnly => $"{sign}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)}f",
-            _ => "",
-        };
+        TimeSpan timeSpan;
+        if (format is null) {
+            if (ghostSettings.IsIGT) {
+                timeSpan = TimeSpan.FromTicks(time);
+            }
+            else {
+                long frames = time / 170000L;
+                timeSpan = TimeSpanFix.Net8FromSeconds(frames / 60.0f);
+            }
+            return ghostSettings.TimeFormat switch {
+                TimeFormats.SecondAndFrame => $"{sign}{timeSpan.VeryShortGameplayFormat()}({sign2}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)}f)",
+                TimeFormats.SecondOnly => $"{sign}{timeSpan.VeryShortGameplayFormat()}{(timeSpan.TotalMinutes >= 1.0 ? "" : "s")}",
+                TimeFormats.FrameOnly => $"{sign}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)}f",
+                _ => "",
+            };
+        }
+        else {
+            if (format == "TotalSecondsAndFramesRTA") {
+                long frames = time / 170000L;
+                timeSpan = TimeSpanFix.Net8FromSeconds(frames / 60.0f);
+            }
+            else {
+                timeSpan = TimeSpan.FromTicks(time);
+            }
+            return format switch {
+                "TotalSecondsAndFrames" or "TotalSecondsAndFramesRTA" =>
+                $"{sign}{timeSpan.VeryShortGameplayFormat()}({sign2}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)})", // note there's no "f"
+                "FrameOnly" => $"{sign}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)}f",
+                _ => "",
+            };
+        }
     }
 
     public static string VeryShortGameplayFormat(this TimeSpan time) {

@@ -33,7 +33,11 @@ internal static class GhostRecorder {
     internal static DynamicData dyn_data;
 
     public static long RTASessionTime {
-        get => (dyn_data?.TryGet(rtaCounterName, out long val) ?? false) ? val : 0L;
+        get {
+            return (dyn_data?.TryGet(rtaCounterName, out long val) ?? false) ? val : 0L;
+            // tas also has a RTA timer, but that only works when tas is running
+            // we expect our timer to work even when tas is not running
+        }
         set {
             if (Engine.Scene is Level) {
                 dyn_data?.Set(rtaCounterName, value);

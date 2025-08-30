@@ -1,7 +1,7 @@
-using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +17,7 @@ internal static class ImprovementTracker {
 
     public static bool Tracking => State == States.Tracking;
 
-    public static List<RoomInfo> Diffs = new List<RoomInfo>();
+    public static List<RoomInfo> Diffs = new();
 
     public static Dictionary<string, int> RevisitCount = new();
 
@@ -25,9 +25,15 @@ internal static class ImprovementTracker {
 
     public static string Error = "Not Started";
 
+    public static long TotalTime;
+
+    public static long TotalGhostTime;
+
     public static string SuccessOutput;
 
     public static string LastSuccessOutput => SuccessOutput ?? Error;
+
+    public static event Action<string> OnOutput;
 
 
     public struct RoomInfo {
@@ -39,7 +45,7 @@ internal static class ImprovementTracker {
         }
 
         public string FormatTimeAndLevel() {
-            return GhostCompare.FormatTime(diffRoomTime, false, TimeFormats.FrameOnly) + " " + FormatLevel();
+            return GhostCompare.FormatTime(diffRoomTime, false, "FrameOnly") + " " + FormatLevel();
         }
 
         public string FormatLevel() {
@@ -50,7 +56,7 @@ internal static class ImprovementTracker {
         }
     }
 
-    public static void Start(Level level) {
+    internal static void Start(Level level) {
         State = States.Tracking;
         Diffs = new();
         IsIGT = ghostSettings.IsIGT;
@@ -75,32 +81,28 @@ internal static class ImprovementTracker {
         }
     }
 
-    public static void SetTrackLost(string error) {
+    internal static void SetTrackLost(string error) {
         if (Tracking) {
             State = States.TrackLost;
             Error = $"Track Lost ({error})";
         }
     }
 
-    public static void OnConfigChange() {
+    internal static void OnConfigChange() {
         SetTrackLost("RTA / IGT mode changed");
     }
-    public static void Add(long diffRoomTime, LevelCount lc) {
+    internal static void Add(long diffRoomTime, LevelCount lc) {
         if (Tracking && diffRoomTime != 0) {
             Diffs.Add(new RoomInfo(diffRoomTime, lc));
         }
     }
 
-    public static void Finish(Dictionary<string, int> dict) {
+    internal static void Finish(Dictionary<string, int> dict) {
         if (Tracking) {
             RevisitCount = dict;
-            Format();
-            if (Diffs.IsNotEmpty()) {
-                Log("\n\n" + SuccessOutput + "\n");
-                // add enough blank lines so users won't copy-paste irrelevant text
-            } else {
-                Log(SuccessOutput);
-            }
+            TotalTime = GhostCompare.CurrentTime;
+            TotalGhostTime = GhostCompare.GhostTime;
+            Output();
         }
         else if (State == States.TrackLost){
             Log(Error);
@@ -108,18 +110,33 @@ internal static class ImprovementTracker {
         State = States.Finished;
     }
 
-    public static void Format() {
+    private static void Output() {
+        Format();
+        if (Diffs.IsNotEmpty()) {
+            Log("\n\n" + SuccessOutput + "\n");
+            // add enough blank lines so users won't copy-paste irrelevant text
+        } else {
+            Log(SuccessOutput);
+        }
+        OnOutput?.Invoke(SuccessOutput);
+    }
+
+    private static void Format() {
         StringBuilder sb = new();
-        long currentTime = GhostCompare.CurrentTime;
-        long ghostTime = GhostCompare.GhostTime;
-        long diffTotal = currentTime - ghostTime;
-        sb.Append(diffTotal == 0 ? "-0f" : GhostCompare.FormatTime(diffTotal, false, TimeFormats.FrameOnly));
+        long diffTotal = TotalTime - TotalGhostTime;
+        sb.Append(diffTotal == 0 ? "-0f" : GhostCompare.FormatTime(diffTotal, false, "FrameOnly"));
         if (!IsIGT) {
             sb.Append(" RTA");
         }
         sb.Append(' ').Append(MapName);
-        sb.Append(" (").Append(RemoveF(GhostCompare.FormatTime(ghostTime, true, TimeFormats.SecondAndFrame)))
-          .Append(" -> ").Append(RemoveF(GhostCompare.FormatTime(currentTime, true, TimeFormats.SecondAndFrame))).Append(')');
+        if (IsIGT) {
+            sb.Append(" (").Append(GhostCompare.FormatTime(TotalGhostTime, true, "TotalSecondsAndFrames"))
+                  .Append(" -> ").Append(GhostCompare.FormatTime(TotalTime, true, "TotalSecondsAndFrames")).Append(')');
+        }
+        else {
+            sb.Append(" (").Append(GhostCompare.FormatTime(TotalGhostTime, true, "TotalSecondsAndFramesRTA"))
+                  .Append(" -> ").Append(GhostCompare.FormatTime(TotalTime, true, "TotalSecondsAndFramesRTA")).Append(')');
+        }
         if (Diffs.Count == 1) {
             sb.Append('\n').Append(Diffs.First().FormatLevel());
         }
@@ -129,14 +146,9 @@ internal static class ImprovementTracker {
             }
         }
         SuccessOutput = sb.ToString();
-
-        static string RemoveF(string str) {
-            return str.Remove(str.Length - 2, 1);
-            // 2:48.589(9917f) -> 2:48.589(9917)
-        }
     }
 
-    public static void Log(string str) {
+    private static void Log(string str) {
         Logger.Log(LogLevel.Verbose, "GhostModForTas", nameof(ImprovementTracker) + ": " + str);
     }
 }
