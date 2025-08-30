@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TAS;
 
 namespace Celeste.Mod.GhostModForTas.Plugin;
 internal static class ImprovementTracker {
@@ -103,6 +104,15 @@ internal static class ImprovementTracker {
             TotalTime = GhostCompare.CurrentTime;
             TotalGhostTime = GhostCompare.GhostTime;
             Output();
+
+            /*
+             * tas's RealTime command is unstable currently, we do it later
+            if (!Manager.Running) {
+                Output();
+            }
+            // else, wait OnTasDiableRun()
+            // and inside these function, we do something to sync with tas
+            */
         }
         else if (State == States.TrackLost){
             Log(Error);
