@@ -97,7 +97,7 @@ internal static class GhostModMenu {
         List<TextMenu.Item> page = new List<TextMenu.Item>();
         page.Add(new HLine(Color.Gray, 0f));
         page.Add(new TextMenuExt.EnumerableSlider<TimeFormats>("Time Format".ToDialogText(), CreateTimeFormatOptions(), ghostSettings.TimeFormat).Change(value => { ghostSettings.TimeFormat = value; GhostRankingList.ConfigChanged = true; }));
-        page.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => ghostSettings.IsIGT = value));
+        page.Add(new TextMenuExt.EnumerableSlider<bool>("Timer Mode".ToDialogText(), CreateRTA_IGTOptions(), ghostSettings.IsIGT).Change(value => { ghostSettings.IsIGT = value; ImprovementTracker.OnConfigChange(); }));
 
         page.Add(new HLine(Color.Gray, 0f));
 

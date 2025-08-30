@@ -1,6 +1,8 @@
 using Celeste.Mod.GhostModForTas.ModInterop;
 using Celeste.Mod.GhostModForTas.Module;
+using Celeste.Mod.GhostModForTas.Plugin;
 using Celeste.Mod.GhostModForTas.Recorder;
+using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Utils;
 using Microsoft.Xna.Framework;
 using Monocle;
@@ -32,12 +34,13 @@ internal static class GhostCompare {
         On.Celeste.Level.Render -= LevelOnRender;
     }
 
-    public static void UpdateRoomTime(Level level, long time) {
+    public static void UpdateRoomTime(Level level, long time, LevelCount lc) {
         LastGhostTime = GhostTime;
         GhostTime = time;
         LastCurrentTime = CurrentTime;
         CurrentTime = ghostSettings.IsIGT ? level.Session.Time : GhostRecorder.RTASessionTime;
         Complaint = ComplaintMode.OK;
+        ImprovementTracker.Add(diffRoomTime: CurrentTime - GhostTime - LastCurrentTime + LastGhostTime, lc);
     }
 
     public static void ResetCompareTime() {
@@ -46,6 +49,7 @@ internal static class GhostCompare {
         CurrentTime = 0;
         LastCurrentTime = 0;
         Complaint = ComplaintMode.OK;
+        ImprovementTracker.SetTrackLost("Ghost Replayer is reset");
     }
 
     private static void LevelOnRender(On.Celeste.Level.orig_Render orig, Level self) {
@@ -170,15 +174,15 @@ internal static class GhostCompare {
         }
     }
 
-    internal static string FormatTime(long time, bool ignorePlus = false) {
+    internal static string FormatTime(long time, bool ignorePlus = false, TimeFormats? format = null) {
         string sign = time > 0 ? (ignorePlus ? "" : "+") : time < 0 ? "-" : " ";
         string sign2 = sign == " " ? "" : sign;
         time = Math.Abs(time);
         TimeSpan timeSpan = TimeSpan.FromTicks(time);
-        return ghostSettings.TimeFormat switch {
-            TimeFormats.SecondAndFrame => $"{sign}{timeSpan.VeryShortGameplayFormat()}({sign2}{time / TimeSpan.FromSeconds(Engine.RawDeltaTime).Ticks}f)",
+        return (format ?? ghostSettings.TimeFormat) switch {
+            TimeFormats.SecondAndFrame => $"{sign}{timeSpan.VeryShortGameplayFormat()}({sign2}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)}f)",
             TimeFormats.SecondOnly => $"{sign}{timeSpan.VeryShortGameplayFormat()}{(timeSpan.TotalMinutes >= 1.0 ? "" : "s")}",
-            TimeFormats.FrameOnly => $"{sign}{time / TimeSpan.FromSeconds(Engine.RawDeltaTime).Ticks}f",
+            TimeFormats.FrameOnly => $"{sign}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)}f",
             _ => "",
         };
     }
@@ -206,8 +210,25 @@ internal static class GhostCompare {
 
     public enum ComplaintMode { GhostChange, NoGhost, OK }
 
-    public static ComplaintMode Complaint = ComplaintMode.OK;
+    private static ComplaintMode backing_Complaint = ComplaintMode.OK;
 
+    public static ComplaintMode Complaint {
+        get => backing_Complaint;
+        private set {
+            backing_Complaint = value;
+        }
+    }
+
+    public static void Complain(ComplaintMode mode) {
+        Complaint = mode;
+        if (mode != ComplaintMode.OK) {
+            ImprovementTracker.SetTrackLost(Complaint switch {
+                ComplaintMode.GhostChange => "Comparer Ghost changes",
+                ComplaintMode.NoGhost => "No Ghost in some room",
+                _ => ""
+            });
+        }
+    }
     public static string ComplaintText => Complaint switch {
         ComplaintMode.GhostChange => "Comparer Ghost changes",
         ComplaintMode.NoGhost => "No Ghost in this room",

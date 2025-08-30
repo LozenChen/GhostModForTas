@@ -170,6 +170,7 @@ public class GhostReplayerEntity : Entity {
         Add(new Plugin.GhostNames(this));
         Add(colorManager = new Plugin.GhostColors(this));
         Add(rankingList = new Plugin.GhostRankingList(this));
+        ImprovementTracker.Start(level);
         colorManager.HandleTransition();
         ghostSettings.ComparerToggler = true;
     }
@@ -219,6 +220,7 @@ public class GhostReplayerEntity : Entity {
             RevisitCount.Add(lc.Level, 1);
         }
         HandleTransitionCore(level, lc);
+        ImprovementTracker.Finish(RevisitCount);
     }
 
     public void HandleTransition(Level level) {
@@ -237,6 +239,7 @@ public class GhostReplayerEntity : Entity {
     }
 
     public void HandleTransitionCore(Level level, LevelCount lc) {
+        LevelCount from = new LevelCount(RoomName, RevisitCount[RoomName]);
         string target = lc.Level;
         if (ForceSync) {
             foreach (Ghost ghost in Ghosts) {
@@ -249,13 +252,13 @@ public class GhostReplayerEntity : Entity {
             List<Ghost> list = (LockComparer && ComparerGhost is not null) ? new List<Ghost> { ComparerGhost } : Ghosts;
 
             if (list.Where(x => !x.NotSynced).FirstOrDefault() is { } firstGhost) {
-                GhostCompare.UpdateRoomTime(level, firstGhost.LastSessionTime);
+                GhostCompare.UpdateRoomTime(level, firstGhost.LastSessionTime, from);
                 if (ComparerGhost != firstGhost) {
-                    GhostCompare.Complaint = GhostCompare.ComplaintMode.GhostChange;
+                    GhostCompare.Complain(GhostCompare.ComplaintMode.GhostChange);
                     ComparerGhost = firstGhost;
                 }
             } else {
-                GhostCompare.Complaint = GhostCompare.ComplaintMode.NoGhost;
+                GhostCompare.Complain(GhostCompare.ComplaintMode.NoGhost);
             }
         } else {
             bool found = false;
@@ -264,11 +267,11 @@ public class GhostReplayerEntity : Entity {
 
             foreach (Ghost ghost in list) {
                 foreach (GhostData data in ghost.AllRoomData) {
-                    if (data.LevelCount == new LevelCount(RoomName, RevisitCount[RoomName]) && data.TargetCount.Level == target) {
+                    if (data.LevelCount == from && data.TargetCount.Level == target) {
                         long time = data.GetSessionTime();
-                        GhostCompare.UpdateRoomTime(level, time);
+                        GhostCompare.UpdateRoomTime(level, time, from);
                         if (ghost != ComparerGhost) {
-                            GhostCompare.Complaint = GhostCompare.ComplaintMode.GhostChange;
+                            GhostCompare.Complain(GhostCompare.ComplaintMode.GhostChange);
                             ComparerGhost = ghost;
                         }
                         found = true;
@@ -280,7 +283,7 @@ public class GhostReplayerEntity : Entity {
                 }
             }
             if (!found) {
-                GhostCompare.Complaint = GhostCompare.ComplaintMode.NoGhost;
+                GhostCompare.Complain(GhostCompare.ComplaintMode.NoGhost);
             }
 
         }
