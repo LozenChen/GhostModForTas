@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.ModInterop;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
 using Celeste.Mod.GhostModForTas.Replayer;
 using Celeste.Mod.GhostModForTas.Utils;
@@ -128,6 +129,7 @@ internal static class ImprovementTracker {
         } else {
             Log(SuccessOutput);
         }
+        TasImports.PopupMessageToStudio("GhostModForTas", SuccessOutput);
         OnOutput?.Invoke(SuccessOutput);
     }
 

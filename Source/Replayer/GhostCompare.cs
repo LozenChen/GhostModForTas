@@ -187,6 +187,7 @@ internal static class GhostCompare {
                 long frames = time / 170000L;
                 timeSpan = TimeSpanFix.Net8FromSeconds(frames / 60.0f);
             }
+            // TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime) = 170000L;
             return ghostSettings.TimeFormat switch {
                 TimeFormats.SecondAndFrame => $"{sign}{timeSpan.VeryShortGameplayFormat()}({sign2}{time / TimeSpanFix.SecondsToTicks(Engine.RawDeltaTime)}f)",
                 TimeFormats.SecondOnly => $"{sign}{timeSpan.VeryShortGameplayFormat()}{(timeSpan.TotalMinutes >= 1.0 ? "" : "s")}",

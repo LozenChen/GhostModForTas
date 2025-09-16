@@ -17,6 +17,10 @@ internal static class TasImports {
 
     internal static bool Manager_Running => __CelesteTasImports.IsTasActive();
 
+    internal static void PopupMessageToStudio(string title, string text) {
+        __CelesteTasImports.PopupMessageToStudio?.Invoke(title, text);
+    }
+
     internal static void AbortTas(string message) {
         TAS.GlobalVariables.AbortTas(message);
     }
@@ -32,6 +36,7 @@ internal static class __CelesteTasImports {
     public delegate void AddSettingsRestoreHandlerDelegate(EverestModule module, (Func<object> Backup, Action<object> Restore)? handler);
     public delegate void RemoveSettingsRestoreHandlerDelegate(EverestModule module);
     public delegate void DrawAccurateLineDelegate(Vector2 from, Vector2 to, Color color);
+    public delegate void PopupMessageToStudioDelegate(string title, string text);
 
     /// Checks if a TAS is active (i.e. running / paused / etc.)
     public static Func<bool> IsTasActive = null!;
@@ -48,5 +53,7 @@ internal static class __CelesteTasImports {
 
     /// De-registers a previously registered handler for the module
     public static RemoveSettingsRestoreHandlerDelegate RemoveSettingsRestoreHandler = null!;
+
+    public static PopupMessageToStudioDelegate PopupMessageToStudio = null!;
 
 }
