@@ -333,6 +333,8 @@ public class GhostRecorderEntity : Entity {
 
     public static bool updateHair = true; // some OoO issue
 
+    public int LastFileLine = -1;
+
     public GhostRecorderEntity(Session session)
         : base() {
         Depth = -10000000;
@@ -341,6 +343,7 @@ public class GhostRecorderEntity : Entity {
         Data = new GhostData(session);
         lastFrameHudInfo = "";
         Logger.Log("GhostModForTas", "Recorder added");
+        LastFileLine = TasImports.GetTasFileLine() - 1;
     }
 
     public void WriteData() {
@@ -353,6 +356,21 @@ public class GhostRecorderEntity : Entity {
         Data.TargetCount.Count = RevisitCount.TryGetValue(Data.TargetCount.Level, out int targetCount) ? targetCount + 1 : 1;
         Data.SessionTime = Data.Frames.LastOrDefault().ChunkData.Time;
         Data.RTASessionTime = Data.Frames.LastOrDefault().ChunkData.RTATime;
+        Data.IsTas = false;
+        if (TasImports.Manager_Running) {
+            int currentFileLine = TasImports.GetTasFileLine();
+            if (LastFileLine > 0 && currentFileLine > LastFileLine) {
+                Data.TasString = TasImports.ReadFile(LastFileLine + 1, currentFileLine);
+                Data.IsTas = Data.TasString.IsNotNullOrEmpty();
+            } else {
+                Data.TasString = "";
+            }
+            LastFileLine = currentFileLine;
+        }
+        else {
+            LastFileLine = -1;
+            Data.TasString = "";
+        }
         Data.Write();
     }
 

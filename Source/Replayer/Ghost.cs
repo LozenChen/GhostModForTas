@@ -16,17 +16,20 @@ public class Ghost : Actor {
     public long LastSessionTime;
 
     public GhostData Data;
+    public GhostData LastData;
     public List<GhostData> AllRoomData;
     private int currentRoomByOrder;
     public int CurrentRoomByOrder {
         get => currentRoomByOrder;
         set {
+            LastData = AllRoomData[currentRoomByOrder];
             currentRoomByOrder = value;
             if (currentRoomByOrder < AllRoomData.Count) {
                 Data = AllRoomData[currentRoomByOrder];
             }
         }
     }
+
     public int FrameIndex;
     public GhostChunkData Frame => Data[FrameIndex].ChunkData;
 
@@ -76,7 +79,8 @@ public class Ghost : Actor {
         Tag = Tags.Global;
         Active = false;
         AllRoomData = allData;
-        CurrentRoomByOrder = 0;
+        currentRoomByOrder = 0;
+        Data = LastData = AllRoomData[0];
         Done = false;
         Depth = 1;
         SpriteMode = ghostSettings.GhostSpriteMode;

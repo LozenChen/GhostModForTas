@@ -34,13 +34,13 @@ internal static class GhostCompare {
         On.Celeste.Level.Render -= LevelOnRender;
     }
 
-    public static void UpdateRoomTime(Level level, long time, LevelCount lc) {
+    public static void UpdateRoomTime(Level level, long time, LevelCount lc, bool fileDiff = false) {
         LastGhostTime = GhostTime;
         GhostTime = time;
         LastCurrentTime = CurrentTime;
         CurrentTime = ghostSettings.IsIGT ? level.Session.Time : GhostRecorder.RTASessionTime;
         Complaint = ComplaintMode.OK;
-        ImprovementTracker.Add(diffRoomTime: CurrentTime - GhostTime - LastCurrentTime + LastGhostTime, lc);
+        ImprovementTracker.Add(diffRoomTime: CurrentTime - GhostTime - LastCurrentTime + LastGhostTime, lc, fileDiff);
     }
 
     public static void ResetCompareTime() {

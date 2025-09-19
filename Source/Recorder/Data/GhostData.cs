@@ -15,7 +15,7 @@ public class GhostData {
     public readonly static string Magic = "everest-ghost\r\n";
     public readonly static char[] MagicChars = Magic.ToCharArray();
 
-    public readonly static int Version = 2;
+    public readonly static int Version = 3;
     // increase this int when we change the data structure in some future update
     public readonly static string OshiroPostfix = ".oshiro";
 
@@ -156,6 +156,8 @@ public class GhostData {
 
     public Guid Run;
     public string CustomInfoTemplate;
+    public bool IsTas;
+    public string TasString;
 
     protected string _FilePath;
 
@@ -291,7 +293,9 @@ public class GhostData {
         IsCompleted = reader.ReadBoolean();
 
         Run = new Guid(reader.ReadBytes(16));
-        CustomInfoTemplate = reader.ReadString();
+        CustomInfoTemplate = reader.ReadNullTerminatedString();
+        IsTas = reader.ReadBoolean();
+        TasString = reader.ReadNullTerminatedString();
 
         int count = reader.ReadInt32();
         if (count > 1E6) {
@@ -357,6 +361,8 @@ public class GhostData {
 
         writer.Write(Run.ToByteArray());
         writer.WriteNullTerminatedString(CustomInfoTemplate);
+        writer.Write(IsTas);
+        writer.WriteNullTerminatedString(TasString);
         writer.Write(Frames.Count);
         writer.Write('\r');
         writer.Write('\n');

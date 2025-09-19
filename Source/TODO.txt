@@ -1,0 +1,2 @@
+[Done] 1. Data should contain TAS string of each room, so ImprovementTracker can detect a -0f change
+2. Data be folder based, and add metadata file to organize them

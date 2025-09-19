@@ -12,6 +12,8 @@ internal static class ImprovementTracker {
 
     public static bool LogToStudio => ghostSettings.ImprovementLogToCelesteStudio;
 
+    public const bool Include_0f_Change = true;
+
     public static bool IsIGT;
 
     public enum States { Tracking, TrackLost, Finished }
@@ -48,7 +50,7 @@ internal static class ImprovementTracker {
         }
 
         public string FormatTimeAndLevel() {
-            return GhostCompare.FormatTime(diffRoomTime, false, "FrameOnly") + " " + FormatLevel();
+            return (diffRoomTime == 0u ? "-0f" : GhostCompare.FormatTime(diffRoomTime, false, "FrameOnly")) + " " + FormatLevel();
         }
 
         public string FormatLevel() {
@@ -94,8 +96,11 @@ internal static class ImprovementTracker {
     internal static void OnConfigChange() {
         SetTrackLost("RTA / IGT mode changed");
     }
-    internal static void Add(long diffRoomTime, LevelCount lc) {
-        if (Tracking && diffRoomTime != 0) {
+    internal static void Add(long diffRoomTime, LevelCount lc, bool fileDiff) {
+        if (!Tracking) {
+            return;
+        }
+        if (diffRoomTime != 0u || (Include_0f_Change && fileDiff)) {
             Diffs.Add(new RoomInfo(diffRoomTime, lc));
         }
     }

@@ -1,6 +1,11 @@
 using Microsoft.Xna.Framework;
 using MonoMod.ModInterop;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using TAS;
 using TAS.EverestInterop;
 
 namespace Celeste.Mod.GhostModForTas.ModInterop;
@@ -24,6 +29,25 @@ internal static class TasImports {
     internal static void AbortTas(string message) {
         TAS.GlobalVariables.AbortTas(message);
     }
+
+    internal static string ReadFile(int startLine, int endLine) {
+        if (!Manager_Running) {
+            return "";
+        }
+        string path = Manager.Controller.FilePath;
+        try {
+            if (!File.Exists(path)) {
+                return "";
+            }
+
+            return string.Join("\n", File.ReadLines(path).Skip(startLine - 1).Take(endLine - startLine + 1));
+        } catch (Exception e) {
+            Logger.Log(LogLevel.Error, "GhostModForTas", e.ToString());
+            return "";
+        }
+    }
+
+    internal static int GetTasFileLine() => Manager_Running ? (Manager.Controller.Current?.FileLine ?? -1) : -1;
 
     [Initialize]
     private static void Initialize() {

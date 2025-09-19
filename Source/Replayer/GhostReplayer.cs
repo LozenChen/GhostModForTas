@@ -1,3 +1,4 @@
+using Celeste.Mod.GhostModForTas.ModInterop;
 using Celeste.Mod.GhostModForTas.Module;
 using Celeste.Mod.GhostModForTas.Plugin;
 using Celeste.Mod.GhostModForTas.Recorder.Data;
@@ -121,6 +122,7 @@ public class GhostReplayerEntity : Entity {
     public int waitingFrames = 0;
 
     public bool LockComparer = false;
+    public int LastFileLine = -1;
     public GhostReplayerEntity(Level level)
         : base(Vector2.Zero) {
         ForceSync = ghostSettings.ForceSync;
@@ -173,6 +175,7 @@ public class GhostReplayerEntity : Entity {
         ImprovementTracker.Start(level);
         colorManager.HandleTransition();
         ghostSettings.ComparerToggler = true;
+        LastFileLine = TasImports.GetTasFileLine() - 1;
     }
 
     private GhostColors colorManager;
@@ -241,6 +244,18 @@ public class GhostReplayerEntity : Entity {
     public void HandleTransitionCore(Level level, LevelCount lc) {
         LevelCount from = new LevelCount(RoomName, RevisitCount[RoomName]);
         string target = lc.Level;
+
+        string tasString = "";
+        if (TasImports.Manager_Running) {
+            int currentFileLine = TasImports.GetTasFileLine();
+            if (LastFileLine > 0 && currentFileLine > LastFileLine) {
+                tasString = TasImports.ReadFile(LastFileLine + 1, currentFileLine);
+            }
+            LastFileLine = currentFileLine;
+        } else {
+            LastFileLine = -1;
+        }
+
         if (ForceSync) {
             foreach (Ghost ghost in Ghosts) {
                 ghost.Sync(lc);
@@ -252,7 +267,8 @@ public class GhostReplayerEntity : Entity {
             List<Ghost> list = (LockComparer && ComparerGhost is not null) ? new List<Ghost> { ComparerGhost } : Ghosts;
 
             if (list.Where(x => !x.NotSynced).FirstOrDefault() is { } firstGhost) {
-                GhostCompare.UpdateRoomTime(level, firstGhost.LastSessionTime, from);
+                bool fileDiff = firstGhost.LastData.IsTas && tasString != "" && tasString != firstGhost.LastData.TasString;
+                GhostCompare.UpdateRoomTime(level, firstGhost.LastSessionTime, from, fileDiff);
                 if (ComparerGhost != firstGhost) {
                     GhostCompare.Complain(GhostCompare.ComplaintMode.GhostChange);
                     ComparerGhost = firstGhost;
@@ -269,7 +285,8 @@ public class GhostReplayerEntity : Entity {
                 foreach (GhostData data in ghost.AllRoomData) {
                     if (data.LevelCount == from && data.TargetCount.Level == target) {
                         long time = data.GetSessionTime();
-                        GhostCompare.UpdateRoomTime(level, time, from);
+                        bool fileDiff = data.IsTas && tasString != "" && tasString != data.TasString;
+                        GhostCompare.UpdateRoomTime(level, time, from, fileDiff);
                         if (ghost != ComparerGhost) {
                             GhostCompare.Complain(GhostCompare.ComplaintMode.GhostChange);
                             ComparerGhost = ghost;
