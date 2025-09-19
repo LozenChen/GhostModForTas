@@ -103,6 +103,8 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     public TimeFormats TimeFormat = TimeFormats.SecondAndFrame;
 
+    public bool ImprovementLogToCelesteStudio = true;
+
 
     [SettingName("GHOST_MOD_FOR_TAS_MAIN_SWITCH_HOTKEY")]
     [SettingSubHeader("GHOST_MOD_FOR_TAS_HOTKEY_DESCRIPTION")]
@@ -171,10 +173,10 @@ public class GhostModuleSettings : EverestModuleSettings {
         return changed;
     }
 
-    private static MethodInfo method = null;
+    private static MethodInfo refreshMethod = null;
 
     private static void Refresh(string text) {
-        method.Invoke(null, new object[] { text });
+        refreshMethod.Invoke(null, new object[] { text });
     }
 
     public void UpdateStateText() {
@@ -189,7 +191,7 @@ public class GhostModuleSettings : EverestModuleSettings {
 
     [Initialize]
     private static void Initialize() {
-        method = ModUtils.GetType("TASHelper", "Celeste.Mod.TASHelper.Entities.HotkeyWatcher")?.GetMethodInfo("Refresh") ?? typeof(GhostHotkeyWatcher).GetMethodInfo("Refresh");
+        refreshMethod = ModUtils.GetType("TASHelper", "Celeste.Mod.TASHelper.Entities.HotkeyWatcher")?.GetMethodInfo("Refresh") ?? typeof(GhostHotkeyWatcher).GetMethodInfo("Refresh");
     }
 
     [Monocle.Command("ghost_record", "[GhostModForTas] Switch to RECORD mode")]

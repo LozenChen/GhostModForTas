@@ -331,8 +331,6 @@ public class GhostRecorderEntity : Entity {
 
     public Dictionary<string, int> RevisitCount;
 
-    public static string HudInfo;
-
     public static bool updateHair = true; // some OoO issue
 
     public GhostRecorderEntity(Session session)

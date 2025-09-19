@@ -19,7 +19,6 @@ namespace Celeste.Mod.GhostModForTas.Module;
 
 internal static class GhostModMenu {
 
-
     private static readonly MethodInfo CreateKeyboardConfigUi = typeof(EverestModule).GetMethodInfo("CreateKeyboardConfigUI");
     private static readonly MethodInfo CreateButtonConfigUI = typeof(EverestModule).GetMethodInfo("CreateButtonConfigUI");
     internal static string ToTASDialogText(this string input) => Dialog.Clean("TAS_" + input.Replace(" ", "_"));
@@ -120,6 +119,7 @@ internal static class GhostModMenu {
         page.Add(new TextMenuExt.EnumerableSlider<bool>("Comparer Style".ToDialogText(), CreateComparerStyleOptions(), ghostSettings.CompareStyleIsModern).Change(value => ghostSettings.CompareStyleIsModern = value));
         page.Add(new TextMenuExt.EnumerableSlider<Alignments>("Comparer Alignment".ToDialogText(), CreateComparerAlignmentsOptions(), ghostSettings.ComparerAlignment).Change(value => ghostSettings.ComparerAlignment = value));
         page.Add(new TextMenuExt.IntSlider("Comparer Alpha".ToDialogText(), 1, 10, ghostSettings.ComparerOpacity).Change(value => { ghostSettings.ComparerOpacity = value; ghostSettings.ComparerAlpha = value / 10f; }));
+        page.Add(new TextMenu.OnOff("Improvement Log To Celeste Studio".ToDialogText(), ghostSettings.ImprovementLogToCelesteStudio).Change(value => { ghostSettings.ImprovementLogToCelesteStudio = value;}));
 
         page.Add(new HLine(Color.Gray, 0f));
 

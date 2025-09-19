@@ -61,3 +61,4 @@ GHOST_MOD_FOR_TAS_GHOST_FILE_EDITOR_INGAME=             这会使你丢失当前
 GHOST_MOD_FOR_TAS_ALWAYS=                               总是
 GHOST_MOD_FOR_TAS_WHEN_NOT_IN_TAS=                      不在 TAS 时
 GHOST_MOD_FOR_TAS_NEVER=                                从不
+GHOST_MOD_FOR_TAS_IMPROVEMENT_LOG_TO_CELESTE_STUDIO=    将 TAS 优化日志 输出到 Celeste Studio            

@@ -6,10 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TAS;
 
 namespace Celeste.Mod.GhostModForTas.Plugin;
 internal static class ImprovementTracker {
+
+    public static bool LogToStudio => ghostSettings.ImprovementLogToCelesteStudio;
 
     public static bool IsIGT;
 
@@ -129,7 +130,9 @@ internal static class ImprovementTracker {
         } else {
             Log(SuccessOutput);
         }
-        TasImports.PopupMessageToStudio("GhostModForTas", SuccessOutput);
+        if (LogToStudio && TasImports.Manager_Running) {
+            TasImports.PopupMessageToStudio("GhostModForTas", SuccessOutput);
+        }
         OnOutput?.Invoke(SuccessOutput);
     }
 
